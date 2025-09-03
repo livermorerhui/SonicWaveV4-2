@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SonicWaveV4</string>
+    <string name="nav_header_title">用户名</string>
+    <string name="nav_header_subtitle">邮箱</string>
+    <string name="nav_header_desc">导航头部</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <!-- 其他你的字符串 -->
+    <string name="frequency_format">%1$d 赫兹</string>
+    <string name="time_minutes_format">%1$d 分钟</string>
+    <string name="button_stop">停止</string>
+    <string name="button_start">开始</string>
+    <string name="label_frequency">频率</string>
+    <string name="label_intensity">强度</string>
+    <string name="label_time">时间</string>
+
+    <!--占位符-->
+    <string name="long_text_placeholder">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        \n\n
+        This is some more text to make the content longer and demonstrate scrolling. If you drag the dividers, you\'ll see the regions resize, and this text will either shrink or expand within its bounds, becoming scrollable if it exceeds the available space.
+        \n\n
+        Another paragraph for good measure. Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus. Nulla quis lorem ut libero malesuada feugiat. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Quisque velit nisi, pretium ut lacinia in, elementum id enim. Mauris in gravida nulla.
+    </string>
+    <string name="long_text_placeholder_big">
+        THIS IS A MUCH LONGER TEXT FOR THE RIGHT MAIN AREA. IT IS MEANT TO SHOWCASE HOW SCROLLING WORKS WHEN THE CONTENT IS OVERFLOWING THE GIVEN SPACE. DRAG THE DIVIDER LINES TO CHANGE THE SIZE OF THIS AREA, AND YOU WILL SEE HOW THE SCROLLVIEW ADAPTS.
+        \n\n
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ac diam sit amet quam vehicula elementum sed sit amet dui. Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem. Proin eget tortor risus. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus. Mauris in gravida nulla. Nulla porttitor accumsan tincidunt. Quisque velit nisi, pretium ut lacinia in, elementum id enim. Sed porttitor lectus nibh.
+        \n\n
+        Pellentesque in ipsum id orci porta dapibus. Nulla quis lorem ut libero malesuada feugiat. Mauris in gravida nulla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec velit neque, auctor sit amet aliquam vel, ullamcorper sit amet ligula. Donec rutrum congue leo eget malesuada. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed porttitor lectus nibh. Quisque velit nisi, pretium ut lacinia in, elementum id enim.
+        \n\n
+        And even more text to ensure it truly overflows and demonstrates the vertical scrolling capability effectively. This dynamic resizing is very useful for dashboard-like interfaces or multi-pane layouts where users need to prioritize certain information.
+        \n\n
+        Final paragraph to make sure the scrollbar is always visible when the area is small. Fusce id felis volutpat, sollicitudin urna at, feugiat ipsum. Maecenas tristique, purus eu elementum semper, sem ipsum ultricies risus, vel semper mi enim in sapien. Etiam scelerisque, odio vel placerat feugiat, magna nisl convallis ante, vel tincidunt massa libero sit amet dui.
+    </string>
+</resources>

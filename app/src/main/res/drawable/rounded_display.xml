@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="20dp" /> <!-- Matches rounded_button.xml -->
+    <solid android:color="#E0E0E0" /> <!-- Light silver/gray for contrast with black text -->
+    <stroke
+        android:width="2dp"
+        android:color="#A9A9A9" /> <!-- Darker gray border for definition -->
+    <padding
+        android:left="10dp"
+        android:top="10dp"
+        android:right="10dp"
+        android:bottom="10dp" /> <!-- Matches rounded_button.xml -->
+</shape>

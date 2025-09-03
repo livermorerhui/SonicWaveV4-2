@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 导航菜单项 -->
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="自选设置" />
+    <!--
+    -android:id="@+id/navigation_home"：菜单项的唯一标识，必须与导航图（mobile_navigation.xml）中对应 Fragment 的 android:id 完全一致，否则点击导航项时无法正确切换页面。
+    -android:icon="@drawable/ic_home_black_24dp"：菜单项的图标资源，引用 res/drawable 目录下的图片文件（这里是内置的黑色 home 图标）。
+      建议：为了适配不同状态（选中 / 未选中），可使用 selector 资源定义图标状态变化（如选中时显示蓝色，未选中时显示灰色）。
+    -android:title="自选设置"：菜单项的文字描述，显示在图标下方。
+      最佳实践：建议使用字符串资源（@string/title_home）而非硬编码文字，方便国际化和统一管理（如 res/values/strings.xml 中定义 <string name="title_home">自选设置</string>）。
+    -->
+    <item
+        android:id="@+id/navigation_dashboard"
+        android:icon="@drawable/ic_dashboard_black_24dp"
+        android:title="预定设置" />
+
+    <item
+        android:id="@+id/navigation_notifications"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="注册" />
+
+</menu>

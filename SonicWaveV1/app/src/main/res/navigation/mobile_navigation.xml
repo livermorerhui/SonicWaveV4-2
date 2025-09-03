@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/navigation_home">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.example.sonicwavev1.ui.home.HomeFragment"
+        android:label="自选设置"
+        app:layout="@layout/fragment_home" />
+
+    <!-- Optional: Add other fragments for additional BottomNavigationView items -->
+    <!-- Example placeholders for Dashboard and Notifications -->
+    <fragment
+        android:id="@+id/navigation_dashboard"
+        android:name="com.example.sonicwavev1.ui.dashboard.DashboardFragment"
+        android:label="预定设置"
+        app:layout="@layout/fragment_dashboard" />
+
+    <fragment
+        android:id="@+id/navigation_notifications"
+        android:name="com.example.sonicwavev1.ui.notifications.NotificationsFragment"
+        android:label="注册"
+        app:layout="@layout/fragment_notifications" />
+
+</navigation>
