@@ -214,9 +214,31 @@ class HomeFragment : Fragment() {
             var samplesGenerated = 0L
             val totalSamples = (sampleRate * totalSeconds).toLong()
 
+            // HomeFragment.kt -> startTonePlayback()
+
             while (isActive && samplesGenerated < totalSamples) {
-                for (i in buffer.indices) { buffer[i] = (sin(phase) * Short.MAX_VALUE * volume).toInt().toShort(); phase += phaseIncrement; if (phase >= 2 * Math.PI) phase -= 2 * Math.PI }
-                audioTrack?.write(buffer, 0, buffer.size); samplesGenerated += buffer.size
+                for (i in buffer.indices) {
+                    buffer[i] = (sin(phase) * Short.MAX_VALUE * volume).toInt().toShort()
+                    phase += phaseIncrement
+                    if (phase >= 2 * Math.PI) phase -= 2 * Math.PI
+                }
+
+                // --- 这是唯一的改动区域 ---
+                // 在写入前，检查 AudioTrack 是否还处于播放状态
+                if (audioTrack?.playState == AudioTrack.PLAYSTATE_PLAYING) {
+                    // write() 方法会返回写入的数据大小，检查它也是更稳妥的做法
+                    val result = audioTrack?.write(buffer, 0, buffer.size) ?: -1
+                    if (result > 0) {
+                        samplesGenerated += result
+                    } else {
+                        // 如果写入失败，也跳出循环
+                        break
+                    }
+                } else {
+                    // 如果 AudioTrack 已经不是播放状态，说明外部调用了 stop()，立即跳出循环
+                    break
+                }
+                // --- 改动结束 ---
             }
         }
     }

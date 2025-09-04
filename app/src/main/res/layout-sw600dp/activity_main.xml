@@ -8,154 +8,139 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <!-- 左侧固定导航栏 -->
-    <com.google.android.material.navigationrail.NavigationRailView
-        android:id="@+id/nav_rail_view"
-        android:layout_width="60dp"
-        android:layout_height="match_parent"
-        android:layout_marginStart="4dp"
-        app:headerLayout="@layout/nav_header_main"
-        app:labelVisibilityMode="labeled"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.395"
-        app:menu="@menu/nav_rail_menu" />
-
-    <!-- 主内容区域：Toolbar -->
+    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:layout_marginTop="0dp"
         android:background="?attr/colorPrimary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/nav_rail_view"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:popupTheme="@style/Theme.AppCompat.Light.DarkActionBar" />
 
-    <!-- 核心变化区域：使用 ConstraintLayout 实现可拖动分割线 -->
+    <!-- Main Content Layout -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_content_constraint_layout"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/nav_rail_view"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- 垂直分割线：将左右区域分开 -->
+        <!-- === Guidelines === -->
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/vertical_divider_guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.61" /> <!-- 初始位置：左侧占40% -->
+            app:layout_constraintGuide_percent="0.61" />
 
-        <!-- 水平分割线：将左侧上下区域分开 -->
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/horizontal_divider_guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.5" /> <!-- 初始位置：左上占50% -->
+            app:layout_constraintGuide_percent="0.64" />
 
-        <!-- 左上角区域: NavHostFragment -->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/inner_nav_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="60dp" />
+
+
+        <!-- === Top Left Area === -->
+        <LinearLayout
+            android:id="@+id/nav_rail_top_section"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="12dp"
+            android:background="?attr/colorSurface"
+            android:elevation="2dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/horizontal_divider_guideline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline">
+            <!-- Buttons added via code -->
+        </LinearLayout>
+
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/nav_host_fragment_activity_main"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            app:defaultNavHost="true"
             app:layout_constraintBottom_toTopOf="@id/horizontal_divider_guideline"
             app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/inner_nav_guideline"
             app:layout_constraintTop_toTopOf="parent"
-            app:defaultNavHost="true"
             app:navGraph="@navigation/mobile_navigation" />
 
-        <!-- 左下角区域: 占位符或另一个 Fragment/View -->
+        <!-- === Bottom Left Area === -->
+        <LinearLayout
+            android:id="@+id/nav_rail_bottom_section"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="12dp"
+            android:background="?attr/colorSurface"
+            android:elevation="2dp"
+            app:layout_constraintTop_toBottomOf="@+id/horizontal_divider_guideline"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline">
+            <!-- Buttons added via code -->
+        </LinearLayout>
+
         <FrameLayout
             android:id="@+id/fragment_bottom_left"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="#FFECB3"
+            app:layout_constraintTop_toBottomOf="@id/horizontal_divider_guideline"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/horizontal_divider_guideline">
-            <!-- 内部内容可滚动示例 -->
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Left Bottom Area (Scrollable Content)\n\n"
-                    android:layout_gravity="center_horizontal"
-                    android:textColor="@android:color/black"
-                    android:padding="16dp"
-                    android:ellipsize="end"
-                    android:textIsSelectable="true"
-                    android:textSize="16sp"
-                    android:textStyle="italic"
-                    android:lineSpacingExtra="4dp"
-                    tools:text="@string/long_text_placeholder"/> <!-- 占位符长文本 -->
-            </ScrollView>
-        </FrameLayout>
+            app:layout_constraintStart_toEndOf="@+id/inner_nav_guideline"
+            app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline" />
 
-        <!-- 右侧一整块区域: 占位符或另一个 Fragment/View -->
+
+        <!-- === Right Area === -->
         <FrameLayout
             android:id="@+id/fragment_right_main"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="#C8E6C9"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/vertical_divider_guideline"
-            app:layout_constraintTop_toTopOf="parent">
-            <!-- 内部内容可滚动示例 -->
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            app:layout_constraintEnd_toEndOf="parent" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:ellipsize="end"
-                    android:lineSpacingExtra="6dp"
-                    android:padding="16dp"
-                    android:text="Right Main Area (Scrollable Content)\n\n"
-                    android:textColor="@android:color/black"
-                    android:textIsSelectable="true"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    tools:text="@string/long_text_placeholder_big" /> <!-- 占位符长文本 -->
-            </ScrollView>
-        </FrameLayout>
-
-        <!-- 垂直拖动把手 (覆盖在 vertical_divider_guideline 上) -->
+        <!-- === Drag Handles === -->
         <View
             android:id="@+id/vertical_drag_handle"
             android:layout_width="16dp"
             android:layout_height="0dp"
             android:background="@android:color/darker_gray"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/vertical_divider_guideline"
             app:layout_constraintEnd_toEndOf="@id/vertical_divider_guideline" />
 
-        <!-- 水平拖动把手 (覆盖在 horizontal_divider_guideline 上) -->
+        <!-- Corrected Horizontal Drag Handle -->
         <View
             android:id="@+id/horizontal_drag_handle"
             android:layout_width="0dp"
             android:layout_height="16dp"
             android:background="@android:color/darker_gray"
-            app:layout_constraintBottom_toBottomOf="@id/horizontal_divider_guideline"
             app:layout_constraintTop_toTopOf="@id/horizontal_divider_guideline"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline" />
+            app:layout_constraintBottom_toBottomOf="@id/horizontal_divider_guideline"
+            app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline"
+            app:layout_constraintStart_toEndOf="@id/inner_nav_guideline" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

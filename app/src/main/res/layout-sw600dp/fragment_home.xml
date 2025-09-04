@@ -8,95 +8,7 @@
     android:padding="16dp"
     tools:context=".ui.home.HomeFragment">
 
-    <!-- === 左侧：参数控制区 === -->
-    <LinearLayout
-        android:id="@+id/parameter_controls_group"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_vertical"
-        android:layout_marginEnd="8dp">
-
-        <!-- 1. 频率控制组 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tv_label_frequency"
-                style="@style/ParameterLabel"
-                android:text="@string/label_frequency"
-                 />
-
-            <Button
-                android:id="@+id/btn_frequency_down"
-                style="@style/ParameterButton.Minus"/>
-            <TextView
-                android:id="@+id/tv_frequency_value"
-                style="@style/ParameterDisplay"
-                android:text="0 Hz" />
-            <Button
-                android:id="@+id/btn_frequency_up"
-                style="@style/ParameterButton.Plus"/>
-        </LinearLayout>
-
-        <!-- 2. 强度控制组 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tv_label_intensity"
-                style="@style/ParameterLabel"
-                android:text="@string/label_intensity"
-                 />
-
-            <Button
-                android:id="@+id/btn_intensity_down"
-                style="@style/ParameterButton.Minus"/>
-            <TextView
-                android:id="@+id/tv_intensity_value"
-                style="@style/ParameterDisplay"
-                android:text="0" />
-            <Button
-                android:id="@+id/btn_intensity_up"
-                style="@style/ParameterButton.Plus"/>
-        </LinearLayout>
-
-        <!-- 3. 时间控制组 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/tv_label_time"
-                style="@style/ParameterLabel"
-                android:text="@string/label_time"
-                android:layout_marginTop="0dp"
-                 />
-            <Button
-                android:id="@+id/btn_time_down"
-                style="@style/ParameterButton.Minus"/>
-            <TextView
-                android:id="@+id/tv_time_value"
-                style="@style/ParameterDisplay"
-                android:text="0 分钟" />
-            <Button
-                android:id="@+id/btn_time_up"
-                style="@style/ParameterButton.Plus"/>
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- 创建一条垂直的参考线，用于分割左右区域 -->
+    <!-- Guideline remains the same, it's our flexible divider -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_vertical"
         android:layout_width="wrap_content"
@@ -105,51 +17,199 @@
         app:layout_constraintGuide_percent="0.5" />
 
 
-    <!-- === 右侧：数字键盘区 === -->
-    <!-- 使用你原来的优秀实现，并让它约束到参考线右侧 -->
-    <androidx.gridlayout.widget.GridLayout
-        android:id="@+id/keypad_group"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:columnCount="3"
-        app:rowCount="4"
+    <!-- ====================================================== -->
+    <!-- ===   [OPTIMIZED] Left Side: Parameter Controls    === -->
+    <!-- ====================================================== -->
+
+    <!-- 1. Frequency Control Group -->
+    <TextView
+        android:id="@+id/tv_label_frequency"
+        style="@style/ParameterLabel"
+        android:text="@string/label_frequency"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/guideline_vertical"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintEnd_toStartOf="@+id/btn_frequency_down" />
+
+    <Button
+        android:id="@+id/btn_frequency_down"
+        style="@style/ParameterButton.Minus"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/tv_label_frequency"
+        app:layout_constraintBottom_toBottomOf="@id/tv_label_frequency"
+        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+        app:layout_constraintEnd_toStartOf="@+id/tv_frequency_value"/>
+
+    <TextView
+        android:id="@+id/tv_frequency_value"
+        style="@style/ParameterDisplay"
+        android:text="0 Hz"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/btn_frequency_down"
+        app:layout_constraintBottom_toBottomOf="@id/btn_frequency_down"
+        app:layout_constraintStart_toEndOf="@+id/btn_frequency_down"
+        app:layout_constraintEnd_toStartOf="@+id/btn_frequency_up"
+        app:layout_constrainedWidth="true"/> <!-- Allow text to wrap if squished -->
+
+    <Button
+        android:id="@+id/btn_frequency_up"
+        style="@style/ParameterButton.Plus"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/tv_frequency_value"
+        app:layout_constraintBottom_toBottomOf="@id/tv_frequency_value"
+        app:layout_constraintStart_toEndOf="@+id/tv_frequency_value"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
+        android:layout_marginEnd="8dp"/>
+
+    <!-- Barrier ensures all minus buttons align vertically after the longest label -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier_labels"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="tv_label_frequency, tv_label_intensity, tv_label_time"
+        android:layout_marginEnd="8dp"/>
+
+
+    <!-- 2. Intensity Control Group (follows the same pattern) -->
+    <TextView
+        android:id="@+id/tv_label_intensity"
+        style="@style/ParameterLabel"
+        android:text="@string/label_intensity"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_label_frequency"
+        android:layout_marginTop="24dp"/>
+
+    <Button
+        android:id="@+id/btn_intensity_down"
+        style="@style/ParameterButton.Minus"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/tv_label_intensity"
+        app:layout_constraintBottom_toBottomOf="@id/tv_label_intensity"
+        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+        app:layout_constraintEnd_toStartOf="@+id/tv_intensity_value"/>
+
+    <TextView
+        android:id="@+id/tv_intensity_value"
+        style="@style/ParameterDisplay"
+        android:text="0"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/btn_intensity_down"
+        app:layout_constraintBottom_toBottomOf="@id/btn_intensity_down"
+        app:layout_constraintStart_toEndOf="@+id/btn_intensity_down"
+        app:layout_constraintEnd_toStartOf="@+id/btn_intensity_up"
+        app:layout_constrainedWidth="true"/>
+
+    <Button
+        android:id="@+id/btn_intensity_up"
+        style="@style/ParameterButton.Plus"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/tv_intensity_value"
+        app:layout_constraintBottom_toBottomOf="@id/tv_intensity_value"
+        app:layout_constraintStart_toEndOf="@+id/tv_intensity_value"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
+        android:layout_marginEnd="8dp"/>
+
+
+    <!-- 3. Time Control Group -->
+    <TextView
+        android:id="@+id/tv_label_time"
+        style="@style/ParameterLabel"
+        android:text="@string/label_time"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_label_intensity"
+        android:layout_marginTop="24dp"/>
+
+    <Button
+        android:id="@+id/btn_time_down"
+        style="@style/ParameterButton.Minus"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/tv_label_time"
+        app:layout_constraintBottom_toBottomOf="@id/tv_label_time"
+        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+        app:layout_constraintEnd_toStartOf="@+id/tv_time_value"/>
+
+    <TextView
+        android:id="@+id/tv_time_value"
+        style="@style/ParameterDisplay"
+        android:text="0 分钟"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/btn_time_down"
+        app:layout_constraintBottom_toBottomOf="@id/btn_time_down"
+        app:layout_constraintStart_toEndOf="@+id/btn_time_down"
+        app:layout_constraintEnd_toStartOf="@+id/btn_time_up"
+        app:layout_constrainedWidth="true"/>
+
+    <Button
+        android:id="@+id/btn_time_up"
+        style="@style/ParameterButton.Plus"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/tv_time_value"
+        app:layout_constraintBottom_toBottomOf="@id/tv_time_value"
+        app:layout_constraintStart_toEndOf="@+id/tv_time_value"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
+        android:layout_marginEnd="8dp"/>
+
+
+    <!-- ===================================================== -->
+    <!-- ===    [REFACTORED] Right Side: Keypad            === -->
+    <!-- ===================================================== -->
+
+    <!-- All keypad buttons are now managed by this Flow helper -->
+
+    <!-- Keypad Buttons (no layout constraints needed anymore) -->
+
+    <androidx.constraintlayout.helper.widget.Flow
+        android:layout_width="221dp"
+        android:layout_height="286dp"
+        android:layout_marginStart="8dp"
+        app:constraint_referenced_ids="btn_key_7, btn_key_8, btn_key_9,
+                                       btn_key_4, btn_key_5, btn_key_6,
+                                       btn_key_1, btn_key_2, btn_key_3,
+                                       btn_key_clear, btn_key_0, btn_key_enter"
+        app:flow_horizontalGap="4dp"
+        app:flow_horizontalStyle="spread_inside"
+        app:flow_maxElementsWrap="3"
+        app:flow_verticalGap="4dp"
+        app:flow_verticalStyle="spread_inside"
+        app:flow_wrapMode="chain"
+        app:layout_constraintBottom_toTopOf="@id/btn_clear"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="8dp">
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0" />
 
-        <!-- 使用了你原来的代码结构，确保了按钮的整齐划一 -->
-        <Button
-            android:id="@+id/btn_key_7" style="@style/KeypadButton" app:layout_column="0" app:layout_row="0" android:text="7" />
-        <Button
-            android:id="@+id/btn_key_8" style="@style/KeypadButton" app:layout_column="1" app:layout_row="0" android:text="8" />
-        <Button
-            android:id="@+id/btn_key_9" style="@style/KeypadButton" app:layout_column="2" app:layout_row="0" android:text="9" />
+    <Button android:id="@+id/btn_key_7" style="@style/KeypadButton" android:minHeight="48dp" android:text="7" />
+    <Button android:id="@+id/btn_key_8" style="@style/KeypadButton" android:minHeight="48dp" android:text="8" />
+    <Button android:id="@+id/btn_key_9" style="@style/KeypadButton" android:minHeight="48dp" android:text="9" />
+    <Button android:id="@+id/btn_key_4" style="@style/KeypadButton" android:minHeight="48dp" android:text="4" />
+    <Button android:id="@+id/btn_key_5" style="@style/KeypadButton" android:minHeight="48dp" android:text="5" />
+    <Button android:id="@+id/btn_key_6" style="@style/KeypadButton" android:minHeight="48dp" android:text="6" />
+    <Button android:id="@+id/btn_key_1" style="@style/KeypadButton" android:minHeight="48dp" android:text="1" />
+    <Button android:id="@+id/btn_key_2" style="@style/KeypadButton" android:minHeight="48dp" android:text="2" />
+    <Button android:id="@+id/btn_key_3" style="@style/KeypadButton" android:minHeight="48dp" android:text="3" />
+    <Button android:id="@+id/btn_key_0" style="@style/KeypadButton" android:minHeight="48dp" android:text="0" />
+    <Button android:id="@+id/btn_key_clear" style="@style/KeypadButton" android:minHeight="48dp" android:text="C" />
+    <ImageButton
+        android:id="@+id/btn_key_enter"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:src="@drawable/ic_return_key_white"
+        android:contentDescription="输入"
+        app:tint="?attr/colorOnSurface"
+        android:scaleType="fitCenter" />
 
-        <Button
-            android:id="@+id/btn_key_4" style="@style/KeypadButton" app:layout_column="0" app:layout_row="1" android:text="4" />
-        <Button
-            android:id="@+id/btn_key_5" style="@style/KeypadButton" app:layout_column="1" app:layout_row="1" android:text="5" />
-        <Button
-            android:id="@+id/btn_key_6" style="@style/KeypadButton" app:layout_column="2" app:layout_row="1" android:text="6" />
-
-        <Button
-            android:id="@+id/btn_key_1" style="@style/KeypadButton" app:layout_column="0" app:layout_row="2" android:text="1" />
-        <Button
-            android:id="@+id/btn_key_2" style="@style/KeypadButton" app:layout_column="1" app:layout_row="2" android:text="2" />
-        <Button
-            android:id="@+id/btn_key_3" style="@style/KeypadButton" app:layout_column="2" app:layout_row="2" android:text="3" />
-
-        <Button
-            android:id="@+id/btn_key_0" style="@style/KeypadButton" app:layout_column="0" app:layout_row="3" android:text="0" />
-        <Button
-            android:id="@+id/btn_key_clear" style="@style/KeypadButton" app:layout_column="1" app:layout_row="3" android:text="C" />
-        <Button
-            android:id="@+id/btn_key_enter" style="@style/KeypadButton" app:layout_column="2" app:layout_row="3" android:text="输入" />
-    </androidx.gridlayout.widget.GridLayout>
-
-
-    <!-- === 底部：功能按钮区 === -->
+    <!-- ===================================================== -->
+    <!-- ===         Bottom: Functional Buttons            === -->
+    <!-- ===================================================== -->
     <Button
         android:id="@+id/btn_start_stop"
         android:layout_width="0dp"
@@ -158,9 +218,11 @@
         android:background="@drawable/rounded_button"
         android:text="Start"
         android:textColor="#FFFFFF"
+        android:minHeight="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline_vertical"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_min="120dp" />
 
     <Button
         android:id="@+id/btn_clear"
@@ -170,8 +232,36 @@
         android:background="@drawable/rounded_button"
         android:text="Clear"
         android:textColor="#FFFFFF"
+        android:minHeight="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/guideline_vertical" />
+        app:layout_constraintStart_toEndOf="@+id/guideline_vertical"
+        app:layout_constraintWidth_min="120dp" />
+
+    <!-- ===================================================== -->
+    <!-- ===    Invisible spacers to enforce min width     === -->
+    <!-- ===================================================== -->
+
+    <Space
+        android:layout_width="383dp"
+        android:layout_height="364dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintWidth_min="280dp" />
+
+    <Space
+        android:layout_width="233dp"
+        android:layout_height="364dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@id/guideline_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintWidth_min="240dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 添加登录按钮 -->
-    <item
-        android:id="@+id/action_login_rail"
-        android:icon="@drawable/ic_account_circle_black_24dp"
-        android:title="登录" />
 
+    <group android:id="@+id/group_navigation">
+        <item
+            android:id="@+id/navigation_home"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="自选设置" />
 
+        <item
+            android:id="@+id/navigation_persetmode"
+            android:icon="@drawable/ic_dashboard_black_24dp"
+            android:title="预定设置" />
+    </group>
 
-    <item
-        android:id="@+id/navigation_home"
-        android:icon="@drawable/ic_home_black_24dp"
-        android:title="自选设置" />
-
-    <item
-        android:id="@+id/navigation_persetmode"
-        android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="预定设置" />
-
+    <group android:id="@+id/group_other">
+        <item
+            android:id="@+id/navigation_music"
+            android:icon="@drawable/ic_music_note_black_24dp"
+            android:title="音乐" />
+    </group>
 
 </menu>
