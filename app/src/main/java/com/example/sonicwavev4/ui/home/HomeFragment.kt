@@ -49,7 +49,6 @@ class HomeFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 在访问 lateinit 变量前，先检查它是否已经被初始化
         if (::soundPool.isInitialized) {
             soundPool.release()
         }
@@ -57,7 +56,6 @@ class HomeFragment : Fragment() {
     private fun setupObservers() {
         viewModel.frequency.observe(viewLifecycleOwner) { updateFrequencyDisplay() }
         viewModel.intensity.observe(viewLifecycleOwner) { updateIntensityDisplay() }
-        // 【改动】现在观察的是分钟
         viewModel.timeInMinutes.observe(viewLifecycleOwner) { updateTimeDisplay() }
 
         viewModel.currentInputType.observe(viewLifecycleOwner) { type ->
@@ -66,17 +64,14 @@ class HomeFragment : Fragment() {
         }
         viewModel.inputBuffer.observe(viewLifecycleOwner) { updateAllDisplays() }
 
-        // 【改动】运行时观察倒计时，否则显示设置的时间
         viewModel.isStarted.observe(viewLifecycleOwner) { isPlaying ->
             binding.btnStartStop.text = if (isPlaying) getString(R.string.button_stop) else getString(R.string.button_start)
-            updateTimeDisplay() // 切换播放状态时也更新时间显示
+            updateTimeDisplay()
             if (isPlaying) startTonePlayback() else stopTonePlayback()
         }
 
-        // 【新增】观察倒计时秒数
         viewModel.countdownSeconds.observe(viewLifecycleOwner) { seconds ->
             if (viewModel.isStarted.value == true) {
-                // 只有在运行时才显示倒计时
                 val minutesPart = seconds / 60
                 val secondsPart = seconds % 60
                 binding.tvTimeValue.text = String.format(Locale.ROOT, "%02d:%02d", minutesPart, secondsPart)
@@ -111,9 +106,7 @@ class HomeFragment : Fragment() {
     }
 
 
-    // 【改动】时间显示逻辑
     private fun updateTimeDisplay() {
-         //如果正在运行，则不处理，让countdown的观察者来处理
         if (viewModel.isStarted.value == true) return
 
         val buffer = viewModel.inputBuffer.value
@@ -122,7 +115,7 @@ class HomeFragment : Fragment() {
         } else {
             binding.tvTimeValue.text = getString(R.string.time_minutes_format, viewModel.timeInMinutes.value ?: 0)
         }
-     }
+    }
 
 
 
@@ -144,7 +137,6 @@ class HomeFragment : Fragment() {
         binding.btnFrequencyDown.setOnClickListener { handleDeltaChange("frequency", -1) }
         binding.btnIntensityUp.setOnClickListener { handleDeltaChange("intensity", 1) }
         binding.btnIntensityDown.setOnClickListener { handleDeltaChange("intensity", -1) }
-        // 【改动】时间按钮现在操作分钟
         binding.btnTimeUp.setOnClickListener { handleDeltaChange("time", 1) }
         binding.btnTimeDown.setOnClickListener { handleDeltaChange("time", -1) }
 
@@ -159,17 +151,13 @@ class HomeFragment : Fragment() {
             binding.btnKey5, binding.btnKey6, binding.btnKey7, binding.btnKey8, binding.btnKey9)
             .forEach { it.setOnClickListener(numericClickListener) }
 
-        // --- 这是唯一的改动区域 ---
-        // 短按：删除最后一个字符
         binding.btnKeyClear.setOnClickListener { viewModel.deleteLastFromInputBuffer(); playTapSound() }
-        // 长按：清除当前高亮参数的已存值和缓冲值
         binding.btnKeyClear.setOnLongClickListener { viewModel.clearCurrentParameter(); playTapSound(); true }
 
         binding.btnKeyEnter.setOnClickListener { viewModel.commitAndCycleInputType(); playTapSound() }
 
     }
 
-    // 【改动】 +/- 按钮逻辑
     private fun handleDeltaChange(type: String, delta: Int) {
         viewModel.setCurrentInputType(type)
         when (type) {
@@ -199,47 +187,48 @@ class HomeFragment : Fragment() {
             val sampleRate = 44100
             val currentFrequency = viewModel.frequency.value ?: 0
             val currentIntensity = viewModel.intensity.value ?: 0
-            // 【改动】音频播放时使用分钟*60来获取总秒数
             val totalSeconds = (viewModel.timeInMinutes.value ?: 0) * 60
             val volume = if (currentIntensity > 100) 1f else currentIntensity / 100f
-            val bufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT)
 
-            audioTrack = AudioTrack.Builder().setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()).setAudioFormat(AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build()).setBufferSizeInBytes(bufferSize).setTransferMode(AudioTrack.MODE_STREAM).build()
+            // AudioTrack 初始化
+            val minBufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT)
+            audioTrack = AudioTrack.Builder()
+                .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
+                .setAudioFormat(AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
+                .setBufferSizeInBytes(minBufferSize) // 使用最小缓冲区大小
+                .setTransferMode(AudioTrack.MODE_STREAM)
+                .build()
+
             audioTrack?.play()
 
-            val buffer = ShortArray(bufferSize)
-            val freqHz = currentFrequency.toDouble()
-            val phaseIncrement = 2 * Math.PI * freqHz / sampleRate
-            var phase = 0.0
+            // --- 【优化核心】 ---
+            // 1. 预计算一个周期的波形
+            val samplesPerCycle = sampleRate.toDouble() / currentFrequency
+            val waveBuffer = ShortArray(samplesPerCycle.toInt())
+            for (i in waveBuffer.indices) {
+                waveBuffer[i] = (sin(2 * Math.PI * i / samplesPerCycle) * Short.MAX_VALUE * volume).toInt().toShort()
+            }
+
             var samplesGenerated = 0L
             val totalSamples = (sampleRate * totalSeconds).toLong()
 
-            // HomeFragment.kt -> startTonePlayback()
-
+            // 2. 在循环中重复写入预计算的波形
             while (isActive && samplesGenerated < totalSamples) {
-                for (i in buffer.indices) {
-                    buffer[i] = (sin(phase) * Short.MAX_VALUE * volume).toInt().toShort()
-                    phase += phaseIncrement
-                    if (phase >= 2 * Math.PI) phase -= 2 * Math.PI
-                }
-
-                // --- 这是唯一的改动区域 ---
-                // 在写入前，检查 AudioTrack 是否还处于播放状态
                 if (audioTrack?.playState == AudioTrack.PLAYSTATE_PLAYING) {
-                    // write() 方法会返回写入的数据大小，检查它也是更稳妥的做法
-                    val result = audioTrack?.write(buffer, 0, buffer.size) ?: -1
+                    val remainingSamples = totalSamples - samplesGenerated
+                    val samplesToWrite = minOf(waveBuffer.size.toLong(), remainingSamples).toInt()
+
+                    val result = audioTrack?.write(waveBuffer, 0, samplesToWrite) ?: -1
                     if (result > 0) {
                         samplesGenerated += result
                     } else {
-                        // 如果写入失败，也跳出循环
-                        break
+                        break // 写入失败，跳出循环
                     }
                 } else {
-                    // 如果 AudioTrack 已经不是播放状态，说明外部调用了 stop()，立即跳出循环
-                    break
+                    break // AudioTrack 停止播放，跳出循环
                 }
-                // --- 改动结束 ---
             }
+            // --- 【优化结束】 ---
         }
     }
 
