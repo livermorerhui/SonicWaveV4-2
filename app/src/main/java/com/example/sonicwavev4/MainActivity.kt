@@ -1,7 +1,9 @@
 package com.example.sonicwavev4
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -30,12 +32,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    // 拖动操作需要记录的变量
-    private var lastTouchX: Float = 0f
-    private var lastTouchY: Float = 0f
-    private var mainInitialGuidelinePercentX: Float = 0f
-    private var mainInitialGuidelinePercentY: Float = 0f
-    // navRailInitialGuidelinePercentY 不再需要，因为只有一个水平拖动条
+    // 移除了之前用于记录拖动初始状态的变量
+    // private var lastTouchX: Float = 0f
+    // ...
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,13 +52,91 @@ class MainActivity : AppCompatActivity() {
         setupDragListeners()
     }
 
+    private fun Int.dpToPx(): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            this.toFloat(),
+            Resources.getSystem().displayMetrics
+        ).toInt()
+    }
+
+    // --- 【核心修改区域：全新的 handleDrag 函数】 ---
+    private fun handleDrag(event: MotionEvent, parentView: View, guideline: Guideline, isHorizontal: Boolean): Boolean {
+        // 获取父容器的尺寸，如果为0则不处理
+        val parentDimension = if (isHorizontal) parentView.width.toFloat() else parentView.height.toFloat()
+        if (parentDimension == 0f) return true
+
+        val params = guideline.layoutParams as ConstraintLayout.LayoutParams
+        val location = IntArray(2)
+        parentView.getLocationOnScreen(location) // 获取父容器在屏幕上的起始坐标
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                // 按下时我们什么都不用做，只需返回true表示我们处理了这个事件
+                return true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val newPercent: Float
+                if (isHorizontal) {
+                    val parentStartX = location[0]
+                    // 计算手指相对于父容器的X坐标
+                    val relativeX = event.rawX - parentStartX
+                    // 直接将相对坐标转换为百分比
+                    newPercent = relativeX / parentDimension
+
+                    val minWidthPx = 700.dpToPx()
+                    val minWidthPercent = minWidthPx / parentDimension
+                    params.guidePercent = newPercent.coerceIn(minWidthPercent, 0.9f)
+                } else {
+                    val parentStartY = location[1]
+                    // 计算手指相对于父容器的Y坐标
+                    val relativeY = event.rawY - parentStartY
+                    // 直接将相对坐标转换为百分比
+                    newPercent = relativeY / parentDimension
+
+                    val minHeightPx = 425.dpToPx()
+                    //限定水平把手的
+                    val minHeightPercent = minHeightPx / parentDimension
+                    params.guidePercent = newPercent.coerceIn(minHeightPercent, 0.9f)
+                }
+                guideline.layoutParams = params
+                return true
+            }
+        }
+        return false
+    }
+    // --- 【修改结束】 ---
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupDragListeners() {
+        binding.mainContentConstraintLayout?.let { mainContentLayout ->
+            val verticalGuideline: Guideline? = mainContentLayout.findViewById(R.id.vertical_divider_guideline)
+            val horizontalGuideline: Guideline? = mainContentLayout.findViewById(R.id.horizontal_divider_guideline)
+            val verticalDragHandle: View? = mainContentLayout.findViewById(R.id.vertical_drag_handle)
+            val horizontalDragHandle: View? = mainContentLayout.findViewById(R.id.horizontal_drag_handle)
+
+            if (verticalGuideline != null && verticalDragHandle != null) {
+                verticalDragHandle.setOnTouchListener { _, event ->
+                    // 【重要】将父容器(mainContentLayout)传递给处理函数
+                    handleDrag(event, mainContentLayout, verticalGuideline, isHorizontal = true)
+                }
+            }
+            if (horizontalGuideline != null && horizontalDragHandle != null) {
+                horizontalDragHandle.setOnTouchListener { _, event ->
+                    // 【重要】将父容器(mainContentLayout)传递给处理函数
+                    handleDrag(event, mainContentLayout, horizontalGuideline, isHorizontal = false)
+                }
+            }
+        }
+    }
+
+    // ... 其他函数 (setupCustomNavigationRail, createNavRailButton, 等) 保持不变 ...
     private fun setupCustomNavigationRail() {
-        // --- 【核心改动】从主内容布局中查找导航容器 ---
         val topSectionContainer: LinearLayout? = binding.mainContentConstraintLayout?.findViewById(R.id.nav_rail_top_section)
         val bottomSectionContainer: LinearLayout? = binding.mainContentConstraintLayout?.findViewById(R.id.nav_rail_bottom_section)
 
         topSectionContainer?.let { topSection ->
-            topSection.removeAllViews() // 防止重复添加
+            topSection.removeAllViews()
             val topMenu = PopupMenu(this, topSection).menu
             menuInflater.inflate(R.menu.nav_rail_top_menu, topMenu)
             topMenu.forEach { menuItem ->
@@ -70,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         bottomSectionContainer?.let { bottomSection ->
-            bottomSection.removeAllViews() // 防止重复添加
+            bottomSection.removeAllViews()
             val bottomMenu = PopupMenu(this, bottomSection).menu
             menuInflater.inflate(R.menu.nav_rail_bottom_menu, bottomMenu)
             bottomMenu.forEach { menuItem ->
@@ -81,7 +158,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 保持您的优秀实现
     private fun createNavRailButton(item: MenuItem, parent: ViewGroup): View? {
         val buttonView = LayoutInflater.from(this)
             .inflate(R.layout.custom_nav_rail_item, parent, false)
@@ -106,61 +182,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupDragListeners() {
-        // --- 【核心改动】直接从 binding 对象获取视图，不再需要 findViewById ---
-        // (前提是这些视图 ID 直接位于 activity_main.xml 中)
-        binding.mainContentConstraintLayout?.let { mainContentLayout ->
-
-            // vertical_divider_guideline, vertical_drag_handle 等 ID 现在位于 main_content_constraint_layout 内部,
-            // ViewBinding 可能无法直接生成它们的引用。所以在这里使用 findViewById 是正确且安全的。
-            val verticalGuideline: Guideline? = mainContentLayout.findViewById(R.id.vertical_divider_guideline)
-            val horizontalGuideline: Guideline? = mainContentLayout.findViewById(R.id.horizontal_divider_guideline)
-            val verticalDragHandle: View? = mainContentLayout.findViewById(R.id.vertical_drag_handle)
-            val horizontalDragHandle: View? = mainContentLayout.findViewById(R.id.horizontal_drag_handle)
-
-            if (verticalGuideline != null && verticalDragHandle != null) {
-                verticalDragHandle.setOnTouchListener { _, event ->
-                    handleDrag(event, mainContentLayout.width.toFloat(), verticalGuideline, isHorizontal = true)
-                }
-            }
-            if (horizontalGuideline != null && horizontalDragHandle != null) {
-                horizontalDragHandle.setOnTouchListener { _, event ->
-                    handleDrag(event, mainContentLayout.height.toFloat(), horizontalGuideline, isHorizontal = false)
-                }
-            }
-        }
-        // 不再需要独立的 navRailLayout 拖动逻辑
-    }
-
-    // 通用拖动处理逻辑（微调）
-    private fun handleDrag(event: MotionEvent, parentDimension: Float, guideline: Guideline, isHorizontal: Boolean): Boolean {
-        if (parentDimension == 0f) return true
-        val params = guideline.layoutParams as ConstraintLayout.LayoutParams
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                if (isHorizontal) {
-                    lastTouchX = event.rawX; mainInitialGuidelinePercentX = params.guidePercent
-                } else {
-                    lastTouchY = event.rawY; mainInitialGuidelinePercentY = params.guidePercent
-                }
-                return true
-            }
-            MotionEvent.ACTION_MOVE -> {
-                val newPercent: Float = if (isHorizontal) {
-                    mainInitialGuidelinePercentX + ((event.rawX - lastTouchX) / parentDimension)
-                } else {
-                    mainInitialGuidelinePercentY + ((event.rawY - lastTouchY) / parentDimension)
-                }
-                params.guidePercent = newPercent.coerceIn(0.1f, 0.9f)
-                guideline.layoutParams = params
-                return true
-            }
-        }
-        return false
-    }
-
-    // --- 其他函数 (无改动) ---
     private fun showLoginDialog() { LoginDialogFragment().show(supportFragmentManager, "LoginDialog") }
     override fun onCreateOptionsMenu(menu: Menu): Boolean { menuInflater.inflate(R.menu.toolbar_menu, menu); return true }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

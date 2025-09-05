@@ -8,7 +8,7 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <!-- Toolbar -->
+    <!-- 顶部工具栏 -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
@@ -19,7 +19,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:popupTheme="@style/Theme.AppCompat.Light.DarkActionBar" />
 
-    <!-- Main Content Layout -->
+    <!-- 主要内容布局 Main Content Layout -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main_content_constraint_layout"
         android:layout_width="0dp"
@@ -29,7 +29,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- === Guidelines === -->
+        <!-- === 区域分割线 Guidelines === -->
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/vertical_divider_guideline"
             android:layout_width="wrap_content"
@@ -42,8 +42,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.64" />
+            app:layout_constraintGuide_percent="0.65" />
 
+        <!-- === 左侧栏布局 === -->
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/inner_nav_guideline"
             android:layout_width="wrap_content"
@@ -52,7 +53,8 @@
             app:layout_constraintGuide_begin="60dp" />
 
 
-        <!-- === Top Left Area === -->
+        <!-- === 左上角区域 === -->
+            <!-- === 左侧栏上部分 === -->
         <LinearLayout
             android:id="@+id/nav_rail_top_section"
             android:layout_width="0dp"
@@ -65,10 +67,11 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/horizontal_divider_guideline"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline">
-            <!-- Buttons added via code -->
+            app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline"
+            app:layout_constraintHeight_min="150dp"  >
         </LinearLayout>
 
+            <!-- === 左上角区域：自选、预定设置 === -->
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/nav_host_fragment_activity_main"
             android:name="androidx.navigation.fragment.NavHostFragment"
@@ -79,9 +82,12 @@
             app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline"
             app:layout_constraintStart_toEndOf="@+id/inner_nav_guideline"
             app:layout_constraintTop_toTopOf="parent"
-            app:navGraph="@navigation/mobile_navigation" />
+            app:navGraph="@navigation/mobile_navigation"
+            app:layout_constraintWidth_min="600dp"
+            app:layout_constraintHeight_min="425dp"  />
 
-        <!-- === Bottom Left Area === -->
+        <!-- === 左下角区域 === -->
+            <!-- === 左侧栏下部分 === -->
         <LinearLayout
             android:id="@+id/nav_rail_bottom_section"
             android:layout_width="0dp"
@@ -95,9 +101,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline">
-            <!-- Buttons added via code -->
         </LinearLayout>
 
+            <!-- === 左下角区域：音乐 === -->
         <FrameLayout
             android:id="@+id/fragment_bottom_left"
             android:layout_width="0dp"
@@ -109,7 +115,7 @@
             app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline" />
 
 
-        <!-- === Right Area === -->
+        <!-- === 右区域：仪表状态 === -->
         <FrameLayout
             android:id="@+id/fragment_right_main"
             android:layout_width="0dp"
@@ -120,7 +126,7 @@
             app:layout_constraintStart_toEndOf="@id/vertical_divider_guideline"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- === Drag Handles === -->
+        <!-- === 垂直拖动手柄 === -->
         <View
             android:id="@+id/vertical_drag_handle"
             android:layout_width="16dp"
@@ -131,7 +137,7 @@
             app:layout_constraintStart_toStartOf="@id/vertical_divider_guideline"
             app:layout_constraintEnd_toEndOf="@id/vertical_divider_guideline" />
 
-        <!-- Corrected Horizontal Drag Handle -->
+        <!-- === 水平拖动手柄 === -->
         <View
             android:id="@+id/horizontal_drag_handle"
             android:layout_width="0dp"
