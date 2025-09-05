@@ -67,8 +67,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/horizontal_divider_guideline"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline"
-            app:layout_constraintHeight_min="150dp"  >
+            app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline">
         </LinearLayout>
 
             <!-- === 左上角区域：自选、预定设置 === -->
@@ -82,9 +81,7 @@
             app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline"
             app:layout_constraintStart_toEndOf="@+id/inner_nav_guideline"
             app:layout_constraintTop_toTopOf="parent"
-            app:navGraph="@navigation/mobile_navigation"
-            app:layout_constraintWidth_min="600dp"
-            app:layout_constraintHeight_min="425dp"  />
+            app:navGraph="@navigation/mobile_navigation" />
 
         <!-- === 左下角区域 === -->
             <!-- === 左侧栏下部分 === -->

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,145 +8,199 @@
     android:padding="16dp"
     tools:context=".ui.home.HomeFragment">
 
+    <!-- Guideline remains the same, it's our flexible divider -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_begin="366dp" />
+        app:layout_constraintGuide_percent="0.7" />
 
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrier_labels"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="end"
-        app:constraint_referenced_ids="tv_label_frequency, tv_label_intensity, tv_label_time" />
 
+    <!-- ====================================================== -->
+    <!-- ===   [OPTIMIZED] Left Side: Parameter Controls    === -->
+    <!-- ====================================================== -->
+
+    <!-- 1. Frequency Control Group -->
     <TextView
         android:id="@+id/tv_label_frequency"
         style="@style/ParameterLabel"
         android:text="@string/label_frequency"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintEnd_toStartOf="@+id/btn_frequency_down" />
 
     <Button
         android:id="@+id/btn_frequency_down"
         style="@style/ParameterButton.Minus"
-        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:layout_marginStart="8dp"
         app:layout_constraintTop_toTopOf="@id/tv_label_frequency"
         app:layout_constraintBottom_toBottomOf="@id/tv_label_frequency"
-        android:layout_marginStart="8dp" />
+        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+        app:layout_constraintEnd_toStartOf="@+id/tv_frequency_value"/>
 
     <TextView
         android:id="@+id/tv_frequency_value"
         style="@style/ParameterDisplay"
         android:text="0 Hz"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/btn_frequency_down"
+        app:layout_constraintBottom_toBottomOf="@id/btn_frequency_down"
         app:layout_constraintStart_toEndOf="@+id/btn_frequency_down"
         app:layout_constraintEnd_toStartOf="@+id/btn_frequency_up"
-        app:layout_constraintTop_toTopOf="@id/tv_label_frequency"
-        app:layout_constraintBottom_toBottomOf="@id/tv_label_frequency" />
+        app:layout_constrainedWidth="true"/> <!-- Allow text to wrap if squished -->
 
     <Button
         android:id="@+id/btn_frequency_up"
         style="@style/ParameterButton.Plus"
-        app:layout_constraintEnd_toStartOf="@id/guideline_vertical"
-        app:layout_constraintTop_toTopOf="@id/tv_label_frequency"
-        app:layout_constraintBottom_toBottomOf="@id/tv_label_frequency"
-        android:layout_marginEnd="8dp" />
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/tv_frequency_value"
+        app:layout_constraintBottom_toBottomOf="@id/tv_frequency_value"
+        app:layout_constraintStart_toEndOf="@+id/tv_frequency_value"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
+        android:layout_marginEnd="8dp"/>
 
+    <!-- Barrier ensures all minus buttons align vertically after the longest label -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier_labels"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="tv_label_frequency, tv_label_intensity, tv_label_time"
+        android:layout_marginEnd="8dp"/>
+
+
+    <!-- 2. Intensity Control Group (follows the same pattern) -->
     <TextView
         android:id="@+id/tv_label_intensity"
         style="@style/ParameterLabel"
         android:text="@string/label_intensity"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_label_frequency"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"/>
 
     <Button
         android:id="@+id/btn_intensity_down"
         style="@style/ParameterButton.Minus"
-        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:layout_marginStart="8dp"
         app:layout_constraintTop_toTopOf="@id/tv_label_intensity"
         app:layout_constraintBottom_toBottomOf="@id/tv_label_intensity"
-        android:layout_marginStart="8dp" />
+        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+        app:layout_constraintEnd_toStartOf="@+id/tv_intensity_value"/>
 
     <TextView
         android:id="@+id/tv_intensity_value"
         style="@style/ParameterDisplay"
         android:text="0"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/btn_intensity_down"
+        app:layout_constraintBottom_toBottomOf="@id/btn_intensity_down"
         app:layout_constraintStart_toEndOf="@+id/btn_intensity_down"
         app:layout_constraintEnd_toStartOf="@+id/btn_intensity_up"
-        app:layout_constraintTop_toTopOf="@id/tv_label_intensity"
-        app:layout_constraintBottom_toBottomOf="@id/tv_label_intensity" />
+        app:layout_constrainedWidth="true"/>
 
     <Button
         android:id="@+id/btn_intensity_up"
         style="@style/ParameterButton.Plus"
-        app:layout_constraintEnd_toStartOf="@id/guideline_vertical"
-        app:layout_constraintTop_toTopOf="@id/tv_label_intensity"
-        app:layout_constraintBottom_toBottomOf="@id/tv_label_intensity"
-        android:layout_marginEnd="8dp" />
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/tv_intensity_value"
+        app:layout_constraintBottom_toBottomOf="@id/tv_intensity_value"
+        app:layout_constraintStart_toEndOf="@+id/tv_intensity_value"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
+        android:layout_marginEnd="8dp"/>
 
+
+    <!-- 3. Time Control Group -->
     <TextView
         android:id="@+id/tv_label_time"
         style="@style/ParameterLabel"
         android:text="@string/label_time"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_label_intensity"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"/>
 
     <Button
         android:id="@+id/btn_time_down"
         style="@style/ParameterButton.Minus"
-        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:layout_marginStart="8dp"
         app:layout_constraintTop_toTopOf="@id/tv_label_time"
         app:layout_constraintBottom_toBottomOf="@id/tv_label_time"
-        android:layout_marginStart="8dp" />
+        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+        app:layout_constraintEnd_toStartOf="@+id/tv_time_value"/>
 
     <TextView
         android:id="@+id/tv_time_value"
         style="@style/ParameterDisplay"
         android:text="0 分钟"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/btn_time_down"
+        app:layout_constraintBottom_toBottomOf="@id/btn_time_down"
         app:layout_constraintStart_toEndOf="@+id/btn_time_down"
         app:layout_constraintEnd_toStartOf="@+id/btn_time_up"
-        app:layout_constraintTop_toTopOf="@id/tv_label_time"
-        app:layout_constraintBottom_toBottomOf="@id/tv_label_time" />
+        app:layout_constrainedWidth="true"/>
 
     <Button
         android:id="@+id/btn_time_up"
         style="@style/ParameterButton.Plus"
-        app:layout_constraintEnd_toStartOf="@id/guideline_vertical"
-        app:layout_constraintTop_toTopOf="@id/tv_label_time"
-        app:layout_constraintBottom_toBottomOf="@id/tv_label_time"
-        android:layout_marginEnd="8dp" />
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintTop_toTopOf="@id/tv_time_value"
+        app:layout_constraintBottom_toBottomOf="@id/tv_time_value"
+        app:layout_constraintStart_toEndOf="@+id/tv_time_value"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
+        android:layout_marginEnd="8dp"/>
 
+
+    <!-- ===================================================== -->
+    <!-- ===    [REFACTORED] Right Side: Keypad            === -->
+    <!-- ===================================================== -->
+
+    <!-- All keypad buttons are now managed by this Flow helper -->
+
+    <!-- Keypad Buttons (no layout constraints needed anymore) -->
 
     <androidx.constraintlayout.helper.widget.Flow
-        android:id="@+id/keypad_flow"
-        android:layout_width="212dp"
-        android:layout_height="266dp"
+        android:layout_width="200dp"
+        android:layout_height="270dp"
         android:layout_marginStart="8dp"
-        app:constraint_referenced_ids="btn_key_7, btn_key_8, btn_key_9, btn_key_4, btn_key_5, btn_key_6, btn_key_1, btn_key_2, btn_key_3, btn_key_0, btn_key_clear, btn_key_enter"
-        app:flow_horizontalStyle="spread_inside"
-        app:flow_maxElementsWrap="3"
-        app:flow_verticalStyle="spread_inside"
-        app:flow_wrapMode="chain"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/guideline_vertical"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:constraint_referenced_ids="btn_key_7, btn_key_8, btn_key_9,
+                                       btn_key_4, btn_key_5, btn_key_6,
+                                       btn_key_1, btn_key_2, btn_key_3,
+                                       btn_key_clear, btn_key_0, btn_key_enter"
 
-    <Button android:id="@+id/btn_key_7" style="@style/KeypadButton" android:text="7" />
-    <Button android:id="@+id/btn_key_8" style="@style/KeypadButton" android:text="8" />
-    <Button android:id="@+id/btn_key_9" style="@style/KeypadButton" android:text="9" />
-    <Button android:id="@+id/btn_key_4" style="@style/KeypadButton" android:text="4" />
-    <Button android:id="@+id/btn_key_5" style="@style/KeypadButton" android:text="5" />
-    <Button android:id="@+id/btn_key_6" style="@style/KeypadButton" android:text="6" />
-    <Button android:id="@+id/btn_key_1" style="@style/KeypadButton" android:text="1" />
-    <Button android:id="@+id/btn_key_2" style="@style/KeypadButton" android:text="2" />
-    <Button android:id="@+id/btn_key_3" style="@style/KeypadButton" android:text="3" />
-    <Button android:id="@+id/btn_key_0" style="@style/KeypadButton" android:text="0" />
-    <Button android:id="@+id/btn_key_clear" style="@style/KeypadButton" android:text="C" />
+        app:flow_maxElementsWrap="3"
+        app:flow_wrapMode="chain"
+        app:flow_verticalStyle="spread_inside"
+        app:flow_horizontalStyle="spread_inside"
+
+        app:layout_constraintBottom_toBottomOf="@id/btn_clear"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.047"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button android:id="@+id/btn_key_7" style="@style/KeypadButton" android:minHeight="48dp" android:text="7" />
+    <Button android:id="@+id/btn_key_8" style="@style/KeypadButton" android:minHeight="48dp" android:text="8" />
+    <Button android:id="@+id/btn_key_9" style="@style/KeypadButton" android:minHeight="48dp" android:text="9" />
+    <Button android:id="@+id/btn_key_4" style="@style/KeypadButton" android:minHeight="48dp" android:text="4" />
+    <Button android:id="@+id/btn_key_5" style="@style/KeypadButton" android:minHeight="48dp" android:text="5" />
+    <Button android:id="@+id/btn_key_6" style="@style/KeypadButton" android:minHeight="48dp" android:text="6" />
+    <Button android:id="@+id/btn_key_1" style="@style/KeypadButton" android:minHeight="48dp" android:text="1" />
+    <Button android:id="@+id/btn_key_2" style="@style/KeypadButton" android:minHeight="48dp" android:text="2" />
+    <Button android:id="@+id/btn_key_3" style="@style/KeypadButton" android:minHeight="48dp" android:text="3" />
+    <Button android:id="@+id/btn_key_0" style="@style/KeypadButton" android:minHeight="48dp" android:text="0" />
+    <Button android:id="@+id/btn_key_clear" style="@style/KeypadButton" android:minHeight="48dp" android:text="C" />
     <ImageButton
         android:id="@+id/btn_key_enter"
         style="@style/KeypadButton"
@@ -155,29 +210,39 @@
         app:tint="?attr/colorOnSurface"
         android:scaleType="fitCenter" />
 
-
+    <!-- ===================================================== -->
+    <!-- ===         Bottom: Functional Buttons            === -->
+    <!-- ===================================================== -->
     <Button
         android:id="@+id/btn_start_stop"
         android:layout_width="0dp"
-        android:layout_height="90dp"
-        android:text="Start"
+        android:layout_height="70dp"
+        android:layout_marginEnd="8dp"
         android:background="@drawable/rounded_button"
+        android:text="Start"
         android:textColor="#FFFFFF"
+        android:minHeight="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btn_clear"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/guideline_vertical"
-        android:layout_marginEnd="8dp"/>
+        app:layout_constraintWidth_min="120dp" />
 
     <Button
         android:id="@+id/btn_clear"
         android:layout_width="0dp"
-        android:layout_height="90dp"
-        android:text="Clear"
+        android:layout_height="70dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/rounded_button"
+        android:text="Clear"
         android:textColor="#FFFFFF"
+        android:minHeight="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/guideline_vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="8dp"/>
+        app:layout_constraintEnd_toStartOf="@+id/guideline_vertical"
+        app:layout_constraintStart_toEndOf="@+id/btn_start_stop"
+        app:layout_constraintWidth_min="120dp" />
+
+    <!-- ===================================================== -->
+    <!-- ===    Invisible spacers to enforce min width     === -->
+    <!-- ===================================================== -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

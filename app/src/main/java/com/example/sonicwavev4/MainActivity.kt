@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
                     // 直接将相对坐标转换为百分比
                     newPercent = relativeX / parentDimension
 
-                    val minWidthPx = 700.dpToPx()
+                    val minWidthPx = 660.dpToPx()
                     val minWidthPercent = minWidthPx / parentDimension
                     params.guidePercent = newPercent.coerceIn(minWidthPercent, 0.9f)
                 } else {
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
                     // 直接将相对坐标转换为百分比
                     newPercent = relativeY / parentDimension
 
-                    val minHeightPx = 425.dpToPx()
+                    val minHeightPx = 315.dpToPx()
                     //限定水平把手的
                     val minHeightPercent = minHeightPx / parentDimension
                     params.guidePercent = newPercent.coerceIn(minHeightPercent, 0.9f)
