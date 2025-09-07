@@ -63,6 +63,7 @@ class HomeFragment : Fragment() {
             updateAllDisplays()
         }
         viewModel.inputBuffer.observe(viewLifecycleOwner) { updateAllDisplays() }
+        viewModel.isEditing.observe(viewLifecycleOwner) { updateAllDisplays() } // Add this observer
 
         viewModel.isStarted.observe(viewLifecycleOwner) { isPlaying ->
             binding.btnStartStop.text = if (isPlaying) getString(R.string.button_stop) else getString(R.string.button_start)
@@ -88,8 +89,13 @@ class HomeFragment : Fragment() {
 
     private fun updateFrequencyDisplay() {
         val buffer = viewModel.inputBuffer.value
-        if (viewModel.currentInputType.value == "frequency" && buffer?.isNotEmpty() == true) {
+        val isInputActive = viewModel.currentInputType.value == "frequency"
+        val isEditing = viewModel.isEditing.value ?: false
+
+        if (isInputActive && !buffer.isNullOrEmpty()) {
             binding.tvFrequencyValue.text = getString(R.string.frequency_format, buffer.toIntOrNull() ?: 0)
+        } else if (isInputActive && isEditing && buffer.isNullOrEmpty()) {
+            binding.tvFrequencyValue.text = getString(R.string.frequency_format, 0)
         } else {
             binding.tvFrequencyValue.text = getString(R.string.frequency_format, viewModel.frequency.value ?: 0)
         }
@@ -98,8 +104,13 @@ class HomeFragment : Fragment() {
 
     private fun updateIntensityDisplay() {
         val buffer = viewModel.inputBuffer.value
-        if (viewModel.currentInputType.value == "intensity" && buffer?.isNotEmpty() == true) {
+        val isInputActive = viewModel.currentInputType.value == "intensity"
+        val isEditing = viewModel.isEditing.value ?: false
+
+        if (isInputActive && !buffer.isNullOrEmpty()) {
             binding.tvIntensityValue.text = buffer
+        } else if (isInputActive && isEditing && buffer.isNullOrEmpty()) {
+            binding.tvIntensityValue.text = "0"
         } else {
             binding.tvIntensityValue.text = (viewModel.intensity.value ?: 0).toString()
         }
@@ -110,8 +121,13 @@ class HomeFragment : Fragment() {
         if (viewModel.isStarted.value == true) return
 
         val buffer = viewModel.inputBuffer.value
-        if (viewModel.currentInputType.value == "time" && buffer?.isNotEmpty() == true) {
+        val isInputActive = viewModel.currentInputType.value == "time"
+        val isEditing = viewModel.isEditing.value ?: false
+
+        if (isInputActive && !buffer.isNullOrEmpty()) {
             binding.tvTimeValue.text = getString(R.string.time_minutes_format, buffer.toIntOrNull() ?: 0)
+        } else if (isInputActive && isEditing && buffer.isNullOrEmpty()) {
+            binding.tvTimeValue.text = getString(R.string.time_minutes_format, 0)
         } else {
             binding.tvTimeValue.text = getString(R.string.time_minutes_format, viewModel.timeInMinutes.value ?: 0)
         }

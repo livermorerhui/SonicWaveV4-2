@@ -37,6 +37,9 @@ class HomeViewModel : ViewModel() {
     private val _inputBuffer = MutableLiveData("")
     val inputBuffer: LiveData<String> = _inputBuffer
 
+    private val _isEditing = MutableLiveData(false)
+    val isEditing: LiveData<Boolean> = _isEditing
+
     // --- 【核心改动】删除逻辑 ---
     fun deleteLastFromInputBuffer() {
         val buffer = _inputBuffer.value
@@ -68,6 +71,7 @@ class HomeViewModel : ViewModel() {
     // 长按清除逻辑（无改动）
     fun clearCurrentParameter() {
         _inputBuffer.value = ""
+        _isEditing.value = false
         when (_currentInputType.value) {
             "frequency" -> _frequency.value = 0
             "intensity" -> _intensity.value = 0
@@ -81,6 +85,7 @@ class HomeViewModel : ViewModel() {
         commitInputBuffer()
         _currentInputType.value = type
         _inputBuffer.value = ""
+        _isEditing.value = false
     }
     fun commitAndCycleInputType() {
         commitInputBuffer()
@@ -92,13 +97,33 @@ class HomeViewModel : ViewModel() {
     private fun commitInputBuffer() {
         val bufferValue = _inputBuffer.value
         val inputType = _currentInputType.value
-        if (bufferValue.isNullOrEmpty() || inputType.isNullOrEmpty()) return
-        val numericValue = bufferValue.toIntOrNull() ?: 0
-        when (inputType) {
-            "frequency" -> _frequency.value = numericValue
-            "intensity" -> _intensity.value = numericValue
-            "time"      -> _timeInMinutes.value = numericValue
+        val wasEditing = _isEditing.value ?: false
+
+        if (inputType.isNullOrEmpty()) {
+            _isEditing.value = false
+            return
         }
+
+        // If the user was editing and cleared the buffer, commit 0.
+        if (wasEditing && bufferValue.isNullOrEmpty()) {
+            when (inputType) {
+                "frequency" -> _frequency.value = 0
+                "intensity" -> _intensity.value = 0
+                "time"      -> _timeInMinutes.value = 0
+            }
+        } 
+        // If the buffer has a value, commit that value.
+        else if (!bufferValue.isNullOrEmpty()) {
+            val numericValue = bufferValue.toIntOrNull() ?: 0
+            when (inputType) {
+                "frequency" -> _frequency.value = numericValue
+                "intensity" -> _intensity.value = numericValue
+                "time"      -> _timeInMinutes.value = numericValue
+            }
+        }
+        
+        // Reset editing state after any commit action
+        _isEditing.value = false
     }
     private fun startCountdown() {
         countdownJob?.cancel()
@@ -128,11 +153,15 @@ class HomeViewModel : ViewModel() {
     fun clearAll() {
         _frequency.value = 0; _intensity.value = 0; _timeInMinutes.value = 0; forceStop()
         _currentInputType.value = ""; _inputBuffer.value = ""
+        _isEditing.value = false
     }
     fun updateFrequency(value: Int) { _frequency.value = max(0, value) }
     fun updateIntensity(value: Int) { _intensity.value = max(0, value) }
     fun updateTimeInMinutes(minutes: Int) { _timeInMinutes.value = max(0, minutes) }
     fun appendToInputBuffer(digit: String) {
-        if ((_inputBuffer.value?.length ?: 0) < 9) { _inputBuffer.value = (_inputBuffer.value ?: "") + digit }
+        if ((_inputBuffer.value?.length ?: 0) < 9) { 
+            _inputBuffer.value = (_inputBuffer.value ?: "") + digit 
+            _isEditing.value = true
+        }
     }
 }
