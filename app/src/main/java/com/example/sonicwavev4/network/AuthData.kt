@@ -1,0 +1,25 @@
+package com.example.sonicwavev4.network
+
+data class LoginRequest(
+    val email: String,
+    val password: String
+)
+
+data class LoginResponse(
+    val message: String,
+    val token: String
+)
+
+data class RegisterRequest(
+    val email: String,
+    val password: String
+)
+
+data class RegisterResponse(
+    val message: String,
+    val userId: Int
+)
+
+data class ApiError(
+    val error: String
+)

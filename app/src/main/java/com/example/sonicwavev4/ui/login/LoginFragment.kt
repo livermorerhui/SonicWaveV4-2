@@ -9,50 +9,62 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.sonicwavev4.R
 
 class LoginFragment : Fragment() {
+
+    private val loginViewModel: LoginViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val root = inflater.inflate(R.layout.fragment_login, container, false)
+        return inflater.inflate(R.layout.fragment_login, container, false)
+    }
 
-        val usernameEditText: EditText = root.findViewById(R.id.usernameEditText)
-        val passwordEditText: EditText = root.findViewById(R.id.passwordEditText)
-        val loginButton: Button = root.findViewById(R.id.loginButton)
-        val forgotPasswordTextView: TextView = root.findViewById(R.id.forgotPasswordTextView)
-        val registerTextView: TextView = root.findViewById(R.id.registerTextView)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val usernameEditText: EditText = view.findViewById(R.id.usernameEditText)
+        val passwordEditText: EditText = view.findViewById(R.id.passwordEditText)
+        val loginButton: Button = view.findViewById(R.id.loginButton)
+        val forgotPasswordTextView: TextView = view.findViewById(R.id.forgotPasswordTextView)
+        val registerTextView: TextView = view.findViewById(R.id.registerTextView)
 
         loginButton.setOnClickListener {
-            val username = usernameEditText.text.toString()
+            val email = usernameEditText.text.toString()
             val password = passwordEditText.text.toString()
 
-            if (username.isNotEmpty() && password.isNotEmpty()) {
-                // 这里可以添加实际的登录逻辑，例如调用ViewModel或API
-                Toast.makeText(requireContext(), "尝试登录: $username", Toast.LENGTH_SHORT).show()
-                // 登录成功后，可以导航回首页或其他页面
-                findNavController().navigate(R.id.navigation_home) // 示例：登录成功后返回首页
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                loginViewModel.login(email, password)
             } else {
-                Toast.makeText(requireContext(), "请输入用户名和密码", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Please enter email and password", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
+            result.onSuccess {
+                // Handle successful login
+                Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
+                // Here you would typically save the token and navigate
+                findNavController().navigate(R.id.navigation_home)
+            }.onFailure {
+                // Handle failed login
+                Toast.makeText(requireContext(), "Login failed: ${it.message}", Toast.LENGTH_LONG).show()
             }
         }
 
         forgotPasswordTextView.setOnClickListener {
-            Toast.makeText(requireContext(), "忘记密码功能待实现", Toast.LENGTH_SHORT).show()
-            // 导航到忘记密码页面
+            Toast.makeText(requireContext(), "Forgot password not implemented", Toast.LENGTH_SHORT).show()
             // findNavController().navigate(R.id.navigation_forgot_password)
         }
 
         registerTextView.setOnClickListener {
-            Toast.makeText(requireContext(), "注册功能待实现", Toast.LENGTH_SHORT).show()
-            // 导航到注册页面
+            Toast.makeText(requireContext(), "Register not implemented", Toast.LENGTH_SHORT).show()
             // findNavController().navigate(R.id.navigation_register)
         }
-
-        return root
     }
 }
