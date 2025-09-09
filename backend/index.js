@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(express.json());
+app.use('/music', express.static('music')); // Serve static files from the 'music' directory
 
 const port = 3000;
 const saltRounds = 10;

@@ -3,7 +3,7 @@
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:viewportHeight="21">
     <!-- 重点：移除了 android:tint 属性，使得图标的颜色不再受主题影响 -->
 
     <path
