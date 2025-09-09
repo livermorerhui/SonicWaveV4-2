@@ -1,11 +1,13 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(express.json());
-app.use('/music', express.static('music')); // Serve static files from the 'music' directory
+app.use('/music', express.static(path.join(__dirname, 'music'))); // Serve static files from the 'music' directory
 
 const port = 3000;
 const saltRounds = 10;
@@ -37,6 +39,19 @@ const db = new sqlite3.Database('./database.db', (err) => {
 // --- Routes ---
 app.get('/', (req, res) => {
     res.send('Backend server is running!');
+});
+
+app.get('/music/list', (req, res) => {
+    const musicDir = path.join(__dirname, 'music');
+    fs.readdir(musicDir, (err, files) => {
+        if (err) {
+            console.error('Error reading music directory:', err);
+            return res.status(500).json({ error: 'Could not list music files' });
+        }
+        // Filter for audio files (e.g., .mp3) and exclude placeholder files
+        const musicFiles = files.filter(file => file.endsWith('.mp3'));
+        res.json(musicFiles);
+    });
 });
 
 app.post('/register', async (req, res) => {
@@ -104,6 +119,6 @@ app.post('/login', (req, res) => {
 
 
 // --- Server Start ---
-app.listen(port, () => {
-    console.log(`Server listening on http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Server listening on http://0.0.0.0:${port}`);
 });

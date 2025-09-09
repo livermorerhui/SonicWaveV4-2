@@ -43,7 +43,7 @@ import com.example.sonicwavev4.DownloadedMusicItem
 import com.example.sonicwavev4.DownloadedMusicRepository
 import com.example.sonicwavev4.MusicItem
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -144,32 +144,35 @@ class MainActivity : AppCompatActivity() {
             musicArea.addView(downloadImageButton)
 
             downloadImageButton.setOnClickListener {
-                val musicUrl = "http://10.0.2.2:3000/music/sample_audio.mp3" // Replace with your actual music file name
-                val fileName = "downloaded_music.txt" // Name to save the file as
-
-                CoroutineScope(Dispatchers.Main).launch {
-                    Toast.makeText(this@MainActivity, "开始下载...", Toast.LENGTH_SHORT).show()
-                    val downloadedFile = musicDownloader.downloadMusic(musicUrl, fileName)
-                    if (downloadedFile != null) {
-                        Toast.makeText(this@MainActivity, "下载成功: ${downloadedFile.absolutePath}", Toast.LENGTH_LONG).show()
-                        // Add downloaded music to repository and refresh list
-                        val downloadedItem = DownloadedMusicItem(
-                            fileName = downloadedFile.name,
-                            title = downloadedFile.nameWithoutExtension, // Simple title for now
-                            artist = "Downloaded", // Default artist for now
-                            internalPath = downloadedFile.absolutePath
-                        )
-                        downloadedMusicRepository.addDownloadedMusic(downloadedItem)
-                        loadMusic() // Reload music to update the list
-                    } else {
-                        Toast.makeText(this@MainActivity, "下载失败", Toast.LENGTH_SHORT).show()
-                    }
-                }
+                val dialog = MusicDownloadDialogFragment()
+                dialog.listener = this
+                dialog.show(supportFragmentManager, "MusicDownloadDialogFragment")
             }
         }
         checkAndRequestPermissions() // Call to check and request permissions
+    }
 
-        
+    override fun onDownloadSelected(files: List<String>) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(this@MainActivity, "开始下载 ${files.size} 个文件...", Toast.LENGTH_SHORT).show()
+            files.forEach { fileName ->
+                val musicUrl = "http://192.168.31.217:3000/music/$fileName"
+                val downloadedFile = musicDownloader.downloadMusic(musicUrl, fileName)
+                if (downloadedFile != null) {
+                    val downloadedItem = DownloadedMusicItem(
+                        fileName = downloadedFile.name,
+                        title = downloadedFile.nameWithoutExtension,
+                        artist = "Downloaded",
+                        internalPath = downloadedFile.absolutePath
+                    )
+                    downloadedMusicRepository.addDownloadedMusic(downloadedItem)
+                } else {
+                    Toast.makeText(this@MainActivity, "下载失败: $fileName", Toast.LENGTH_SHORT).show()
+                }
+            }
+            Toast.makeText(this@MainActivity, "下载完成", Toast.LENGTH_SHORT).show()
+            loadMusic() // Reload music to update the list
+        }
     }
 
     
