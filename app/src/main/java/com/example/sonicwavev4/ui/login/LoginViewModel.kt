@@ -17,7 +17,7 @@ class LoginViewModel : ViewModel() {
     fun login(email: String, password: String) {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.instance.login(LoginRequest(email, password))
+                val response = RetrofitClient.api.login(LoginRequest(email, password))
                 if (response.isSuccessful && response.body() != null) {
                     _loginResult.postValue(Result.success(response.body()!!))
                 } else {

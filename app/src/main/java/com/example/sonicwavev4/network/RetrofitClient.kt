@@ -1,29 +1,43 @@
 package com.example.sonicwavev4.network
 
+import android.content.Context
+import com.example.sonicwavev4.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitClient {
+class RetrofitClient private constructor(context: Context) {
 
-    // Use 10.0.2.2 to connect to the host machine's localhost from the Android emulator
-    private const val BASE_URL = "http://10.0.2.2:3000/"
+    val instance: ApiService
 
-    private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
+    init {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+        }
 
-    private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(loggingInterceptor)
-        .build()
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(NetworkLoggingInterceptor(context))
+            .addInterceptor(loggingInterceptor)
+            .build()
 
-    val instance: ApiService by lazy {
         val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.SERVER_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        retrofit.create(ApiService::class.java)
+
+        instance = retrofit.create(ApiService::class.java)
+    }
+
+    companion object {
+        @Volatile private var INSTANCE: RetrofitClient? = null
+
+        fun getInstance(context: Context): RetrofitClient = INSTANCE ?: synchronized(this) {
+            INSTANCE ?: RetrofitClient(context).also { INSTANCE = it }
+        }
+
+        val api: ApiService
+            get() = INSTANCE!!.instance
     }
 }

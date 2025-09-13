@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env
+    extra_hosts:
+      - "db:127.0.0.1"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'vscode89xuhang'  # 请换成一个你自己的强密码
+      MYSQL_DATABASE: 'sonicwave_db'
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-pvscode89xuhang"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: --default-authentication-plugin=mysql_native_password

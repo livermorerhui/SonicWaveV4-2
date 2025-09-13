@@ -25,6 +25,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "SERVER_BASE_URL", "\"http://8.148.182.90:3000\"")
+        }
+        debug {
+            // 添加本地测试服务器地址
+            buildConfigField("String", "SERVER_BASE_URL", "\"http://10.0.2.2:3000\"")
         }
     }
     compileOptions {
@@ -36,6 +41,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -59,6 +65,10 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0") // For logging requests
 
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // WorkManager for background tasks
+    implementation("androidx.work:work-runtime-ktx:2.10.4")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

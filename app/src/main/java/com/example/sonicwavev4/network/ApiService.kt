@@ -1,14 +1,18 @@
 package com.example.sonicwavev4.network
 
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface ApiService {
 
-    @POST("register")
+    @POST("api/users/register")
     suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
 
-    @POST("login")
+    @POST("api/users/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+
+    @POST("api/logs")
+    suspend fun createClientLogs(@Body requestBody: RequestBody): Response<Unit>
 }

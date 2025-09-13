@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.example.sonicwavev4.R
+import com.example.sonicwavev4.ui.register.RegisterDialogFragment
 
 class LoginDialogFragment : DialogFragment() {
 
