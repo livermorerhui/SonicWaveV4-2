@@ -1,6 +1,16 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+}
+
+// Read properties from local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 android {
@@ -28,8 +38,9 @@ android {
             buildConfigField("String", "SERVER_BASE_URL", "\"http://8.148.182.90:3000\"")
         }
         debug {
-            // 添加本地测试服务器地址
-            buildConfigField("String", "SERVER_BASE_URL", "\"http://10.0.2.2:3000\"")
+            // Read server URL from local.properties or use a default value
+            val serverUrl = localProperties.getProperty("SERVER_BASE_URL") ?: "http://10.0.2.2:3000"
+            buildConfigField("String", "SERVER_BASE_URL", "\"$serverUrl\"")
         }
     }
     compileOptions {

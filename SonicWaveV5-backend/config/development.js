@@ -8,5 +8,6 @@ module.exports = {
   jwt: {
     secret: process.env.JWT_SECRET
   },
+  host: '0.0.0.0',
   port: process.env.PORT || 3000
 };

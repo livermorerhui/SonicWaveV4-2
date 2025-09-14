@@ -156,7 +156,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         CoroutineScope(Dispatchers.Main).launch {
             Toast.makeText(this@MainActivity, "开始下载 ${files.size} 个文件...", Toast.LENGTH_SHORT).show()
             files.forEach { fileName ->
-                val musicUrl = "http://192.168.31.217:3000/music/$fileName"
+                val musicUrl = "${BuildConfig.SERVER_BASE_URL}music/$fileName"
                 val downloadedFile = musicDownloader.downloadMusic(musicUrl, fileName)
                 if (downloadedFile != null) {
                     val downloadedItem = DownloadedMusicItem(

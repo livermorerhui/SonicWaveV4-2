@@ -66,7 +66,7 @@ class MusicDownloadDialogFragment : DialogFragment() {
     }
 
     private fun fetchMusicList() {
-        val request = Request.Builder().url("http://192.168.31.217:3000/music/list").build()
+        val request = Request.Builder().url("${BuildConfig.SERVER_BASE_URL}/api/music").build()
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
