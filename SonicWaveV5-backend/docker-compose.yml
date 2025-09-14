@@ -5,8 +5,6 @@ services:
       - "3000:3000"
     env_file:
       - ./.env
-    extra_hosts:
-      - "db:127.0.0.1"
     depends_on:
       db:
         condition: service_healthy
