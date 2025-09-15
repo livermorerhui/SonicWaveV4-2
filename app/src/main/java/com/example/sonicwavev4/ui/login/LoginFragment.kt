@@ -8,12 +8,12 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.sonicwavev4.R
-import com.example.sonicwavev4.ui.register.RegisterDialogFragment
+import com.example.sonicwavev4.ui.register.RegisterFragment
 
-class LoginDialogFragment : DialogFragment() {
+class LoginFragment : Fragment() {
 
     private val loginViewModel: LoginViewModel by viewModels()
 
@@ -21,7 +21,7 @@ class LoginDialogFragment : DialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.dialog_login, container, false)
+        return inflater.inflate(R.layout.fragment_login, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -47,8 +47,7 @@ class LoginDialogFragment : DialogFragment() {
         loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
                 Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
-                // You would typically save the token here
-                dismiss() // Close the dialog on success
+                // TODO: Handle successful login, e.g., navigate to another screen
             }.onFailure {
                 Toast.makeText(requireContext(), "Login failed: ${it.message}", Toast.LENGTH_LONG).show()
             }
@@ -59,8 +58,10 @@ class LoginDialogFragment : DialogFragment() {
         }
 
         registerTextView.setOnClickListener {
-            dismiss() // Dismiss the login dialog
-            RegisterDialogFragment().show(parentFragmentManager, "RegisterDialog")
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_right_main, RegisterFragment())
+                .addToBackStack(null)
+                .commit()
         }
     }
 }

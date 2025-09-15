@@ -36,7 +36,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sonicwavev4.databinding.ActivityMainBinding
-import com.example.sonicwavev4.ui.login.LoginDialogFragment
+
 import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -427,7 +427,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         }
     }
 
-    private fun showLoginDialog() { LoginDialogFragment().show(supportFragmentManager, "LoginDialog") }
+    
     override fun onCreateOptionsMenu(menu: Menu): Boolean { menuInflater.inflate(R.menu.toolbar_menu, menu); return true }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {

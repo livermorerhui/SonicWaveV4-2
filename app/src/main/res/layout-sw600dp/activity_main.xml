@@ -137,12 +137,12 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        <!-- === 右区域：仪表状态 === -->
-        <FrameLayout
+        <!-- === 右区域：登录 === -->
+        <androidx.fragment.app.FragmentContainerView
             android:id="@+id/fragment_right_main"
+            android:name="com.example.sonicwavev4.ui.login.LoginFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="#C8E6C9"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/vertical_divider_guideline"

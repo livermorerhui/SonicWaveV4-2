@@ -7,14 +7,12 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.sonicwavev4.R
-import com.example.sonicwavev4.ui.login.LoginDialogFragment
 import com.google.android.material.textfield.TextInputEditText
-import com.example.sonicwavev4.ui.register.RegisterViewModel // Correct import
 
-class RegisterDialogFragment : DialogFragment() {
+class RegisterFragment : Fragment() {
 
     private val registerViewModel: RegisterViewModel by viewModels()
 
@@ -22,7 +20,7 @@ class RegisterDialogFragment : DialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.dialog_register, container, false)
+        return inflater.inflate(R.layout.fragment_register, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -55,16 +53,14 @@ class RegisterDialogFragment : DialogFragment() {
         registerViewModel.registerResult.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
                 Toast.makeText(requireContext(), "Registration successful! Please login.", Toast.LENGTH_SHORT).show()
-                dismiss() // Dismiss the registration dialog
-                LoginDialogFragment().show(parentFragmentManager, "LoginDialog")
+                parentFragmentManager.popBackStack()
             }.onFailure {
                 Toast.makeText(requireContext(), "Registration failed: ${it.message}", Toast.LENGTH_LONG).show()
             }
         }
 
         loginLinkTextView.setOnClickListener {
-            dismiss()
-            LoginDialogFragment().show(parentFragmentManager, "LoginDialog")
+            parentFragmentManager.popBackStack()
         }
     }
 }
