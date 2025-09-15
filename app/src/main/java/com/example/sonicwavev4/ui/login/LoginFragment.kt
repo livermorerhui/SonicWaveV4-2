@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.ui.register.RegisterFragment
+import com.example.sonicwavev4.ui.user.UserFragment
 
 class LoginFragment : Fragment() {
 
@@ -46,8 +47,11 @@ class LoginFragment : Fragment() {
 
         loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
+                val userName = it.username
                 Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
-                // TODO: Handle successful login, e.g., navigate to another screen
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_right_main, UserFragment.newInstance(userName))
+                    .commit()
             }.onFailure {
                 Toast.makeText(requireContext(), "Login failed: ${it.message}", Toast.LENGTH_LONG).show()
             }
