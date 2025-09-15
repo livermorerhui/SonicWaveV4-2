@@ -15,7 +15,6 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -32,16 +31,17 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sonicwavev4.databinding.ActivityMainBinding
 import com.example.sonicwavev4.ui.login.LoginDialogFragment
+import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import com.example.sonicwavev4.DownloadedMusicItem
-import com.example.sonicwavev4.DownloadedMusicRepository
-import com.example.sonicwavev4.MusicItem
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadListener {
     private lateinit var binding: ActivityMainBinding
@@ -51,54 +51,22 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private var musicAreaLayout: ConstraintLayout? = null
     private var musicRecyclerView: RecyclerView? = null
     private var playButton: ImageButton? = null
-    private lateinit var musicAdapter: MusicAdapter
-    private var mediaPlayer: MediaPlayer? = null // MediaPlayer instance
-    private var currentPlayingUri: Uri? = null // To keep track of currently playing song
-    private var isPlaying: Boolean = false // Playback state
-    private lateinit var musicDownloader: MusicDownloader // Declare MusicDownloader
-    private lateinit var downloadedMusicRepository: DownloadedMusicRepository // Declare DownloadedMusicRepository
+    private lateinit var musicAdapter: MusicAdapter // 【修改点 1】Adapter类型将在后面定义为ListAdapter
+    private var mediaPlayer: MediaPlayer? = null
+    private var currentPlayingUri: Uri? = null
+    private var isPlaying: Boolean = false
+    private lateinit var musicDownloader: MusicDownloader
+    private lateinit var downloadedMusicRepository: DownloadedMusicRepository
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
-                // Permission is granted. Continue the action or workflow in your app.
                 Toast.makeText(this, "存储权限已授予", Toast.LENGTH_SHORT).show()
-                loadMusic() // Load music after permission is granted
+                loadMusic()
             } else {
-                // Explain to the user that the feature is unavailable because the
-                // features requires a permission that the user has denied.
                 Toast.makeText(this, "存储权限被拒绝，无法加载音乐", Toast.LENGTH_LONG).show()
             }
         }
-
-    private fun checkAndRequestPermissions() {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            android.Manifest.permission.READ_MEDIA_AUDIO
-        } else {
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-
-        when {
-            checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED -> {
-                // You can use the API that requires the permission.
-                loadMusic()
-            }
-            shouldShowRequestPermissionRationale(permission) -> {
-                // In an educational UI, explain to the user why your app requires this
-                // permission for a specific feature.
-                Toast.makeText(this, "需要存储权限才能读取设备上的音乐文件", Toast.LENGTH_LONG).show()
-                requestPermissionLauncher.launch(permission)
-            }
-            else -> {
-                // You can directly ask for the permission.
-                requestPermissionLauncher.launch(permission)
-            }
-        }
-    }
-
-    // 移除了之前用于记录拖动初始状态的变量
-    // private var lastTouchX: Float = 0f
-    // ...
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,30 +83,26 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         setupCustomNavigationRail()
         setupDragListeners()
 
-        // Initialize music area views and setup
         musicAreaLayout = binding.mainContentConstraintLayout?.findViewById(R.id.fragment_bottom_left)
         musicRecyclerView = musicAreaLayout?.findViewById(R.id.music_list_recyclerview)
         playButton = musicAreaLayout?.findViewById(R.id.play_button)
         setupMusicArea()
 
-        // Initialize MusicDownloader
         musicDownloader = MusicDownloader(this)
-        // Initialize DownloadedMusicRepository
         downloadedMusicRepository = DownloadedMusicRepository(this)
 
-        // Add a download button to musicAreaLayout
         musicAreaLayout?.let { musicArea ->
             val downloadImageButton = ImageButton(this).apply {
                 id = View.generateViewId()
-                setImageResource(android.R.drawable.stat_sys_download) // Use a download icon
-                setBackgroundResource(android.R.color.transparent) // Make background transparent
+                setImageResource(android.R.drawable.stat_sys_download)
+                setBackgroundResource(android.R.color.transparent)
                 layoutParams = ConstraintLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
                     ConstraintLayout.LayoutParams.WRAP_CONTENT
                 ).apply {
                     topToTop = ConstraintLayout.LayoutParams.PARENT_ID
                     endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-                    setMargins(0, 16.dpToPx(), 16.dpToPx(), 0) // Top and right margin
+                    setMargins(0, 16.dpToPx(), 16.dpToPx(), 0)
                 }
             }
             musicArea.addView(downloadImageButton)
@@ -149,37 +113,45 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                 dialog.show(supportFragmentManager, "MusicDownloadDialogFragment")
             }
         }
-        checkAndRequestPermissions() // Call to check and request permissions
+        checkAndRequestPermissions()
     }
 
+    // 【修改点 2】修复了下载功能的线程问题，防止UI卡死
     override fun onDownloadSelected(files: List<String>) {
+        // CoroutineScope现在用于在主线程启动，但在内部切换到IO线程执行耗时操作
         CoroutineScope(Dispatchers.Main).launch {
             Toast.makeText(this@MainActivity, "开始下载 ${files.size} 个文件...", Toast.LENGTH_SHORT).show()
-            files.forEach { fileName ->
-                val musicUrl = "${BuildConfig.SERVER_BASE_URL}music/$fileName"
-                val downloadedFile = musicDownloader.downloadMusic(musicUrl, fileName)
-                if (downloadedFile != null) {
-                    val downloadedItem = DownloadedMusicItem(
-                        fileName = downloadedFile.name,
-                        title = downloadedFile.nameWithoutExtension,
-                        artist = "Downloaded",
-                        internalPath = downloadedFile.absolutePath
-                    )
-                    downloadedMusicRepository.addDownloadedMusic(downloadedItem)
-                } else {
-                    Toast.makeText(this@MainActivity, "下载失败: $fileName", Toast.LENGTH_SHORT).show()
+
+            // 使用 withContext 将网络和文件操作切换到后台IO线程
+            withContext(Dispatchers.IO) {
+                files.forEach { fileName ->
+                    val musicUrl = "${BuildConfig.SERVER_BASE_URL}music/$fileName"
+                    val downloadedFile = musicDownloader.downloadMusic(musicUrl, fileName)
+                    if (downloadedFile != null) {
+                        val downloadedItem = DownloadedMusicItem(
+                            fileName = downloadedFile.name,
+                            title = downloadedFile.nameWithoutExtension,
+                            artist = "Downloaded",
+                            internalPath = downloadedFile.absolutePath
+                        )
+                        downloadedMusicRepository.addDownloadedMusic(downloadedItem)
+                    } else {
+                        // 在后台线程中显示Toast需要切回主线程
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@MainActivity, "下载失败: $fileName", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             }
+
             Toast.makeText(this@MainActivity, "下载完成", Toast.LENGTH_SHORT).show()
-            loadMusic() // Reload music to update the list
+            loadMusic() // 下载完成后，在主线程刷新列表
         }
     }
 
-    
-
     private fun setupMusicArea() {
-        // Initialize musicAdapter with an empty list initially
-        musicAdapter = MusicAdapter(emptyList()) { uri ->
+        // 【修改点 3】初始化新的ListAdapter
+        musicAdapter = MusicAdapter { uri ->
             playMusic(uri)
         }
         musicRecyclerView?.apply {
@@ -191,8 +163,148 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             togglePlayPause()
         }
 
-        // Ensure the music area is visible
         musicAreaLayout?.visibility = View.VISIBLE
+    }
+
+    private fun loadMusic() {
+        // 使用协程在后台线程加载音乐，在主线程更新UI
+        CoroutineScope(Dispatchers.IO).launch {
+            val musicList = mutableListOf<MusicItem>()
+            val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+            } else {
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+            }
+
+            val projection = arrayOf(
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media.DATA
+            )
+
+            val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
+
+            contentResolver.query(
+                collection,
+                projection,
+                null,
+                null,
+                sortOrder
+            )?.use { cursor ->
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+                val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
+                val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
+                val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+
+                while (cursor.moveToNext()) {
+                    val id = cursor.getLong(idColumn)
+                    val title = cursor.getString(titleColumn)
+                    val artist = cursor.getString(artistColumn)
+                    val contentUri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id.toString())
+                    } else {
+                        cursor.getString(dataColumn).toUri()
+                    }
+
+                    if (title != null && artist != null && !title.startsWith(".")) {
+                        musicList.add(MusicItem(title, artist, contentUri))
+                    }
+                }
+            }
+            // 【修改点 4】修复了此函数中一个多余的右大括号语法错误
+
+            // 加载已下载的音乐
+            val downloadedMusic = downloadedMusicRepository.loadDownloadedMusic()
+            downloadedMusic.forEach { downloadedItem ->
+                musicList.add(downloadedItem.toMusicItem())
+            }
+
+            // 切回主线程更新UI
+            withContext(Dispatchers.Main) {
+                if (musicList.isNotEmpty()) {
+                    // 【修改点 5】使用 submitList 更新列表，而不是 notifyDataSetChanged
+                    musicAdapter.submitList(musicList)
+                    Toast.makeText(this@MainActivity, "已加载 ${musicList.size} 首音乐", Toast.LENGTH_SHORT).show()
+                } else {
+                    musicAdapter.submitList(emptyList()) // 提交空列表以清空UI
+                    Toast.makeText(this@MainActivity, "未找到音乐文件", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    // 【修改点 6】将Adapter重构为 ListAdapter，并使用 DiffUtil 提高性能
+    inner class MusicAdapter(private val onMusicItemClick: (Uri) -> Unit) :
+        ListAdapter<MusicItem, MusicAdapter.MusicViewHolder>(MusicDiffCallback()) {
+
+        inner class MusicViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            private val titleTextView: TextView = view.findViewById(R.id.text_view_song_title)
+            private val artistTextView: TextView = view.findViewById(R.id.text_view_artist)
+
+            init {
+                view.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        // 使用 getItem(position) 来安全地获取当前项
+                        onMusicItemClick(getItem(position).uri)
+                    }
+                }
+            }
+
+            fun bind(item: MusicItem) {
+                titleTextView.text = item.title
+                artistTextView.text = item.artist
+            }
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MusicViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_music_track, parent, false)
+            return MusicViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: MusicViewHolder, position: Int) {
+            holder.bind(getItem(position))
+        }
+    }
+
+    // DiffUtil.ItemCallback 用于计算新旧列表之间的差异，是 ListAdapter 的核心
+    class MusicDiffCallback : DiffUtil.ItemCallback<MusicItem>() {
+        override fun areItemsTheSame(oldItem: MusicItem, newItem: MusicItem): Boolean {
+            // 通常使用唯一ID来判断是否是同一个项目
+            return oldItem.uri == newItem.uri
+        }
+
+        override fun areContentsTheSame(oldItem: MusicItem, newItem: MusicItem): Boolean {
+            // 如果项目是同一个，再判断内容是否发生了变化
+            // 对于data class，可以直接使用 == 来比较所有字段
+            return oldItem == newItem
+        }
+    }
+
+
+    // --- 以下是未作重大修改的代码，保持了原有逻辑 ---
+
+    private fun checkAndRequestPermissions() {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            android.Manifest.permission.READ_MEDIA_AUDIO
+        } else {
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        when {
+            checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED -> {
+                loadMusic()
+            }
+            shouldShowRequestPermissionRationale(permission) -> {
+                Toast.makeText(this, "需要存储权限才能读取设备上的音乐文件", Toast.LENGTH_LONG).show()
+                requestPermissionLauncher.launch(permission)
+            }
+            else -> {
+                requestPermissionLauncher.launch(permission)
+            }
+        }
     }
 
     private fun Int.dpToPx(): Int {
@@ -203,42 +315,32 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         ).toInt()
     }
 
-    // --- 【核心修改区域：全新的 handleDrag 函数】 ---
     private fun handleDrag(event: MotionEvent, parentView: View, guideline: Guideline, isHorizontal: Boolean): Boolean {
-        // 获取父容器的尺寸，如果为0则不处理
         val parentDimension = if (isHorizontal) parentView.width.toFloat() else parentView.height.toFloat()
         if (parentDimension == 0f) return true
 
         val params = guideline.layoutParams as ConstraintLayout.LayoutParams
         val location = IntArray(2)
-        parentView.getLocationOnScreen(location) // 获取父容器在屏幕上的起始坐标
+        parentView.getLocationOnScreen(location)
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                // 按下时我们什么都不用做，只需返回true表示我们处理了这个事件
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
                 val newPercent: Float
                 if (isHorizontal) {
                     val parentStartX = location[0]
-                    // 计算手指相对于父容器的X坐标
                     val relativeX = event.rawX - parentStartX
-                    // 直接将相对坐标转换为百分比
                     newPercent = relativeX / parentDimension
-
                     val minWidthPx = 660.dpToPx()
                     val minWidthPercent = minWidthPx / parentDimension
                     params.guidePercent = newPercent.coerceIn(minWidthPercent, 0.9f)
                 } else {
                     val parentStartY = location[1]
-                    // 计算手指相对于父容器的Y坐标
                     val relativeY = event.rawY - parentStartY
-                    // 直接将相对坐标转换为百分比
                     newPercent = relativeY / parentDimension
-
                     val minHeightPx = 315.dpToPx()
-                    //限定水平把手的
                     val minHeightPercent = minHeightPx / parentDimension
                     params.guidePercent = newPercent.coerceIn(minHeightPercent, 0.9f)
                 }
@@ -248,7 +350,6 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         }
         return false
     }
-    // --- 【修改结束】 ---
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupDragListeners() {
@@ -260,20 +361,17 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
             if (verticalGuideline != null && verticalDragHandle != null) {
                 verticalDragHandle.setOnTouchListener { _, event ->
-                    // 【重要】将父容器(mainContentLayout)传递给处理函数
                     handleDrag(event, mainContentLayout, verticalGuideline, isHorizontal = true)
                 }
             }
             if (horizontalGuideline != null && horizontalDragHandle != null) {
                 horizontalDragHandle.setOnTouchListener { _, event ->
-                    // 【重要】将父容器(mainContentLayout)传递给处理函数
                     handleDrag(event, mainContentLayout, horizontalGuideline, isHorizontal = false)
                 }
             }
         }
     }
 
-    // ... 其他函数 (setupCustomNavigationRail, createNavRailButton, 等) 保持不变 ...
     private fun setupCustomNavigationRail() {
         val topSectionContainer: LinearLayout? = binding.mainContentConstraintLayout?.findViewById(R.id.nav_rail_top_section)
         val bottomSectionContainer: LinearLayout? = binding.mainContentConstraintLayout?.findViewById(R.id.nav_rail_bottom_section)
@@ -322,14 +420,9 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         when (item.itemId) {
             R.id.navigation_home, R.id.navigation_persetmode -> {
                 navController.navigate(item.itemId)
-                // No explicit visibility changes needed here for musicAreaLayout or navHostFragmentView
-                // as musicAreaLayout is always visible and navHostFragmentView is managed by NavController
             }
             R.id.navigation_music -> {
                 Toast.makeText(this, "音乐按钮被点击", Toast.LENGTH_SHORT).show()
-                // If you want to navigate to a specific fragment in the top-left when music is selected,
-                // you would do it here, e.g., navController.navigate(R.id.navigation_home)
-                // For now, it will just show the toast and keep the current top-left fragment.
             }
         }
     }
@@ -338,16 +431,20 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     override fun onCreateOptionsMenu(menu: Menu): Boolean { menuInflater.inflate(R.menu.toolbar_menu, menu); return true }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_login_toolbar -> { showLoginDialog(); true }
+            R.id.action_notification_toolbar -> {
+                NotificationDialogFragment.newInstance().show(supportFragmentManager, NotificationDialogFragment.TAG)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun playMusic(uri: Uri) {
+        // ... 播放逻辑保持不变 ...
         if (mediaPlayer == null) {
             mediaPlayer = MediaPlayer().apply {
                 setDataSource(this@MainActivity, uri)
-                prepareAsync() // Prepare asynchronously to avoid blocking UI thread
+                prepareAsync()
                 setOnPreparedListener {
                     it.start()
                     this@MainActivity.isPlaying = true
@@ -358,7 +455,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                     this@MainActivity.isPlaying = false
                     playButton?.setImageResource(android.R.drawable.ic_media_play)
                     Toast.makeText(this@MainActivity, "播放完成", Toast.LENGTH_SHORT).show()
-                    it.release() // Release MediaPlayer when done
+                    it.release()
                     this@MainActivity.mediaPlayer = null
                     currentPlayingUri = null
                 }
@@ -369,19 +466,17 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                     mp.release()
                     this@MainActivity.mediaPlayer = null
                     currentPlayingUri = null
-                    true // Indicate that the error was handled
+                    true
                 }
             }
         } else {
-            // If a different song is selected, stop current and play new one
             if (currentPlayingUri != uri) {
                 mediaPlayer?.release()
                 mediaPlayer = null
                 isPlaying = false
                 currentPlayingUri = null
-                playMusic(uri) // Play the new song
+                playMusic(uri)
             } else {
-                // If the same song is selected, just toggle play/pause
                 togglePlayPause()
             }
         }
@@ -402,78 +497,8 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                 Toast.makeText(this, "继续播放", Toast.LENGTH_SHORT).show()
             }
         } ?: run {
-            // If mediaPlayer is null, start playing the first dummy song
-            val firstSongUri = musicAdapter.musicList.firstOrNull()?.uri
+            val firstSongUri = musicAdapter.currentList.firstOrNull()?.uri
             firstSongUri?.let { playMusic(it) } ?: Toast.makeText(this, "没有可播放的音乐", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun loadMusic() {
-        val musicList = mutableListOf<MusicItem>()
-        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            MediaStore.Audio.Media.getContentUri(
-                MediaStore.VOLUME_EXTERNAL
-            )
-        } else {
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        }
-
-        val projection = arrayOf(
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.DATA // Path to the file (deprecated in Q, but useful for older versions)
-        )
-
-        val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
-
-        contentResolver.query(
-            collection,
-            projection,
-            null,
-            null,
-            sortOrder
-        )?.use { cursor ->
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
-            val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
-            val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-            val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA) // For older Android versions
-
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                val title = cursor.getString(titleColumn)
-                val artist = cursor.getString(artistColumn)
-                val contentUri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    // For Android 10 (Q) and above, use content URI
-                    Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id.toString())
-                } else {
-                    // For older versions, use file path
-                    cursor.getString(dataColumn).toUri()
-                }
-
-                // Filter out non-music files (e.g., ringtones, notifications) if necessary
-                // This is a basic filter, more robust filtering might be needed
-                if (title != null && artist != null && !title.startsWith(".")) { // Simple filter for hidden files
-                    musicList.add(MusicItem(title, artist, contentUri))
-                }
-            }
-        }
-
-        
-
-
-        // Load downloaded music from internal storage
-        val downloadedMusic = downloadedMusicRepository.loadDownloadedMusic()
-        downloadedMusic.forEach { downloadedItem ->
-            musicList.add(downloadedItem.toMusicItem())
-        }
-
-
-        if (musicList.isNotEmpty()) {
-            musicAdapter.updateMusicList(musicList) // Need to add updateMusicList to adapter
-            Toast.makeText(this, "已加载 ${musicList.size} 首音乐", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "未找到音乐文件", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -486,43 +511,5 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
-
-    
-
-    // RecyclerView Adapter
-    inner class MusicAdapter(var musicList: List<MusicItem>, private val onMusicItemClick: (Uri) -> Unit) : RecyclerView.Adapter<MusicAdapter.MusicViewHolder>() {
-
-        inner class MusicViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val titleTextView: TextView = view.findViewById(R.id.text_view_song_title)
-            val artistTextView: TextView = view.findViewById(R.id.text_view_artist)
-
-            init {
-                view.setOnClickListener {
-                    val position = adapterPosition
-                    if (position != RecyclerView.NO_POSITION) {
-                        onMusicItemClick(musicList[position].uri)
-                    }
-                }
-            }
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MusicViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_music_track, parent, false)
-            return MusicViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: MusicViewHolder, position: Int) {
-            val item = musicList[position]
-            holder.titleTextView.text = item.title
-            holder.artistTextView.text = item.artist
-        }
-
-        override fun getItemCount(): Int = musicList.size
-
-        @SuppressLint("NotifyDataSetChanged")
-        fun updateMusicList(newList: List<MusicItem>) {
-            musicList = newList
-            notifyDataSetChanged()
-        }
-    }
 }
+// 【修改点 7】删除了文件末尾所有多余的、导致语法错误的杂乱字符

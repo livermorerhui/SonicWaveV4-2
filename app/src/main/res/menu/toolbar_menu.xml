@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_login_toolbar"
-        android:icon="@drawable/ic_account_circle_black_24dp"
-        android:title="登录"
+        android:id="@+id/action_notification_toolbar"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="通知"
         app:showAsAction="ifRoom" />
 
 </menu>
