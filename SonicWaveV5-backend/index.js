@@ -14,6 +14,7 @@ const userRouter = require('./routes/users.routes.js');
 const musicRouter = require('./routes/music.routes.js');
 const createReportRouter = require('./routes/reports.routes.js');
 const logsRouter = require('./routes/logs.routes.js');
+const appRouter = require('./routes/app.routes.js');
 
 // 初始化
 const app = express();
@@ -70,6 +71,7 @@ app.use('/api/music', musicRouter);
 // 通过工厂函数注入 wss 和 wsClients 实例
 app.use('/api/reports', createReportRouter(wss, wsClients));
 app.use('/api/logs', logsRouter);
+app.use('/api/app', appRouter);
 
 // 启动应用
 async function startApp() {

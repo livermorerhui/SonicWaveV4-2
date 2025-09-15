@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.ui.login.LoginFragment
 import android.widget.ImageButton
+import com.example.sonicwavev4.utils.SessionManager
 
 class UserFragment : Fragment() {
 
@@ -30,11 +31,13 @@ class UserFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val sessionManager = SessionManager(requireContext())
         val userNameTextView: TextView = view.findViewById(R.id.user_name_textview)
         userNameTextView.text = "Welcome, $userName!"
 
         val logoutButton: ImageButton = view.findViewById(R.id.logout_button)
         logoutButton.setOnClickListener {
+            sessionManager.clearSession()
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_right_main, LoginFragment())
                 .commit()

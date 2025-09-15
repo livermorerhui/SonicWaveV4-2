@@ -13,6 +13,7 @@ import androidx.fragment.app.viewModels
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.ui.register.RegisterFragment
 import com.example.sonicwavev4.ui.user.UserFragment
+import com.example.sonicwavev4.utils.SessionManager
 
 class LoginFragment : Fragment() {
 
@@ -27,6 +28,8 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val sessionManager = SessionManager(requireContext())
 
         val usernameEditText: EditText = view.findViewById(R.id.usernameEditText)
         val passwordEditText: EditText = view.findViewById(R.id.passwordEditText)
@@ -48,6 +51,9 @@ class LoginFragment : Fragment() {
         loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
                 val userName = it.username
+                val token = it.token
+                sessionManager.saveAuthToken(token)
+                sessionManager.saveUserId(userName) // Assuming username is used as userId for now
                 Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.beginTransaction()
                     .replace(R.id.fragment_right_main, UserFragment.newInstance(userName))

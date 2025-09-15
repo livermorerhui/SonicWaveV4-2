@@ -4,6 +4,7 @@ import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
+import com.example.sonicwavev4.network.AppUsageRequest
 
 interface ApiService {
 
@@ -15,4 +16,7 @@ interface ApiService {
 
     @POST("api/logs")
     suspend fun createClientLogs(@Body requestBody: RequestBody): Response<Unit>
+
+    @POST("api/app/usage")
+    suspend fun recordAppUsage(@Body request: AppUsageRequest): Response<Unit>
 }

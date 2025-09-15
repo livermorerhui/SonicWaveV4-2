@@ -38,6 +38,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.sonicwavev4.databinding.ActivityMainBinding
 
 import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
+import com.example.sonicwavev4.network.AppUsageRequest
+import com.example.sonicwavev4.network.RetrofitClient
+import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,6 +75,8 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val sessionManager = SessionManager(this)
 
         setSupportActionBar(binding.toolbar)
 
@@ -114,6 +119,19 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             }
         }
         checkAndRequestPermissions()
+
+        // Record app launch time
+        val launchTime = System.currentTimeMillis()
+        val userId = sessionManager.fetchUserId()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val request = AppUsageRequest(launchTime = launchTime, userId = userId)
+                RetrofitClient.api.recordAppUsage(request)
+            } catch (e: Exception) {
+                // Log error or handle it appropriately
+                e.printStackTrace()
+            }
+        }
     }
 
     // 【修改点 2】修复了下载功能的线程问题，防止UI卡死
