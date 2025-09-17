@@ -4,7 +4,8 @@ import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
-import com.example.sonicwavev4.network.AppUsageRequest
+import retrofit2.http.PUT
+import retrofit2.http.Path
 
 interface ApiService {
 
@@ -19,4 +20,11 @@ interface ApiService {
 
     @POST("api/app/usage")
     suspend fun recordAppUsage(@Body request: AppUsageRequest): Response<Unit>
+
+    // --- 以下是新增的方法 ---
+    @POST("api/operations/start")
+    suspend fun startOperation(@Body request: StartOperationRequest): StartOperationResponse
+
+    @PUT("api/operations/stop/{id}")
+    suspend fun stopOperation(@Path("id") id: Long): Response<Unit>
 }

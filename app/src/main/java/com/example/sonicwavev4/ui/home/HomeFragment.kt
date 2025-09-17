@@ -1,5 +1,6 @@
 package com.example.sonicwavev4.ui.home
 
+import android.util.Log
 import android.os.Build
 import android.media.*
 import android.os.Bundle
@@ -10,16 +11,19 @@ import android.widget.Button
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.databinding.FragmentHomeBinding
+import com.example.sonicwavev4.utils.SessionManager
+import com.example.sonicwavev4.ui.home.HomeViewModelFactory
 import kotlinx.coroutines.*
 import java.util.Locale
 import kotlin.math.sin
 
 class HomeFragment : Fragment() {
 
-    private val viewModel: HomeViewModel by viewModels()
+    private lateinit var viewModel: HomeViewModel
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
@@ -39,8 +43,17 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initializeSoundPool()
-        audioManager = context?.getSystemService(AudioManager::class.java)
+
+        // 创建 SessionManager 实例
+        val sessionManager = SessionManager(requireContext())
+
+        // 创建 ViewModelFactory
+        val viewModelFactory = HomeViewModelFactory(sessionManager)
+
+        // 通过 Factory 获取 ViewModel 实例
+        viewModel = ViewModelProvider(this, viewModelFactory).get(HomeViewModel::class.java)
+
+        // ... 继续执行 setupClickListeners() 和 setupObservers() ...
         setupClickListeners()
         setupObservers()
     }
@@ -194,10 +207,35 @@ class HomeFragment : Fragment() {
     private fun playTapSound() { if (isSoundPoolReady) soundPool.play(tapSoundId, 1f, 1f, 1, 0, 1f) }
 
     private fun startTonePlayback() {
+        // --- FINAL SOLUTION: Best-effort audio focus request ---
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT).setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()).setOnAudioFocusChangeListener { if (it == AudioManager.AUDIOFOCUS_LOSS) viewModel.forceStop() }.build()
-            audioFocusRequest?.let { if (audioManager?.requestAudioFocus(it) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) { viewModel.forceStop(); return } }
-        } else { @Suppress("DEPRECATION") if (audioManager?.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) { viewModel.forceStop(); return } }
+            audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
+                .setOnAudioFocusChangeListener { if (it == AudioManager.AUDIOFOCUS_LOSS) viewModel.forceStop() }
+                .build()
+
+            audioFocusRequest?.let {
+                // MODIFIED: If focus request fails, just log a warning and continue.
+                if (audioManager?.requestAudioFocus(it) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                    Log.w("HomeFragment", "Audio focus request failed, but continuing playback anyway.")
+                    // We no longer call viewModel.forceStop() or return here.
+                }
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            // MODIFIED: If focus request fails, just log a warning and continue.
+            if (audioManager?.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN) !=
+                AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                Log.w("HomeFragment", "Audio focus request failed (legacy), but continuing playback anyway.")
+                // We no longer call viewModel.forceStop() or return here.
+            }
+        }
+        // --- END FINAL SOLUTION ---
 
         playbackJob = lifecycleScope.launch(Dispatchers.Default) {
             val sampleRate = 44100
@@ -206,19 +244,17 @@ class HomeFragment : Fragment() {
             val totalSeconds = (viewModel.timeInMinutes.value ?: 0) * 60
             val volume = if (currentIntensity > 100) 1f else currentIntensity / 100f
 
-            // AudioTrack 初始化
             val minBufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT)
             audioTrack = AudioTrack.Builder()
+
                 .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
                 .setAudioFormat(AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
-                .setBufferSizeInBytes(minBufferSize) // 使用最小缓冲区大小
+                .setBufferSizeInBytes(minBufferSize)
                 .setTransferMode(AudioTrack.MODE_STREAM)
                 .build()
 
             audioTrack?.play()
 
-            // --- 【优化核心】 ---
-            // 1. 预计算一个周期的波形
             val samplesPerCycle = sampleRate.toDouble() / currentFrequency
             val waveBuffer = ShortArray(samplesPerCycle.toInt())
             for (i in waveBuffer.indices) {
@@ -228,25 +264,26 @@ class HomeFragment : Fragment() {
             var samplesGenerated = 0L
             val totalSamples = (sampleRate * totalSeconds).toLong()
 
-            // 2. 在循环中重复写入预计算的波形
             while (isActive && samplesGenerated < totalSamples) {
                 if (audioTrack?.playState == AudioTrack.PLAYSTATE_PLAYING) {
                     val remainingSamples = totalSamples - samplesGenerated
                     val samplesToWrite = minOf(waveBuffer.size.toLong(), remainingSamples).toInt()
-
                     val result = audioTrack?.write(waveBuffer, 0, samplesToWrite) ?: -1
                     if (result > 0) {
                         samplesGenerated += result
                     } else {
-                        break // 写入失败，跳出循环
+                        break
                     }
                 } else {
-                    break // AudioTrack 停止播放，跳出循环
+                    break
                 }
             }
-            // --- 【优化结束】 ---
         }
     }
+
+
+
+
 
     private fun stopTonePlayback() {
         playbackJob?.cancel(); playbackJob = null

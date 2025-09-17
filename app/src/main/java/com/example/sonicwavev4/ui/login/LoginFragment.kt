@@ -1,6 +1,8 @@
 package com.example.sonicwavev4.ui.login
 
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +16,7 @@ import com.example.sonicwavev4.R
 import com.example.sonicwavev4.ui.register.RegisterFragment
 import com.example.sonicwavev4.ui.user.UserFragment
 import com.example.sonicwavev4.utils.SessionManager
+import org.json.JSONObject
 
 class LoginFragment : Fragment() {
 
@@ -49,15 +52,35 @@ class LoginFragment : Fragment() {
         }
 
         loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
-            result.onSuccess {
-                val userName = it.username
-                val token = it.token
+            result.onSuccess { loginResponse ->
+                val token = loginResponse.token
+                val userName = loginResponse.username
+                val email = usernameEditText.text.toString()
+
+                // 1. 保存Token
                 sessionManager.saveAuthToken(token)
-                sessionManager.saveUserId(userName) // Assuming username is used as userId for now
+
+                // 2. 从Token中解码出真正的userId并保存
+                val userId = decodeUserIdFromJwt(token)
+                if (userId != null) {
+                    sessionManager.saveUserId(userId)
+                    Log.d("LoginFragment", "Successfully saved userId: $userId")
+                } else {
+                    Log.e("LoginFragment", "Failed to parse userId from token.")
+                    Toast.makeText(requireContext(), "Login failed: Invalid token data.", Toast.LENGTH_LONG).show()
+                    return@onSuccess
+                }
+
+                // 3. 保存userName和email
+                sessionManager.saveUserName(userName)
+                sessionManager.saveEmail(email)
+                Log.d("LoginFragment", "Successfully saved userName: $userName and email: $email")
+
                 Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.beginTransaction()
                     .replace(R.id.fragment_right_main, UserFragment.newInstance(userName))
                     .commit()
+
             }.onFailure {
                 Toast.makeText(requireContext(), "Login failed: ${it.message}", Toast.LENGTH_LONG).show()
             }
@@ -72,6 +95,21 @@ class LoginFragment : Fragment() {
                 .replace(R.id.fragment_right_main, RegisterFragment())
                 .addToBackStack(null)
                 .commit()
+        }
+    }
+
+    // --- ADDED: 添加一个辅助函数来解码JWT ---
+    private fun decodeUserIdFromJwt(token: String): String? {
+        try {
+            val parts = token.split(".")
+            if (parts.size < 2) return null
+
+            val payload = String(Base64.decode(parts[1], Base64.URL_SAFE), Charsets.UTF_8)
+            val jsonObject = JSONObject(payload)
+            return jsonObject.optString("userId", null)
+        } catch (e: Exception) {
+            Log.e("LoginFragment", "Error decoding JWT", e)
+            return null
         }
     }
 }

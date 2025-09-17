@@ -17,6 +17,7 @@ class RetrofitClient private constructor(context: Context) {
         }
 
         val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(context)) // 添加认证拦截器
             .addInterceptor(NetworkLoggingInterceptor(context))
             .addInterceptor(loggingInterceptor)
             .build()
