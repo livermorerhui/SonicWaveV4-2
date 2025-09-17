@@ -8,6 +8,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    command: sh -c "npx knex migrate:latest --knexfile knexfile.js && node index.js"
 
   db:
     image: mysql:8.0
