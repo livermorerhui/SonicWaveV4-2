@@ -27,4 +27,7 @@ interface ApiService {
 
     @PUT("api/operations/stop/{id}")
     suspend fun stopOperation(@Path("id") id: Long): Response<Unit>
+
+    @POST("api/heartbeat")
+    suspend fun sendHeartbeat(): Response<Unit>
 }

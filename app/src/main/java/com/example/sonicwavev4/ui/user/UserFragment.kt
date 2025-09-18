@@ -10,6 +10,7 @@ import com.example.sonicwavev4.R
 import com.example.sonicwavev4.ui.login.LoginFragment
 import android.widget.ImageButton
 import com.example.sonicwavev4.utils.SessionManager
+import com.example.sonicwavev4.utils.HeartbeatManager
 
 class UserFragment : Fragment() {
 
@@ -37,7 +38,11 @@ class UserFragment : Fragment() {
 
         val logoutButton: ImageButton = view.findViewById(R.id.logout_button)
         logoutButton.setOnClickListener {
+            // 1. 停止心跳
+            HeartbeatManager.stop()
+            // 2. 清理用户会话
             sessionManager.clearSession()
+            // 3. 返回登录页面
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_right_main, LoginFragment())
                 .commit()

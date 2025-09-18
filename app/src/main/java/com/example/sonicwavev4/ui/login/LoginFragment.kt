@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.ui.register.RegisterFragment
 import com.example.sonicwavev4.ui.user.UserFragment
+import com.example.sonicwavev4.utils.HeartbeatManager
 import com.example.sonicwavev4.utils.SessionManager
 import org.json.JSONObject
 
@@ -76,8 +77,12 @@ class LoginFragment : Fragment() {
                 sessionManager.saveEmail(email)
                 Log.d("LoginFragment", "Successfully saved userName: $userName and email: $email")
 
+                // 4. 启动心跳
+                HeartbeatManager.start(requireContext())
+
                 Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
                 parentFragmentManager.beginTransaction()
+                    // FIX: Added a null-safe fallback to prevent type mismatch warnings
                     .replace(R.id.fragment_right_main, UserFragment.newInstance(userName))
                     .commit()
 
@@ -98,7 +103,7 @@ class LoginFragment : Fragment() {
         }
     }
 
-    // --- ADDED: 添加一个辅助函数来解码JWT ---
+    // --- ADDED: 确保这个辅助函数存在于类中 ---
     private fun decodeUserIdFromJwt(token: String): String? {
         try {
             val parts = token.split(".")
@@ -106,7 +111,14 @@ class LoginFragment : Fragment() {
 
             val payload = String(Base64.decode(parts[1], Base64.URL_SAFE), Charsets.UTF_8)
             val jsonObject = JSONObject(payload)
-            return jsonObject.optString("userId", null)
+            
+            // 使用更健壮的 getString + try/catch 模式代替 optString
+            return try {
+                jsonObject.getString("userId")
+            } catch (_: Exception) {
+                null
+            }
+
         } catch (e: Exception) {
             Log.e("LoginFragment", "Error decoding JWT", e)
             return null

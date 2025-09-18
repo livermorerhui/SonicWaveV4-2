@@ -7,6 +7,7 @@ const url = require('url');
 
 const logger = require('./logger');
 const { checkDbConnection } = require('./config/db');
+const { startCleanupInterval } = require('./onlineStatusManager');
 const config = require('./config/config'); // 引入新的配置
 
 // 引入路由模块
@@ -16,6 +17,7 @@ const createReportRouter = require('./routes/reports.routes.js');
 const logsRouter = require('./routes/logs.routes.js');
 const appRouter = require('./routes/app.routes.js');
 const operationsRouter = require('./routes/operations.routes.js');
+const heartbeatRouter = require('./routes/heartbeat.routes.js');
 
 // 初始化
 const app = express();
@@ -74,6 +76,7 @@ app.use('/api/reports', createReportRouter(wss, wsClients));
 app.use('/api/logs', logsRouter);
 app.use('/api/app', appRouter);
 app.use('/api/operations', operationsRouter);
+app.use('/api/heartbeat', heartbeatRouter);
 
 // 启动应用
 async function startApp() {
@@ -83,6 +86,8 @@ async function startApp() {
   // 启动服务器
   server.listen(PORT, () => {
     logger.info(`✅ Server (HTTP + WebSocket) is running on http://localhost:${PORT}`);
+    // 在服务器启动后，开始在线用户清理任务
+    startCleanupInterval();
   });
 }
 
