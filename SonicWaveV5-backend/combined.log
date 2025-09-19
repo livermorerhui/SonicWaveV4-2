@@ -9,3 +9,465 @@
 {"error":"","level":"error","message":"❌ Failed to connect to the database.","timestamp":"2025-09-11T14:16:48.015Z"}
 {"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-11T14:18:46.604Z"}
 {"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-11T14:18:46.607Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T01:21:47.849Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T01:21:47.852Z"}
+{"launchTime":1757982182072,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T01:24:21.261Z","userId":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T02:09:10.070Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T02:09:10.072Z"}
+{"launchTime":1757984890975,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T02:09:30.168Z","userId":"123"}
+{"error":"db.promise is not a function","level":"error","message":"Error recording app usage:","timestamp":"2025-09-17T02:09:30.169Z"}
+{"launchTime":1757985154365,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T02:13:53.521Z"}
+{"error":"db.promise is not a function","level":"error","message":"Error recording app usage:","timestamp":"2025-09-17T02:13:53.523Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T02:16:24.232Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T02:16:24.235Z"}
+{"launchTime":1757985313408,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T02:16:32.569Z"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error recording app usage:","timestamp":"2025-09-17T02:16:32.571Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T02:22:48.668Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T02:22:48.670Z"}
+{"launchTime":1757985697873,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T02:22:57.073Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T04:43:47.937Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T04:43:47.940Z"}
+{"launchTime":1757994418017,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T04:48:17.193Z","userId":"123"}
+{"launchTime":1757994767081,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T04:54:06.260Z","userId":"123"}
+{"launchTime":1757996742050,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T05:27:01.201Z","userId":"123"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T05:27:27.677Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T05:29:53.711Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T05:29:53.714Z"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T05:29:57.412Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T05:37:56.073Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T05:37:56.076Z"}
+{"frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-17T05:38:19.807Z","userId":"123"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T05:38:19.811Z"}
+{"frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-17T05:39:40.678Z","userId":"123"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T05:39:40.680Z"}
+{"frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-17T05:40:07.327Z","userId":"123"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T05:40:07.327Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T05:42:57.394Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T05:42:57.397Z"}
+{"frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-17T05:43:05.747Z","userId":"123"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T05:43:05.748Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T05:45:04.841Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T05:45:04.844Z"}
+{"launchTime":1757999056044,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T06:05:35.167Z"}
+{"email":"123@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-17T06:06:33.444Z","userId":"2","userName":"123"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T06:06:33.446Z"}
+{"email":"123@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-17T06:06:35.802Z","userId":"2","userName":"123"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T06:06:35.803Z"}
+{"email":"123@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-17T06:07:24.656Z","userId":"2","userName":"123"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T06:07:24.659Z"}
+{"email":"123@qq.com","frequency":888,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-17T06:13:44.893Z","userId":"2","userName":"123"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T06:13:44.894Z"}
+{"launchTime":1757999631283,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T06:15:10.559Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T06:16:20.220Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T06:16:20.223Z"}
+{"launchTime":1757999714643,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T06:16:33.931Z"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-17T06:17:22.493Z","userId":"2","userName":"123"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-17T06:17:22.495Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T06:19:49.178Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T06:19:49.181Z"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-17T06:19:52.982Z","userId":"2","userName":"123"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-17T06:20:44.215Z","userId":"2","userName":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T06:31:57.926Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T06:31:57.930Z"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-17T06:34:01.578Z","userId":"2","userName":"123"}
+{"launchTime":1758001184505,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T06:41:03.826Z","userId":"2"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-17T06:41:53.094Z","userId":"2","userName":"123"}
+{"email":"234@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-17T06:42:34.888Z","userId":"4","userName":"234"}
+{"launchTime":1758003090823,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T07:12:50.174Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T07:13:00.968Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T07:13:00.972Z"}
+{"email":"qaz@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-17T07:13:37.258Z","userId":"5","userName":"qaz"}
+{"email":"qaz@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-17T07:13:39.065Z","userId":"5","userName":"qaz"}
+{"launchTime":1758003692557,"level":"info","message":"App usage recorded:","timestamp":"2025-09-17T07:22:51.878Z","userId":"5"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-17T07:22:59.081Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-17T07:22:59.084Z"}
+{"email":"qaz@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-17T07:23:08.678Z","userId":"5","userName":"qaz"}
+{"email":"123@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-17T07:23:27.729Z","userId":"2","userName":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T02:32:43.421Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T02:32:43.426Z"}
+{"level":"info","message":"✅ Online user status manager started.","timestamp":"2025-09-18T02:32:43.427Z"}
+{"launchTime":1758047228942,"level":"info","message":"App usage recorded:","timestamp":"2025-09-18T02:32:46.373Z"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-18T02:46:36.086Z","userId":"2","userName":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T02:50:38.189Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T02:50:38.192Z"}
+{"level":"info","message":"✅ Online user status manager started.","timestamp":"2025-09-18T02:50:38.192Z"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-18T02:50:46.221Z","userId":"2","userName":"123"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-18T02:51:40.502Z","userId":"2","userName":"123"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-18T02:51:43.770Z","userId":"2","userName":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T02:51:59.535Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T02:51:59.538Z"}
+{"level":"info","message":"✅ Online user status manager started.","timestamp":"2025-09-18T02:51:59.538Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:01.152Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:06.176Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:11.196Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:16.214Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:21.230Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:26.242Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:31.258Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:36.278Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:41.297Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:46.312Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:51.321Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:52:56.332Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:01.345Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:06.356Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:11.373Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:16.387Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:21.404Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:26.418Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:31.437Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:36.449Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:41.470Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:46.484Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:51.497Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:53:56.512Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:54:01.526Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:54:06.542Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:54:11.555Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:54:16.568Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:54:21.581Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:54:26.602Z"}
+{"level":"info","message":"Heartbeat received from user: 2","timestamp":"2025-09-18T02:54:31.620Z"}
+{"level":"info","message":"User 2 timed out and was marked as offline.","timestamp":"2025-09-18T02:55:14.545Z"}
+{"level":"info","message":"Cleaned up 1 inactive user(s).","timestamp":"2025-09-18T02:55:14.547Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T15:14:13.536Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T15:26:15.003Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T15:26:15.012Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-18T15:26:15.013Z"}
+{"error":"Table 'sonicwave_db.user_sessions' doesn't exist","level":"error","message":"Error recording login event:","timestamp":"2025-09-18T15:31:16.588Z","userId":2}
+{"email":"123@qq.com","frequency":77,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":11,"timestamp":"2025-09-18T15:33:34.171Z","userId":"2","userName":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T15:35:49.762Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T15:35:49.765Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-18T15:35:49.765Z"}
+{"launchTime":1758065889234,"level":"info","message":"App usage recorded:","timestamp":"2025-09-18T15:36:26.239Z","userId":"2"}
+{"email":"123@qq.com","frequency":888,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-18T15:37:12.542Z","userId":"2","userName":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T16:13:16.716Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T16:13:16.719Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-18T16:13:16.719Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T16:14:26.366Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T16:14:26.369Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-18T16:14:26.369Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T16:18:48.418Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T16:18:48.421Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-18T16:18:48.421Z"}
+{"email":"234@qq.com","frequency":888,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-18T16:23:46.753Z","userId":"4","userName":"234"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19 00:28:14"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19 00:28:14"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19 00:28:14"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19 00:30:40","userId":"2","userName":"123"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19 00:30:45","userId":"2","userName":"123"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19 00:38:28","userId":"2","userName":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19 00:38:47"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19 00:38:47"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19 00:38:47"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19 00:38:54","userId":"2","userName":"123"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19 00:38:57","userId":"2","userName":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19 00:39:09"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19 00:39:09"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19 00:39:09"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T16:49:22.457Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T16:49:22.460Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-18T16:49:22.460Z"}
+{"email":"123@qq.com","frequency":777,"intensity":55,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-18T16:49:28.863Z","userId":"2","userName":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T16:59:21.879Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T16:59:21.882Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-18T16:59:21.882Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T17:02:32.507Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T17:02:32.510Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-18T17:02:32.510Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-18T17:02:48.511Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-18T17:02:48.514Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-18T17:02:48.514Z"}
+{"level":"info","message":"[Login Event] User 2 logged in. Session ID: 10","timestamp":"2025-09-18T17:03:46.185Z"}
+{"launchTime":1758073439543,"level":"info","message":"App usage recorded:","timestamp":"2025-09-18T17:42:16.549Z"}
+{"level":"info","message":"[Login Event] User 2 logged in. Session ID: 11","timestamp":"2025-09-18T17:42:32.842Z"}
+{"launchTime":1758080375232,"level":"info","message":"App usage recorded:","timestamp":"2025-09-19T00:20:30.043Z"}
+{"level":"info","message":"[Login Event] User 2 logged in. Session ID: 12","timestamp":"2025-09-19T00:20:56.340Z"}
+{"email":"123@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":2,"timestamp":"2025-09-19T00:23:18.048Z","userId":"2","userName":"123"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19T01:13:01.636Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19T01:13:01.639Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19T01:13:01.639Z"}
+{"launchTime":1758083547463,"level":"info","message":"App usage recorded:","timestamp":"2025-09-19T01:13:22.215Z"}
+{"level":"info","message":"[Login Event] User 2 logged in. Session ID: 13","timestamp":"2025-09-19T01:13:57.903Z"}
+{"level":"info","message":"[Login Event] User 4 logged in. Session ID: 14","timestamp":"2025-09-19T01:18:21.355Z"}
+{"email":"234@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":3,"timestamp":"2025-09-19T01:18:23.778Z","userId":"4","userName":"234"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19T01:26:12.982Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19T01:26:12.985Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19T01:26:12.986Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19T01:28:00.365Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19T01:28:00.368Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19T01:28:00.368Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19T01:30:09.497Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19T01:30:09.499Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19T01:30:09.500Z"}
+{"launchTime":1758084585159,"level":"info","message":"App usage recorded:","timestamp":"2025-09-19T01:30:39.868Z"}
+{"level":"warn","message":"[Auth Middleware] Token is missing. Request to '/api/operations/start' denied.","timestamp":"2025-09-19T01:30:59.116Z"}
+{"level":"warn","message":"[Auth Middleware] Token is missing. Request to '/api/operations/start' denied.","timestamp":"2025-09-19T01:30:59.278Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T01:31:15.805Z"}
+{"level":"info","message":"[Login Event] User 2 logged in. Session ID: 15","timestamp":"2025-09-19T01:31:15.815Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T01:31:21.925Z"}
+{"email":"123@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T01:31:21.926Z","userId":"2","userName":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/operations/stop/25'.","timestamp":"2025-09-19T01:31:25.402Z"}
+{"launchTime":1758085941002,"level":"info","message":"App usage recorded:","timestamp":"2025-09-19T01:53:15.758Z"}
+{"level":"warn","message":"[Auth Middleware] Token is missing. Request to '/api/operations/start' denied.","timestamp":"2025-09-19T01:53:39.473Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T01:53:47.482Z"}
+{"level":"info","message":"[Login Event] User 2 logged in. Session ID: 16","timestamp":"2025-09-19T01:53:47.491Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 6. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T01:56:42.638Z"}
+{"level":"info","message":"[Login Event] User 6 logged in. Session ID: 17","timestamp":"2025-09-19T01:56:42.643Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 6. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T01:57:03.753Z"}
+{"email":"qwe@qq.com","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T01:57:03.755Z","userId":"6","userName":"qwe"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 6. Granting access to '/api/operations/stop/26'.","timestamp":"2025-09-19T01:57:04.724Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19T02:06:10.389Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19T02:06:10.392Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19T02:06:10.392Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T02:06:34.831Z"}
+{"level":"info","message":"[Login Event] User 2 logged in. Session ID: 18","timestamp":"2025-09-19T02:06:34.845Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19T02:23:23.429Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19T02:23:23.435Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19T02:23:23.435Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T02:23:44.761Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 1","timestamp":"2025-09-19T02:23:44.769Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T02:24:00.033Z"}
+{"email":"123","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T02:24:00.034Z","userId":"1","userName":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/operations/stop/1'.","timestamp":"2025-09-19T02:24:03.304Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T02:24:38.900Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 2","timestamp":"2025-09-19T02:24:38.913Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T02:26:41.798Z"}
+{"email":"123","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T02:26:41.799Z","userId":"1","userName":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/operations/stop/2'.","timestamp":"2025-09-19T02:26:42.855Z"}
+{"launchTime":1758087972577,"level":"info","message":"App usage recorded:","timestamp":"2025-09-19T02:27:13.105Z","userId":"1"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T02:28:12.000Z"}
+{"level":"info","message":"[Login Event] User 2 logged in. Session ID: 3","timestamp":"2025-09-19T02:28:12.005Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T02:28:43.697Z"}
+{"email":"234","frequency":888,"intensity":45,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T02:28:43.697Z","userId":"2","userName":"234"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/operations/stop/3'.","timestamp":"2025-09-19T02:28:51.930Z"}
+{"launchTime":1758088578648,"level":"info","message":"App usage recorded:","timestamp":"2025-09-19T02:37:19.159Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 3. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T02:37:49.612Z"}
+{"level":"info","message":"[Login Event] User 3 logged in. Session ID: 4","timestamp":"2025-09-19T02:37:49.617Z"}
+{"launchTime":1758089288855,"level":"info","message":"App usage recorded:","timestamp":"2025-09-19T02:49:09.536Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T02:51:02.394Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 5","timestamp":"2025-09-19T02:51:02.407Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T02:51:11.079Z"}
+{"email":"123","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T02:51:11.080Z","userId":"1","userName":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/operations/stop/4'.","timestamp":"2025-09-19T02:51:12.256Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T02:52:31.278Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 6","timestamp":"2025-09-19T02:52:31.293Z"}
+{"launchTime":1758089854512,"level":"info","message":"App usage recorded:","timestamp":"2025-09-19T02:58:35.222Z","userId":"1"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T02:58:59.974Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 7","timestamp":"2025-09-19T02:58:59.983Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19T06:14:33.088Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19T06:14:33.092Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19T06:14:33.092Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 4. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T06:16:13.169Z"}
+{"level":"info","message":"[Login Event] User 4 logged in. Session ID: 8","timestamp":"2025-09-19T06:16:13.183Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 4. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T06:16:45.283Z"}
+{"email":"qaz","frequency":77,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T06:16:45.284Z","userId":"4","userName":"qaz"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 4. Granting access to '/api/operations/stop/5'.","timestamp":"2025-09-19T06:16:46.431Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 4. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T06:17:11.935Z"}
+{"frequency":77,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T06:17:11.938Z","userId":"guest"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-19T06:17:11.939Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 4. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T06:17:12.597Z"}
+{"frequency":77,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T06:17:12.598Z","userId":"guest"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-19T06:17:12.599Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 4. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T06:17:12.795Z"}
+{"frequency":77,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T06:17:12.796Z","userId":"guest"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-19T06:17:12.797Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 4. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T06:17:21.376Z"}
+{"frequency":77,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T06:17:21.376Z","userId":"guest"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-19T06:17:21.376Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 4. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T06:17:22.676Z"}
+{"frequency":77,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T06:17:22.676Z","userId":"guest"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-19T06:17:22.676Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T06:18:11.902Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 9","timestamp":"2025-09-19T06:18:11.911Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-19T09:35:41.022Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-19T09:35:41.026Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-19T09:35:41.026Z"}
+{"launchTime":1758100612407,"level":"info","message":"App usage recorded:","timestamp":"2025-09-19T09:35:44.814Z","userId":"1"}
+{"level":"warn","message":"[Auth Middleware] Token is missing. Request to '/api/operations/start' denied.","timestamp":"2025-09-19T09:36:14.793Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/auth/login-event'.","timestamp":"2025-09-19T09:36:22.863Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 10","timestamp":"2025-09-19T09:36:22.878Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:36:22.951Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:36:22.952Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:36:22.952Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:36:38.077Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:36:38.078Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:36:38.078Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T09:36:48.248Z"}
+{"email":"123","frequency":77,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T09:36:48.249Z","userId":"1","userName":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/operations/stop/6'.","timestamp":"2025-09-19T09:36:49.260Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:36:53.099Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:36:53.100Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:36:53.100Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:37:08.150Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:37:08.150Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:37:08.150Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:37:23.196Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:37:23.197Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:37:23.197Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:37:38.233Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:37:38.234Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:37:38.234Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:37:53.275Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:37:53.275Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:37:53.275Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:38:08.310Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:38:08.310Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:38:08.310Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:38:23.344Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:38:23.344Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:38:23.344Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:38:38.374Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:38:38.374Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:38:38.374Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:38:53.401Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:38:53.401Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:38:53.401Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:39:08.424Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:39:08.424Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:39:08.424Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:39:23.453Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:39:23.453Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:39:23.453Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:39:38.481Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:39:38.481Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:39:38.481Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:39:53.510Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:39:53.510Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:39:53.511Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:40:08.549Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:40:08.549Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:40:08.550Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:40:23.576Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:40:23.576Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:40:23.576Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:40:38.603Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:40:38.603Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:40:38.604Z"}
+{"level":"info","message":"为 1 个活跃会话批量更新了心跳时间。","timestamp":"2025-09-19T09:40:41.048Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:40:53.644Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:40:53.644Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:40:53.644Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:41:08.670Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:41:08.671Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:41:08.671Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:41:23.708Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:41:23.709Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:41:23.709Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:41:38.738Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:41:38.738Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:41:38.739Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:41:53.775Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:41:53.775Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:41:53.775Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:42:08.813Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:42:08.813Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:42:08.813Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:42:23.846Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:42:23.846Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:42:23.846Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:42:38.885Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:42:38.885Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:42:38.886Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:42:53.919Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:42:53.920Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:42:53.920Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:43:08.960Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:43:08.961Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:43:08.961Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:43:23.985Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:43:23.986Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:43:23.986Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:43:39.013Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:43:39.013Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:43:39.013Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:43:54.041Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:43:54.042Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:43:54.042Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:44:09.084Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:44:09.084Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:44:09.084Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:44:24.107Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:44:24.108Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:44:24.108Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:44:39.140Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:44:39.140Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:44:39.140Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:44:54.172Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:44:54.172Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:44:54.172Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:45:09.201Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:45:09.201Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:45:09.201Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:45:24.230Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:45:24.230Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:45:24.230Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:45:39.271Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:45:39.271Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:45:39.271Z"}
+{"level":"info","message":"为 1 个活跃会话批量更新了心跳时间。","timestamp":"2025-09-19T09:45:41.049Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:45:54.302Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:45:54.303Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:45:54.303Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:46:09.327Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:46:09.328Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:46:09.328Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:46:24.356Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:46:24.357Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:46:24.357Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:46:39.391Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:46:39.391Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:46:39.391Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:46:54.423Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:46:54.424Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:46:54.424Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:47:09.471Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:47:09.472Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:47:09.472Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:47:24.518Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:47:24.518Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:47:24.518Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:47:39.559Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:47:39.560Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:47:39.560Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:47:54.589Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:47:54.590Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:47:54.590Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:48:09.636Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:48:09.636Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:48:09.637Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:48:24.668Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:48:24.669Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:48:24.669Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:48:39.696Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:48:39.696Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:48:39.696Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:48:54.727Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:48:54.728Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:48:54.728Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:49:09.791Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:49:09.792Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:49:09.792Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:49:24.812Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:49:24.813Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:49:24.813Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:49:39.839Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:49:39.840Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:49:39.840Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:49:54.871Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:49:54.871Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:49:54.871Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/heartbeat'.","timestamp":"2025-09-19T09:50:09.932Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-19T09:50:09.933Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 10","timestamp":"2025-09-19T09:50:09.933Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/auth/logout-event'.","timestamp":"2025-09-19T09:50:23.756Z"}
+{"level":"info","message":"[Logout Attempt] Received request for userId: '1', sessionId: '10'","timestamp":"2025-09-19T09:50:23.757Z"}
+{"level":"info","message":"[Logout Check] Performing security SELECT for sessionId: 10 and userId: 1","timestamp":"2025-09-19T09:50:23.757Z"}
+{"level":"info","message":"[Logout Check Result] Found 1 matching active session(s).","timestamp":"2025-09-19T09:50:23.777Z"}
+{"level":"info","message":"[Logout Success] Security check passed. Proceeding to update session 10.","timestamp":"2025-09-19T09:50:23.777Z"}
+{"level":"info","message":"[Logout DB Update] Database update complete. Affected rows: 1.","timestamp":"2025-09-19T09:50:23.795Z"}
+{"level":"info","message":"为 1 个活跃会话批量更新了心跳时间。","timestamp":"2025-09-19T09:50:41.051Z"}
+{"level":"info","message":"发现 1 个超时会话，正在数据库中标为非活跃。","timestamp":"2025-09-19T09:51:03.567Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/operations/start'.","timestamp":"2025-09-19T09:51:52.259Z"}
+{"frequency":77,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-19T09:51:52.260Z","userId":"guest"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-19T09:51:52.261Z"}

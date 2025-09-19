@@ -1,4 +1,7 @@
 
+require('dotenv').config();
+console.log("--- Backend service starting ---");
+
 const express = require('express');
 const http = require('http');
 const { WebSocketServer } = require('ws');
@@ -7,7 +10,7 @@ const url = require('url');
 
 const logger = require('./logger');
 const { checkDbConnection } = require('./config/db');
-const { startCleanupInterval } = require('./onlineStatusManager');
+const { startManagerIntervals } = require('./onlineStatusManager');
 const config = require('./config/config'); // 引入新的配置
 
 // 引入路由模块
@@ -18,6 +21,7 @@ const logsRouter = require('./routes/logs.routes.js');
 const appRouter = require('./routes/app.routes.js');
 const operationsRouter = require('./routes/operations.routes.js');
 const heartbeatRouter = require('./routes/heartbeat.routes.js');
+const authEventRouter = require('./routes/auth.routes.js');
 
 // 初始化
 const app = express();
@@ -77,6 +81,7 @@ app.use('/api/logs', logsRouter);
 app.use('/api/app', appRouter);
 app.use('/api/operations', operationsRouter);
 app.use('/api/heartbeat', heartbeatRouter);
+app.use('/api/auth', authEventRouter);
 
 // 启动应用
 async function startApp() {
@@ -87,7 +92,7 @@ async function startApp() {
   server.listen(PORT, () => {
     logger.info(`✅ Server (HTTP + WebSocket) is running on http://localhost:${PORT}`);
     // 在服务器启动后，开始在线用户清理任务
-    startCleanupInterval();
+    startManagerIntervals();
   });
 }
 

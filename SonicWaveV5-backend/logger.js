@@ -1,29 +1,43 @@
 const winston = require('winston');
+// [修正] 从 winston.format 中解构并导入 errors 函数
+const { splat, combine, timestamp, printf, colorize, json, errors } = winston.format;
 
 // --- 日志记录器配置 ---
 const logger = winston.createLogger({
-  // 日志级别：info 及以上级别的日志才会被记录
-  level: 'info',
-  // 日志格式：输出为 JSON 格式，并包含时间戳
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
+  level: process.env.LOG_LEVEL || 'info',
+  
+  // 文件日志的格式：保持为JSON，便于机器解析
+  format: combine(
+    timestamp(),
+    errors({ stack: true }), // 现在可以正确调用 errors
+    json()
   ),
-  // 日志输出目标
+  
   transports: [
-    // 1. 将 error 级别的日志写入 error.log 文件
     new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    // 2. 将所有日志写入 combined.log 文件
     new winston.transports.File({ filename: 'combined.log' }),
   ],
 });
 
-// 如果不是在生产环境，我们希望日志也能漂亮地打印在控制台上
+// 仅在非生产环境，添加一个格式更丰富的控制台输出
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(), // 添加颜色
-      winston.format.simple()    // 简单格式
+    format: combine(
+      colorize(),
+      timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+      splat(),
+      printf(info => {
+        const { timestamp, level, message, ...meta } = info;
+        
+        // 检查是否有堆栈信息（来自 errors({ stack: true })）
+        const stack = info.stack ? `\n${info.stack}` : '';
+
+        // 检查是否有附加的元数据对象 (来自 splat())
+        const splatData = meta[Symbol.for('splat')];
+        const metaString = splatData ? `\n${JSON.stringify(splatData[0], null, 2)}` : '';
+        
+        return `${timestamp} ${level}: ${message}${metaString}${stack}`;
+      })
     ),
   }));
 }

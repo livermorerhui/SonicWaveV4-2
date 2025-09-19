@@ -2,33 +2,53 @@ package com.example.sonicwavev4.utils
 
 import android.content.Context
 import android.util.Log
+import com.example.sonicwavev4.network.HeartbeatRequest
 import com.example.sonicwavev4.network.RetrofitClient
 import kotlinx.coroutines.*
 
 object HeartbeatManager {
 
-    private const val HEARTBEAT_INTERVAL_MS = 5000L // 5秒
+    private const val HEARTBEAT_INTERVAL_MS = 15000L // [修改] 15秒
     private var heartbeatJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     fun start(context: Context) {
+        Log.d("DEBUG_FLOW", "HeartbeatManager: start() CALLED.")
         if (heartbeatJob?.isActive == true) {
-            Log.d("HeartbeatManager", "Heartbeat is already running.")
+            Log.d("DEBUG_FLOW", "HeartbeatManager: Heartbeat is already running. Exiting.")
             return
         }
 
-        Log.d("HeartbeatManager", "Starting heartbeat...")
+        Log.d("DEBUG_FLOW", "HeartbeatManager: Starting new heartbeat job...")
         val appContext = context.applicationContext
+        val sessionManager = SessionManager(appContext)
+
         heartbeatJob = scope.launch {
+            Log.d("DEBUG_FLOW", "HeartbeatManager: Coroutine launched. Entering while(isActive) loop.")
             while (isActive) {
+                Log.d("DEBUG_FLOW", "HeartbeatManager: Loop iteration started.")
                 try {
-                    val response = RetrofitClient.getInstance(appContext).instance.sendHeartbeat()
-                    if (!response.isSuccessful) {
-                        Log.w("HeartbeatManager", "Failed to send heartbeat: ${response.code()}")
+                    Log.d("DEBUG_FLOW", "HeartbeatManager: Fetching sessionId...")
+                    val sessionId = sessionManager.fetchSessionId()
+                    Log.d("DEBUG_FLOW", "HeartbeatManager: Fetched sessionId: $sessionId")
+                    if (sessionId != -1L) {
+                        val request = HeartbeatRequest(sessionId)
+                        Log.d("DEBUG_FLOW", "HeartbeatManager: Preparing to send heartbeat for session $sessionId.")
+                        val response = RetrofitClient.api.sendHeartbeat(request)
+                        Log.d("DEBUG_FLOW", "HeartbeatManager: sendHeartbeat call finished.")
+                        if (!response.isSuccessful) {
+                            Log.w("DEBUG_FLOW", "HeartbeatManager: sendHeartbeat FAILED. Code: ${response.code()}")
+                        } else {
+                            Log.d("DEBUG_FLOW", "HeartbeatManager: sendHeartbeat SUCCESSFUL for session $sessionId.")
+                        }
+                    } else {
+                        Log.w("DEBUG_FLOW", "HeartbeatManager: Session ID is -1L. Stopping job.")
+                        stop()
                     }
                 } catch (e: Exception) {
-                    Log.e("HeartbeatManager", "Error sending heartbeat", e)
+                    Log.e("DEBUG_FLOW", "HeartbeatManager: EXCEPTION in loop.", e)
                 }
+                Log.d("DEBUG_FLOW", "HeartbeatManager: Loop iteration finished. Delaying for $HEARTBEAT_INTERVAL_MS ms.")
                 delay(HEARTBEAT_INTERVAL_MS)
             }
         }

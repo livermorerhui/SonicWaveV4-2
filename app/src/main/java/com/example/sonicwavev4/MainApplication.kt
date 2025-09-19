@@ -13,7 +13,7 @@ class MainApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        RetrofitClient.getInstance(this)
+        RetrofitClient.initialize(this)
         scheduleLogUpload()
     }
 
