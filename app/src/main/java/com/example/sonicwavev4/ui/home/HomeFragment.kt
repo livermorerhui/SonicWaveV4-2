@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.sonicwavev4.R
@@ -56,6 +55,7 @@ class HomeFragment : Fragment() {
         // ... 继续执行 setupClickListeners() 和 setupObservers() ...
         setupClickListeners()
         setupObservers()
+        initializeSoundPool() // 初始化SoundPool
     }
 
     override fun onDestroyView() { super.onDestroyView(); stopTonePlayback(); _binding = null }
@@ -105,10 +105,8 @@ class HomeFragment : Fragment() {
         val isInputActive = viewModel.currentInputType.value == "frequency"
         val isEditing = viewModel.isEditing.value ?: false
 
-        if (isInputActive && !buffer.isNullOrEmpty()) {
-            binding.tvFrequencyValue.text = getString(R.string.frequency_format, buffer.toIntOrNull() ?: 0)
-        } else if (isInputActive && isEditing && buffer.isNullOrEmpty()) {
-            binding.tvFrequencyValue.text = getString(R.string.frequency_format, 0)
+        if (isInputActive && (isEditing || !buffer.isNullOrEmpty())) {
+            binding.tvFrequencyValue.text = getString(R.string.frequency_format, buffer?.toIntOrNull() ?: 0)
         } else {
             binding.tvFrequencyValue.text = getString(R.string.frequency_format, viewModel.frequency.value ?: 0)
         }
@@ -120,10 +118,8 @@ class HomeFragment : Fragment() {
         val isInputActive = viewModel.currentInputType.value == "intensity"
         val isEditing = viewModel.isEditing.value ?: false
 
-        if (isInputActive && !buffer.isNullOrEmpty()) {
-            binding.tvIntensityValue.text = buffer
-        } else if (isInputActive && isEditing && buffer.isNullOrEmpty()) {
-            binding.tvIntensityValue.text = "0"
+        if (isInputActive && (isEditing || !buffer.isNullOrEmpty())) {
+            binding.tvIntensityValue.text = buffer?.ifEmpty { "0" } ?: "0"
         } else {
             binding.tvIntensityValue.text = (viewModel.intensity.value ?: 0).toString()
         }
@@ -137,10 +133,8 @@ class HomeFragment : Fragment() {
         val isInputActive = viewModel.currentInputType.value == "time"
         val isEditing = viewModel.isEditing.value ?: false
 
-        if (isInputActive && !buffer.isNullOrEmpty()) {
-            binding.tvTimeValue.text = getString(R.string.time_minutes_format, buffer.toIntOrNull() ?: 0)
-        } else if (isInputActive && isEditing && buffer.isNullOrEmpty()) {
-            binding.tvTimeValue.text = getString(R.string.time_minutes_format, 0)
+        if (isInputActive && (isEditing || !buffer.isNullOrEmpty())) {
+            binding.tvTimeValue.text = getString(R.string.time_minutes_format, buffer?.toIntOrNull() ?: 0)
         } else {
             binding.tvTimeValue.text = getString(R.string.time_minutes_format, viewModel.timeInMinutes.value ?: 0)
         }
@@ -158,16 +152,18 @@ class HomeFragment : Fragment() {
 
     // --- 点击事件监听器 ---
     private fun setupClickListeners() {
-        binding.tvFrequencyValue.setOnClickListener { viewModel.setCurrentInputType("frequency") }
-        binding.tvIntensityValue.setOnClickListener { viewModel.setCurrentInputType("intensity") }
-        binding.tvTimeValue.setOnClickListener { viewModel.setCurrentInputType("time") }
+        binding.tvFrequencyValue.setOnClickListener { viewModel.setCurrentInputType("frequency"); playTapSound() }
+        binding.tvIntensityValue.setOnClickListener { viewModel.setCurrentInputType("intensity"); playTapSound() }
+        binding.tvTimeValue.setOnClickListener { viewModel.setCurrentInputType("time"); playTapSound() }
 
-        binding.btnFrequencyUp.setOnClickListener { handleDeltaChange("frequency", 1) }
-        binding.btnFrequencyDown.setOnClickListener { handleDeltaChange("frequency", -1) }
-        binding.btnIntensityUp.setOnClickListener { handleDeltaChange("intensity", 1) }
-        binding.btnIntensityDown.setOnClickListener { handleDeltaChange("intensity", -1) }
-        binding.btnTimeUp.setOnClickListener { handleDeltaChange("time", 1) }
-        binding.btnTimeDown.setOnClickListener { handleDeltaChange("time", -1) }
+        // --- NEW: Simplified click listeners ---
+        binding.btnFrequencyUp.setOnClickListener { viewModel.incrementFrequency(); playTapSound() }
+        binding.btnFrequencyDown.setOnClickListener { viewModel.decrementFrequency(); playTapSound() }
+        binding.btnIntensityUp.setOnClickListener { viewModel.incrementIntensity(); playTapSound() }
+        binding.btnIntensityDown.setOnClickListener { viewModel.decrementIntensity(); playTapSound() }
+        binding.btnTimeUp.setOnClickListener { viewModel.incrementTime(); playTapSound() }
+        binding.btnTimeDown.setOnClickListener { viewModel.decrementTime(); playTapSound() }
+
 
         binding.btnStartStop.setOnClickListener { viewModel.startStopPlayback(); playTapSound() }
         binding.btnClear.setOnClickListener { viewModel.clearAll(); playTapSound() }
@@ -187,15 +183,7 @@ class HomeFragment : Fragment() {
 
     }
 
-    private fun handleDeltaChange(type: String, delta: Int) {
-        viewModel.setCurrentInputType(type)
-        when (type) {
-            "frequency" -> viewModel.updateFrequency((viewModel.frequency.value ?: 0) + delta)
-            "intensity" -> viewModel.updateIntensity((viewModel.intensity.value ?: 0) + delta)
-            "time"      -> viewModel.updateTimeInMinutes((viewModel.timeInMinutes.value ?: 0) + delta)
-        }
-        playTapSound()
-    }
+    // --- REMOVED: handleDeltaChange function is no longer needed ---
 
     // --- 其他辅助函数 ---
     private fun initializeSoundPool() {
