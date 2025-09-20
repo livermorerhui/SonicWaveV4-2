@@ -1,7 +1,6 @@
 package com.example.sonicwavev4.ui.register
 
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,19 +11,14 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.databinding.FragmentRegisterBinding
-import com.example.sonicwavev4.network.LoginResponse
-import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.ui.user.UserFragment
-import com.example.sonicwavev4.util.Event
-import com.example.sonicwavev4.utils.SessionManager
-import org.json.JSONObject
 
 class RegisterFragment : Fragment() {
 
     private val registerViewModel: RegisterViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
-    private lateinit var sessionManager: SessionManager
+
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
 
@@ -38,7 +32,6 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sessionManager = SessionManager(requireContext())
         setupRegisterButton()
         observeViewModels()
         setupLoginLink()
@@ -65,11 +58,13 @@ class RegisterFragment : Fragment() {
     }
 
     private fun observeViewModels() {
+        // Observe registration result
         registerViewModel.registerResult.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
                 Toast.makeText(requireContext(), "Registration successful! Logging in...", Toast.LENGTH_SHORT).show()
                 val email = binding.emailEditText.text.toString().trim()
                 val password = binding.passwordEditText.text.toString()
+                // Trigger the complete login flow in the ViewModel
                 loginViewModel.login(email, password)
             }.onFailure {
                 Toast.makeText(requireContext(), "Registration failed: ${it.message}", Toast.LENGTH_LONG).show()
@@ -77,15 +72,16 @@ class RegisterFragment : Fragment() {
             }
         }
 
-        loginViewModel.loginResult.observe(viewLifecycleOwner) { result ->
-            result.onSuccess { loginResponse ->
-                handleLoginSuccess(loginResponse)
-            }.onFailure {
-                handleLoginFailure(it)
-                binding.registerButton.isEnabled = true
+        // Observe login result (only for failure cases now)
+        loginViewModel.loginResult.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { result ->
+                result.onFailure { error ->
+                    handleLoginFailure(error)
+                }
             }
         }
 
+        // Observe navigation event (for success cases)
         loginViewModel.navigationEvent.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { userName ->
                 navigateToUserFragment(userName)
@@ -99,32 +95,6 @@ class RegisterFragment : Fragment() {
         }
     }
 
-    private fun handleLoginSuccess(loginResponse: LoginResponse) {
-        val userSessionData = processAndSaveSession(loginResponse)
-        if (userSessionData == null) {
-            handleLoginFailure(IllegalStateException("Could not parse a valid User ID from token."))
-            return
-        }
-        loginViewModel.startPostLoginTasks(userSessionData.userName)
-    }
-
-    private fun processAndSaveSession(loginResponse: LoginResponse): UserSessionData? {
-        val token = loginResponse.token
-        val userName = loginResponse.username
-        val email = binding.emailEditText.text.toString()
-        val userId = decodeUserIdFromJwt(token) ?: return null
-
-        sessionManager.saveUserSession(
-            token = token,
-            userId = userId,
-            userName = userName,
-            email = email
-        )
-        RetrofitClient.updateToken(token)
-        Log.d("RegisterFragment", "User session saved, User ID: $userId")
-        return UserSessionData(userId, userName)
-    }
-
     private fun navigateToUserFragment(userName: String) {
         Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
         parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
@@ -136,25 +106,11 @@ class RegisterFragment : Fragment() {
     private fun handleLoginFailure(error: Throwable) {
         Log.e("RegisterFragment", "Auto-login after registration failed", error)
         Toast.makeText(requireContext(), "Auto-login failed: ${error.message}", Toast.LENGTH_LONG).show()
-        parentFragmentManager.popBackStack()
-    }
-
-    private fun decodeUserIdFromJwt(token: String): String? {
-        try {
-            val parts = token.split(".")
-            if (parts.size < 2) return null
-            val payload = String(Base64.decode(parts[1], Base64.URL_SAFE), Charsets.UTF_8)
-            return JSONObject(payload).getString("userId")
-        } catch (e: Exception) {
-            Log.e("RegisterFragment", "Error decoding JWT", e)
-            return null
-        }
+        binding.registerButton.isEnabled = true
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-
-    private data class UserSessionData(val userId: String, val userName: String)
 }

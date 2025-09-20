@@ -14,6 +14,7 @@ import com.example.sonicwavev4.network.LogoutEventRequest
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.login.LoginFragment
 import com.example.sonicwavev4.utils.HeartbeatManager
+import com.example.sonicwavev4.utils.LogoutReason
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.launch
 
@@ -86,8 +87,8 @@ class UserFragment : Fragment() {
     private fun performLocalLogout() {
         // 停止心跳
         HeartbeatManager.stop()
-        // 清理本地会话
-        sessionManager.clearSession()
+        // 清理本地会话并通知
+        sessionManager.initiateLogout(LogoutReason.UserInitiated)
         // 导航回登录页
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_right_main, LoginFragment())

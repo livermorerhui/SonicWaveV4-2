@@ -2,51 +2,102 @@ package com.example.sonicwavev4.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.core.content.edit // 确保导入 KTX 扩展函数
+import android.util.Log
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
+import com.example.sonicwavev4.network.RetrofitClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+// Sealed class for defining logout reasons, allowing for future expansion.
+sealed class LogoutReason {
+    object HardLogout : LogoutReason() // e.g., Refresh token failed
+    object UserInitiated : LogoutReason() // e.g., User clicked logout button
+    object ReAuthenticationRequired : LogoutReason() // Future use case
+}
 
 class SessionManager(context: Context) {
-    // 将 prefs 保持为 private，这是正确的封装
-    private val prefs: SharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+
+    private lateinit var prefs: SharedPreferences
+
+    init {
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            prefs = EncryptedSharedPreferences.create(
+                context,
+                "SecureAppPrefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            Log.e("SessionManager", "Failed to create EncryptedSharedPreferences, falling back to standard SharedPreferences.", e)
+            prefs = context.getSharedPreferences("AppPrefs_Fallback", Context.MODE_PRIVATE)
+        }
+    }
 
     companion object {
-        const val AUTH_TOKEN = "auth_token"
+        const val ACCESS_TOKEN = "access_token"
+        const val REFRESH_TOKEN = "refresh_token"
         const val USER_ID = "user_id"
         const val USER_NAME = "user_name"
         const val USER_EMAIL = "user_email"
         const val SESSION_ID = "session_id"
     }
 
-    /**
-     * 最佳实践] 提供一个统一的方法来保存整个用户会话信息。
-     * LoginFragment 只需调用这一个方法。
-     * 内部使用了 KTX 的 edit 函数，简洁且安全。
-     */
-    fun saveUserSession(token: String, userId: String, userName: String, email: String) {
-        prefs.edit {
-            putString(AUTH_TOKEN, token)
+    fun saveTokens(accessToken: String, refreshToken: String) {
+        prefs.edit().apply {
+            putString(ACCESS_TOKEN, accessToken)
+            putString(REFRESH_TOKEN, refreshToken)
+            apply()
+        }
+    }
+
+    fun saveUserSession(userId: String, userName: String, email: String) {
+        prefs.edit().apply {
             putString(USER_ID, userId)
             putString(USER_NAME, userName)
             putString(USER_EMAIL, email)
+            apply()
         }
     }
 
-    // 单独的 sessionId 保存函数，因为它是在另一个网络请求后才获取的
     fun saveSessionId(sessionId: Long) {
-        prefs.edit {
+        prefs.edit().apply {
             putLong(SESSION_ID, sessionId)
+            apply()
         }
     }
 
-    // 获取函数保持不变
-    fun fetchAuthToken(): String? = prefs.getString(AUTH_TOKEN, null)
+    fun fetchAccessToken(): String? = prefs.getString(ACCESS_TOKEN, null)
+    fun fetchRefreshToken(): String? = prefs.getString(REFRESH_TOKEN, null)
     fun fetchUserId(): String? = prefs.getString(USER_ID, null)
     fun fetchUserName(): String? = prefs.getString(USER_NAME, null)
     fun fetchEmail(): String? = prefs.getString(USER_EMAIL, null)
     fun fetchSessionId(): Long = prefs.getLong(SESSION_ID, -1L)
 
-    fun clearSession() {
-        prefs.edit {
-            clear()
+    fun initiateLogout(reason: LogoutReason) {
+        Log.w("SessionManager", "Logout initiated with reason: ${reason::class.simpleName}")
+        when (reason) {
+            is LogoutReason.HardLogout, is LogoutReason.UserInitiated -> {
+                clearSessionAndNotify()
+            }
+            is LogoutReason.ReAuthenticationRequired -> {
+                clearSessionAndNotify()
+            }
+        }
+    }
+
+    private fun clearSessionAndNotify() {
+        prefs.edit().clear().apply()
+        RetrofitClient.updateToken(null)
+        // Launch a coroutine on a global scope to call the suspend function
+        CoroutineScope(Dispatchers.IO).launch {
+            GlobalLogoutManager.logout()
         }
     }
 }

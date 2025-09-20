@@ -13,11 +13,14 @@ function authenticateToken(req, res, next) {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
-      // [新增日志]
-      logger.error(`[Auth Middleware] Token verification failed for request to '${req.originalUrl}'. Error: ${err.message}`);
-      return res.sendStatus(403); // Forbidden
+      if (err.name === 'TokenExpiredError') {
+        logger.warn(`[Auth Middleware] Token expired for request to '${req.originalUrl}'.`);
+        return res.status(401).json({ message: 'Access token expired.' }); // Signal client to refresh
+      } else {
+        logger.error(`[Auth Middleware] Token verification failed for request to '${req.originalUrl}'. Error: ${err.message}`);
+        return res.status(403).json({ message: 'Invalid token.' }); // Other errors are forbidden
+      }
     }
-    // [新增日志]
     logger.info(`[Auth Middleware] Token verified for userId: ${user.userId}. Granting access to '${req.originalUrl}'.`);
     req.user = user;
     next();

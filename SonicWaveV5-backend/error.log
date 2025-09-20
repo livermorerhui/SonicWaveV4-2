@@ -20,3 +20,18 @@
 {"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-19T06:17:21.376Z"}
 {"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-19T06:17:22.676Z"}
 {"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-19T09:51:52.261Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-09-20T13:47:25.688Z"}
+{"error":"Table 'sonicwave_db.refresh_tokens' doesn't exist","level":"error","message":"Error during user login:","timestamp":"2025-09-20T13:47:32.359Z"}
+{"error":"Table 'sonicwave_db.refresh_tokens' doesn't exist","level":"error","message":"Error during user login:","timestamp":"2025-09-20T13:48:37.291Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-09-20T13:57:58.086Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/heartbeat'. Error: jwt expired","timestamp":"2025-09-20T14:20:58.231Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/heartbeat'. Error: jwt expired","timestamp":"2025-09-20T14:21:13.261Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/heartbeat'. Error: jwt expired","timestamp":"2025-09-20T14:21:28.318Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/heartbeat'. Error: jwt expired","timestamp":"2025-09-20T14:21:43.355Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/heartbeat'. Error: jwt expired","timestamp":"2025-09-20T14:21:58.381Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/heartbeat'. Error: jwt expired","timestamp":"2025-09-20T14:22:13.419Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/heartbeat'. Error: jwt expired","timestamp":"2025-09-20T14:22:28.449Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/heartbeat'. Error: jwt expired","timestamp":"2025-09-20T14:22:43.482Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/heartbeat'. Error: jwt expired","timestamp":"2025-09-20T14:22:58.528Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/auth/logout-event'. Error: jwt expired","timestamp":"2025-09-20T14:22:59.219Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-09-20T15:39:40.090Z"}

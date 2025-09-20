@@ -13,7 +13,7 @@ class AuthInterceptor(context: Context) : Interceptor {
         val requestBuilder = chain.request().newBuilder()
 
         // 从 SessionManager 获取 Token
-        sessionManager.fetchAuthToken()?.let {
+        sessionManager.fetchAccessToken()?.let {
             // 如果 Token 存在，则将其添加到请求头中
             requestBuilder.addHeader("Authorization", "Bearer $it")
         }

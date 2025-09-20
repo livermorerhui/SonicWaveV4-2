@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const SHA256 = require('crypto-js/sha256');
 const { dbPool } = require('../config/db');
 const logger = require('../logger');
 
@@ -32,7 +34,21 @@ const registerUser = async (req, res) => {
   }
 };
 
-// 用户登录
+// Helper function to generate and store a new refresh token
+const generateAndStoreRefreshToken = async (userId, dbPool) => {
+    const refreshToken = crypto.randomBytes(64).toString('hex');
+    const hashedToken = SHA256(refreshToken).toString();
+    const expiresInDays = 7;
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+
+    const sql = 'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)';
+    await dbPool.execute(sql, [userId, hashedToken, expiresAt]);
+
+    return refreshToken;
+};
+
+// 用户登录 (Refactored)
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -54,14 +70,19 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
-    const payload = { userId: user.id, username: user.username };
+    // 1. Generate Access Token (short-lived)
+    const accessTokenPayload = { userId: user.id, username: user.username };
     const secret = process.env.JWT_SECRET;
-    const options = { expiresIn: '1h' };
-    const token = jwt.sign(payload, secret, options);
+    const accessToken = jwt.sign(accessTokenPayload, secret, { expiresIn: '15m' });
 
+    // 2. Generate and Store Refresh Token (long-lived)
+    const refreshToken = await generateAndStoreRefreshToken(user.id, dbPool);
+
+    // 3. Return both tokens to the client
     res.json({
       message: 'Logged in successfully!',
-      token: token,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
       username: user.username
     });
 

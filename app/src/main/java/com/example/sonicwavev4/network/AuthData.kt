@@ -5,11 +5,7 @@ data class LoginRequest(
     val password: String
 )
 
-data class LoginResponse(
-    val message: String,
-    val token: String,
-    val username: String
-)
+
 
 data class RegisterRequest(
     val username: String,

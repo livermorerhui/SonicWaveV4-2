@@ -22,6 +22,7 @@ const appRouter = require('./routes/app.routes.js');
 const operationsRouter = require('./routes/operations.routes.js');
 const heartbeatRouter = require('./routes/heartbeat.routes.js');
 const authEventRouter = require('./routes/auth.routes.js');
+const tokenRouter = require('./routes/token.routes.js');
 
 // 初始化
 const app = express();
@@ -73,15 +74,15 @@ wss.on('connection', (ws, req) => {
 
 // 挂载 API 路由
 app.get('/', (req, res) => res.send('Welcome to the refactored SonicWaveV5 Backend!'));
-app.use('/api/users', userRouter);
-app.use('/api/music', musicRouter);
-// 通过工厂函数注入 wss 和 wsClients 实例
-app.use('/api/reports', createReportRouter(wss, wsClients));
-app.use('/api/logs', logsRouter);
-app.use('/api/app', appRouter);
-app.use('/api/operations', operationsRouter);
-app.use('/api/heartbeat', heartbeatRouter);
-app.use('/api/auth', authEventRouter);
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/music', musicRouter);
+app.use('/api/v1/reports', createReportRouter(wss, wsClients));
+app.use('/api/v1/logs', logsRouter);
+app.use('/api/v1/app', appRouter);
+app.use('/api/v1/operations', operationsRouter);
+app.use('/api/v1/heartbeat', heartbeatRouter);
+app.use('/api/v1/auth', authEventRouter);
+app.use('/api/v1/token', tokenRouter); // 新增
 
 // 启动应用
 async function startApp() {
