@@ -35,4 +35,9 @@
         \n\n
         Final paragraph to make sure the scrollbar is always visible when the area is small. Fusce id felis volutpat, sollicitudin urna at, feugiat ipsum. Maecenas tristique, purus eu elementum semper, sem ipsum ultricies risus, vel semper mi enim in sapien. Etiam scelerisque, odio vel placerat feugiat, magna nisl convallis ante, vel tincidunt massa libero sit amet dui.
     </string>
+
+    <string-array name="gender_options">
+        <item>男</item>
+        <item>女</item>
+    </string-array>
 </resources>

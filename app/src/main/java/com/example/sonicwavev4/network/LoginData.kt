@@ -14,5 +14,8 @@ data class LoginResponse(
     val refreshToken: String,
 
     @SerializedName("username")
-    val username: String
+    val username: String,
+
+    @SerializedName("userId")
+    val userId: Int
 )

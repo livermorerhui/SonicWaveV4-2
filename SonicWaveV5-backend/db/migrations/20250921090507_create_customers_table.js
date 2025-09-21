@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-  return knex.schema.createTable('customers', function(table) {
+  return knex.schema.createTableIfNotExists('customers', function(table) {
     table.increments('id').primary();
     table.string('name').notNullable();
     table.date('date_of_birth');

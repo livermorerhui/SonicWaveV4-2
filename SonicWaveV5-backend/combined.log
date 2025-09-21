@@ -1843,3 +1843,321 @@
 {"level":"info","message":"[Logout Success] Security check passed. Proceeding to update session 21.","timestamp":"2025-09-21T10:34:53.383Z"}
 {"level":"info","message":"[Logout DB Update] Database update complete. Affected rows: 1.","timestamp":"2025-09-21T10:34:53.391Z"}
 {"level":"info","message":"发现 1 个超时会话，正在数据库中标为非活跃。","timestamp":"2025-09-21T10:35:51.934Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T11:55:31.656Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T11:55:31.660Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T11:55:31.660Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T11:56:28.293Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T11:56:28.295Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T11:56:28.296Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T11:57:46.511Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T11:57:46.514Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T11:57:46.514Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T12:00:43.880Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T12:00:43.882Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T12:00:43.882Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T12:00:55.709Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T12:00:55.712Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T12:00:55.712Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T12:04:19.920Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T12:04:19.922Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T12:04:19.923Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T13:21:41.467Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T13:21:41.469Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T13:21:41.470Z"}
+{"launchTime":1758207650010,"level":"info","message":"App usage recorded:","timestamp":"2025-09-21T13:44:29.331Z"}
+{"error":"Table 'sonicwave_db.app_usage_logs' doesn't exist","level":"error","message":"Error recording app usage:","timestamp":"2025-09-21T13:44:29.349Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/login-event'.","timestamp":"2025-09-21T13:45:52.261Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 22","timestamp":"2025-09-21T13:45:52.268Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:45:52.527Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T13:45:52.527Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 22","timestamp":"2025-09-21T13:45:52.527Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/customers'.","timestamp":"2025-09-21T13:45:52.671Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:46:07.581Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T13:46:07.582Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 22","timestamp":"2025-09-21T13:46:07.582Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:46:22.632Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T13:46:22.633Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 22","timestamp":"2025-09-21T13:46:22.633Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:46:37.666Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T13:46:37.666Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 22","timestamp":"2025-09-21T13:46:37.666Z"}
+{"level":"info","message":"为 1 个活跃会话批量更新了心跳时间。","timestamp":"2025-09-21T13:46:41.601Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:46:52.694Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T13:46:52.694Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 22","timestamp":"2025-09-21T13:46:52.695Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/customers'.","timestamp":"2025-09-21T13:47:06.974Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/customers'.","timestamp":"2025-09-21T13:47:07.154Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:47:07.705Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T13:47:07.705Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 22","timestamp":"2025-09-21T13:47:07.705Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:47:22.727Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T13:47:22.728Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 22","timestamp":"2025-09-21T13:47:22.728Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/logout-event'.","timestamp":"2025-09-21T13:47:37.814Z"}
+{"level":"info","message":"[Logout Attempt] Received request for userId: '1', sessionId: '22'","timestamp":"2025-09-21T13:47:37.817Z"}
+{"level":"info","message":"[Logout Check] Performing security SELECT for sessionId: 22 and userId: 1","timestamp":"2025-09-21T13:47:37.817Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:47:37.830Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T13:47:37.830Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 22","timestamp":"2025-09-21T13:47:37.830Z"}
+{"level":"info","message":"[Logout Check Result] Found 1 matching active session(s).","timestamp":"2025-09-21T13:47:37.839Z"}
+{"level":"info","message":"[Logout Success] Security check passed. Proceeding to update session 22.","timestamp":"2025-09-21T13:47:37.840Z"}
+{"level":"info","message":"[Logout DB Update] Database update complete. Affected rows: 1.","timestamp":"2025-09-21T13:47:37.851Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/auth/login-event'.","timestamp":"2025-09-21T13:47:45.600Z"}
+{"level":"info","message":"[Login Event] User 2 logged in. Session ID: 23","timestamp":"2025-09-21T13:47:45.603Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:47:45.677Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:47:45.677Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:47:45.677Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/customers'.","timestamp":"2025-09-21T13:47:45.827Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:48:00.700Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:48:00.700Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:48:00.700Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/customers'.","timestamp":"2025-09-21T13:48:11.220Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/customers'.","timestamp":"2025-09-21T13:48:11.373Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:48:15.715Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:48:15.715Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:48:15.716Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:48:30.737Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:48:30.737Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:48:30.737Z"}
+{"level":"info","message":"发现 1 个超时会话，正在数据库中标为非活跃。","timestamp":"2025-09-21T13:48:41.647Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/operations/start'.","timestamp":"2025-09-21T13:48:42.368Z"}
+{"frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-21T13:48:42.369Z","userId":"guest"}
+{"error":"Table 'sonicwave_db.user_operations' doesn't exist","level":"error","message":"Error starting operation:","timestamp":"2025-09-21T13:48:42.375Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:48:45.777Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:48:45.777Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:48:45.777Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/operations/start'.","timestamp":"2025-09-21T13:48:58.257Z"}
+{"frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-21T13:48:58.260Z","userId":"guest"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/operations/stop/1'.","timestamp":"2025-09-21T13:48:59.123Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:49:00.808Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:49:00.809Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:49:00.809Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:49:15.862Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:49:15.862Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:49:15.863Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:49:30.897Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:49:30.897Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:49:30.898Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:49:45.929Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:49:45.930Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:49:45.930Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:50:00.957Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:50:00.957Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:50:00.957Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:50:15.980Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:50:15.980Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:50:15.980Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:50:31.011Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:50:31.011Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:50:31.011Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:50:46.037Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:50:46.037Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:50:46.037Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:51:01.059Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:51:01.060Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:51:01.060Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:51:16.086Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:51:16.087Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:51:16.087Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:51:31.123Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:51:31.123Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:51:31.123Z"}
+{"level":"info","message":"为 1 个活跃会话批量更新了心跳时间。","timestamp":"2025-09-21T13:51:41.602Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:51:46.152Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:51:46.153Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:51:46.153Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:52:01.176Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:52:01.176Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:52:01.176Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:52:16.199Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:52:16.199Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:52:16.199Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T13:52:28.557Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T13:52:28.565Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T13:52:28.565Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:52:31.242Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:52:31.242Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:52:31.242Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:52:46.270Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:52:46.271Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:52:46.271Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T13:52:49.523Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T13:52:49.527Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T13:52:49.527Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T13:52:59.445Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T13:52:59.447Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T13:52:59.447Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:53:01.338Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:53:01.339Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:53:01.339Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:53:16.378Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:53:16.378Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:53:16.378Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:53:31.402Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:53:31.403Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:53:31.403Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:53:46.437Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:53:46.438Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:53:46.438Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/operations/start'.","timestamp":"2025-09-21T13:53:52.120Z"}
+{"frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-21T13:53:52.123Z","userId":"guest"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/operations/stop/2'.","timestamp":"2025-09-21T13:53:52.801Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:54:01.471Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:54:01.472Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:54:01.472Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/customers'.","timestamp":"2025-09-21T13:54:15.820Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/customers'.","timestamp":"2025-09-21T13:54:16.009Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:54:16.484Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:54:16.484Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:54:16.484Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:54:31.509Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:54:31.509Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:54:31.509Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:54:46.527Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:54:46.528Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:54:46.528Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:55:01.552Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:55:01.552Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:55:01.552Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:55:16.570Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:55:16.570Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:55:16.570Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:55:31.592Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:55:31.593Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:55:31.593Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:55:46.609Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:55:46.610Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:55:46.610Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:56:01.630Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:56:01.630Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:56:01.630Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:56:16.652Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:56:16.652Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:56:16.652Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:56:31.675Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:56:31.676Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:56:31.676Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:56:46.703Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:56:46.703Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:56:46.704Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:57:01.735Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:57:01.735Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:57:01.735Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:57:16.778Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:57:16.778Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:57:16.779Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:57:31.801Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:57:31.801Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:57:31.801Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:57:46.840Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:57:46.840Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:57:46.840Z"}
+{"level":"info","message":"为 1 个活跃会话批量更新了心跳时间。","timestamp":"2025-09-21T13:57:59.465Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:58:01.869Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:58:01.869Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:58:01.869Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:58:16.895Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:58:16.895Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:58:16.895Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:58:31.919Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:58:31.919Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:58:31.920Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:58:46.958Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:58:46.958Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:58:46.958Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:59:01.984Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:59:01.985Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:59:01.985Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:59:17.016Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:59:17.017Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:59:17.017Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:59:32.043Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:59:32.043Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:59:32.043Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T13:59:47.075Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T13:59:47.076Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T13:59:47.076Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:00:02.105Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:00:02.105Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:00:02.105Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:00:17.136Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:00:17.136Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:00:17.137Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:00:32.164Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:00:32.164Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:00:32.164Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:00:47.191Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:00:47.191Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:00:47.192Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:01:02.224Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:01:02.224Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:01:02.225Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:01:17.258Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:01:17.258Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:01:17.258Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:01:32.285Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:01:32.285Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:01:32.285Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:01:47.309Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:01:47.309Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:01:47.310Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:02:02.333Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:02:02.333Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:02:02.333Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:02:17.358Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:02:17.359Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:02:17.359Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:02:32.394Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:02:32.394Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:02:32.394Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:02:47.422Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:02:47.480Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:02:47.480Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 23","timestamp":"2025-09-21T14:02:47.480Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/auth/logout-event'.","timestamp":"2025-09-21T14:02:56.126Z"}
+{"level":"info","message":"[Logout Attempt] Received request for userId: '2', sessionId: '23'","timestamp":"2025-09-21T14:02:56.128Z"}
+{"level":"info","message":"[Logout Check] Performing security SELECT for sessionId: 23 and userId: 2","timestamp":"2025-09-21T14:02:56.129Z"}
+{"level":"info","message":"[Logout Check Result] Found 1 matching active session(s).","timestamp":"2025-09-21T14:02:56.140Z"}
+{"level":"info","message":"[Logout Success] Security check passed. Proceeding to update session 23.","timestamp":"2025-09-21T14:02:56.140Z"}
+{"level":"info","message":"[Logout DB Update] Database update complete. Affected rows: 1.","timestamp":"2025-09-21T14:02:56.149Z"}
+{"level":"info","message":"为 1 个活跃会话批量更新了心跳时间。","timestamp":"2025-09-21T14:02:59.461Z"}
+{"level":"info","message":"发现 1 个超时会话，正在数据库中标为非活跃。","timestamp":"2025-09-21T14:03:51.972Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-09-21T14:11:59.847Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-09-21T14:11:59.850Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-09-21T14:11:59.851Z"}
+{"launchTime":1758209533234,"level":"info","message":"App usage recorded:","timestamp":"2025-09-21T14:15:52.546Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/login-event'.","timestamp":"2025-09-21T14:16:04.548Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 24","timestamp":"2025-09-21T14:16:04.557Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:16:04.746Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T14:16:04.747Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 24","timestamp":"2025-09-21T14:16:04.747Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/customers'.","timestamp":"2025-09-21T14:16:04.871Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/operations/start'.","timestamp":"2025-09-21T14:16:16.582Z"}
+{"email":"123","frequency":777,"intensity":44,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-09-21T14:16:16.583Z","userId":"1","userName":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/operations/stop/3'.","timestamp":"2025-09-21T14:16:17.400Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:16:19.808Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T14:16:19.808Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 24","timestamp":"2025-09-21T14:16:19.808Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:16:34.830Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-09-21T14:16:34.830Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 24","timestamp":"2025-09-21T14:16:34.831Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/logout-event'.","timestamp":"2025-09-21T14:16:37.363Z"}
+{"level":"info","message":"[Logout Attempt] Received request for userId: '1', sessionId: '24'","timestamp":"2025-09-21T14:16:37.363Z"}
+{"level":"info","message":"[Logout Check] Performing security SELECT for sessionId: 24 and userId: 1","timestamp":"2025-09-21T14:16:37.364Z"}
+{"level":"info","message":"[Logout Check Result] Found 1 matching active session(s).","timestamp":"2025-09-21T14:16:37.370Z"}
+{"level":"info","message":"[Logout Success] Security check passed. Proceeding to update session 24.","timestamp":"2025-09-21T14:16:37.371Z"}
+{"level":"info","message":"[Logout DB Update] Database update complete. Affected rows: 1.","timestamp":"2025-09-21T14:16:37.379Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/auth/login-event'.","timestamp":"2025-09-21T14:16:40.736Z"}
+{"level":"info","message":"[Login Event] User 2 logged in. Session ID: 25","timestamp":"2025-09-21T14:16:40.740Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-09-21T14:16:40.853Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 2","timestamp":"2025-09-21T14:16:40.854Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 2, session: 25","timestamp":"2025-09-21T14:16:40.854Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/customers'.","timestamp":"2025-09-21T14:16:40.975Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 2. Granting access to '/api/v1/auth/logout-event'.","timestamp":"2025-09-21T14:16:44.480Z"}
+{"level":"info","message":"[Logout Attempt] Received request for userId: '2', sessionId: '25'","timestamp":"2025-09-21T14:16:44.481Z"}
+{"level":"info","message":"[Logout Check] Performing security SELECT for sessionId: 25 and userId: 2","timestamp":"2025-09-21T14:16:44.481Z"}
+{"level":"info","message":"[Logout Check Result] Found 1 matching active session(s).","timestamp":"2025-09-21T14:16:44.485Z"}
+{"level":"info","message":"[Logout Success] Security check passed. Proceeding to update session 25.","timestamp":"2025-09-21T14:16:44.485Z"}
+{"level":"info","message":"[Logout DB Update] Database update complete. Affected rows: 1.","timestamp":"2025-09-21T14:16:44.489Z"}
+{"level":"info","message":"为 2 个活跃会话批量更新了心跳时间。","timestamp":"2025-09-21T14:16:59.884Z"}
+{"level":"info","message":"发现 2 个超时会话，正在数据库中标为非活跃。","timestamp":"2025-09-21T14:17:37.367Z"}

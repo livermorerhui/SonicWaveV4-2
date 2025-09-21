@@ -12,8 +12,40 @@ class UserViewModel : ViewModel() {
 
     private val customerRepository = CustomerRepository()
 
+    // For Add Customer operation
     private val _addCustomerResult = MutableStateFlow<Result<Unit>?>(null)
     val addCustomerResult: StateFlow<Result<Unit>?> = _addCustomerResult
+
+    // For Update Customer operation
+    private val _updateCustomerResult = MutableStateFlow<Result<Unit>?>(null)
+    val updateCustomerResult: StateFlow<Result<Unit>?> = _updateCustomerResult
+
+    // For Customer List
+    private val _customers = MutableStateFlow<List<Customer>?>(null)
+    val customers: StateFlow<List<Customer>?> = _customers
+
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
+
+    fun fetchCustomers() {
+        viewModelScope.launch {
+            _loading.value = true
+            try {
+                val response = customerRepository.getCustomers()
+                if (response.isSuccessful) {
+                    _customers.value = response.body()
+                } else {
+                    // Handle error
+                    _customers.value = emptyList()
+                }
+            } catch (e: Exception) {
+                // Handle exception
+                _customers.value = emptyList()
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
 
     fun addCustomer(customer: Customer) {
         viewModelScope.launch {
@@ -21,6 +53,7 @@ class UserViewModel : ViewModel() {
                 val response = customerRepository.addCustomer(customer)
                 if (response.isSuccessful) {
                     _addCustomerResult.value = Result.success(Unit)
+                    fetchCustomers() // Refresh list after adding
                 } else {
                     _addCustomerResult.value = Result.failure(Exception(response.errorBody()?.string()))
                 }
@@ -30,7 +63,27 @@ class UserViewModel : ViewModel() {
         }
     }
 
+    fun updateCustomer(customerId: Int, customer: Customer) {
+        viewModelScope.launch {
+            try {
+                val response = customerRepository.updateCustomer(customerId, customer)
+                if (response.isSuccessful) {
+                    _updateCustomerResult.value = Result.success(Unit)
+                    fetchCustomers() // Refresh list after updating
+                } else {
+                    _updateCustomerResult.value = Result.failure(Exception(response.errorBody()?.string()))
+                }
+            } catch (e: Exception) {
+                _updateCustomerResult.value = Result.failure(e)
+            }
+        }
+    }
+
     fun resetAddCustomerResult() {
         _addCustomerResult.value = null
+    }
+
+    fun resetUpdateCustomerResult() {
+        _updateCustomerResult.value = null
     }
 }

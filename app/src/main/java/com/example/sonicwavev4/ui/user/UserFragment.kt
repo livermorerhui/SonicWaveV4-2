@@ -1,6 +1,5 @@
 package com.example.sonicwavev4.ui.user
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,6 +13,7 @@ import com.example.sonicwavev4.network.LogoutEventRequest
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.login.LoginFragment
 import com.example.sonicwavev4.ui.AddCustomerDialogFragment
+import com.example.sonicwavev4.ui.customer.CustomerListFragment
 import com.example.sonicwavev4.utils.HeartbeatManager
 import com.example.sonicwavev4.utils.LogoutReason
 import com.example.sonicwavev4.utils.SessionManager
@@ -21,17 +21,9 @@ import kotlinx.coroutines.launch
 
 class UserFragment : Fragment() {
 
-    private var userName: String? = null
     private lateinit var sessionManager: SessionManager
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            userName = it.getString(ARG_USER_NAME)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,20 +36,27 @@ class UserFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sessionManager = SessionManager(requireContext())
-        setupUI()
+        setupUsernameDisplay()
         setupLogoutButton()
         setupAddCustomerButton()
+
+        // Add CustomerListFragment dynamically
+        if (savedInstanceState == null) {
+            childFragmentManager.beginTransaction()
+                .replace(R.id.customer_list_container, CustomerListFragment())
+                .commit()
+        }
+    }
+
+    private fun setupUsernameDisplay() {
+        val username = sessionManager.fetchUserName()
+        binding.userNameTextview.text = "欢迎, ${username ?: "用户"}!"
     }
 
     private fun setupAddCustomerButton() {
         binding.addCustomerButton.setOnClickListener {
-            AddCustomerDialogFragment().show(parentFragmentManager, "AddCustomerDialog")
+            AddCustomerDialogFragment.newInstance().show(childFragmentManager, "AddCustomerDialog")
         }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun setupUI() {
-        binding.userNameTextview.text = "欢迎, $userName!"
     }
 
     private fun setupLogoutButton() {
@@ -109,12 +108,12 @@ class UserFragment : Fragment() {
     }
 
     companion object {
-        private const val ARG_USER_NAME = "user_name"
-        @JvmStatic
-        fun newInstance(userName: String) = UserFragment().apply {
-            arguments = Bundle().apply {
-                putString(ARG_USER_NAME, userName)
-            }
-        }
+        // Removed ARG_USER_NAME as username is now fetched from SessionManager
+        // @JvmStatic
+        // fun newInstance(userName: String) = UserFragment().apply {
+        //     arguments = Bundle().apply {
+        //         putString(ARG_USER_NAME, userName)
+        //     }
+        // }
     }
 }

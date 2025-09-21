@@ -36,8 +36,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     
                     // Step 2: Save Access and Refresh tokens immediately
                     sessionManager.saveTokens(loginResponse.accessToken, loginResponse.refreshToken)
+                    // Save user details (userId, username, email) to SessionManager
+                    sessionManager.saveUserSession(loginResponse.userId.toString(), loginResponse.username, email) // Assuming email is the login email
                     RetrofitClient.updateToken(loginResponse.accessToken)
-                    Log.d("DEBUG_FLOW", "LoginViewModel: Tokens saved.")
+                    Log.d("DEBUG_FLOW", "LoginViewModel: Tokens and user details saved.")
 
                     // Step 3: Record the login event to get a session ID
                     Log.d("DEBUG_FLOW", "LoginViewModel: Recording login event to get session ID...")

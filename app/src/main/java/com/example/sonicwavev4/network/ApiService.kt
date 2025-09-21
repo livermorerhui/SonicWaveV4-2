@@ -2,6 +2,7 @@ package com.example.sonicwavev4.network
 
 import okhttp3.RequestBody
 import retrofit2.Response
+import retrofit2.http.GET
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -44,4 +45,10 @@ interface ApiService {
 
     @POST("api/v1/customers")
     suspend fun addCustomer(@Body customer: Customer): Response<CustomerCreationResponse>
+
+    @GET("api/v1/customers")
+    suspend fun getCustomers(): Response<List<Customer>>
+
+    @PUT("api/v1/customers/{customerId}")
+    suspend fun updateCustomer(@Path("customerId") customerId: Int, @Body customer: Customer): Response<Unit>
 }

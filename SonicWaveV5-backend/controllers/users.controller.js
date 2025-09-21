@@ -83,7 +83,8 @@ const loginUser = async (req, res) => {
       message: 'Logged in successfully!',
       accessToken: accessToken,
       refreshToken: refreshToken,
-      username: user.username
+      username: user.username,
+      userId: user.id
     });
 
   } catch (error) {

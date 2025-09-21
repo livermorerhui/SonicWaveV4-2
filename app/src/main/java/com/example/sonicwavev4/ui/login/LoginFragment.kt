@@ -65,16 +65,16 @@ class LoginFragment : Fragment() {
         }
 
         loginViewModel.navigationEvent.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { userName ->
-                navigateToUserFragment(userName)
+            event.getContentIfNotHandled()?.let { // No userName needed here anymore
+                navigateToUserFragment()
             }
         }
     }
 
-    private fun navigateToUserFragment(userName: String) {
+    private fun navigateToUserFragment() {
         Toast.makeText(requireContext(), "登录成功！", Toast.LENGTH_SHORT).show()
         parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_right_main, UserFragment.newInstance(userName))
+            .replace(R.id.fragment_right_main, UserFragment())
             .commit()
     }
 

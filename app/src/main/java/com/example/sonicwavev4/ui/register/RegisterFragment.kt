@@ -83,8 +83,8 @@ class RegisterFragment : Fragment() {
 
         // Observe navigation event (for success cases)
         loginViewModel.navigationEvent.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { userName ->
-                navigateToUserFragment(userName)
+            event.getContentIfNotHandled()?.let { // No userName needed here anymore
+                navigateToUserFragment()
             }
         }
     }
@@ -95,11 +95,11 @@ class RegisterFragment : Fragment() {
         }
     }
 
-    private fun navigateToUserFragment(userName: String) {
+    private fun navigateToUserFragment() {
         Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
         parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_right_main, UserFragment.newInstance(userName))
+            .replace(R.id.fragment_right_main, UserFragment())
             .commit()
     }
 
