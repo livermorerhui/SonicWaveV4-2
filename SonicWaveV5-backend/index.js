@@ -23,6 +23,7 @@ const operationsRouter = require('./routes/operations.routes.js');
 const heartbeatRouter = require('./routes/heartbeat.routes.js');
 const authEventRouter = require('./routes/auth.routes.js');
 const tokenRouter = require('./routes/token.routes.js');
+const customerRouter = require('./routes/customer.routes.js');
 
 // 初始化
 const app = express();
@@ -83,6 +84,7 @@ app.use('/api/v1/operations', operationsRouter);
 app.use('/api/v1/heartbeat', heartbeatRouter);
 app.use('/api/v1/auth', authEventRouter);
 app.use('/api/v1/token', tokenRouter); // 新增
+app.use('/api/v1/customers', customerRouter);
 
 // 启动应用
 async function startApp() {

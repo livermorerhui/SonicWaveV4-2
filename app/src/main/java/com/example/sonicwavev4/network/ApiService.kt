@@ -41,4 +41,7 @@ interface ApiService {
 
     @PUT("api/v1/auth/logout-event") // RESTful实践：使用PUT更新会话状态
     suspend fun recordLogoutEvent(@Body request: LogoutEventRequest): Response<Unit>
+
+    @POST("api/v1/customers")
+    suspend fun addCustomer(@Body customer: Customer): Response<CustomerCreationResponse>
 }

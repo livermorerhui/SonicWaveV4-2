@@ -7,7 +7,7 @@ const startOperation = async (req, res) => {
     logger.info('Received request body for startOperation:', req.body);
 
     const {
-      userId, userName, email, customer = null, frequency, intensity, operationTime
+      userId, userName = null, email = null, customer = null, frequency, intensity, operationTime
     } = req.body;
 
     if (!userId || operationTime === undefined) {

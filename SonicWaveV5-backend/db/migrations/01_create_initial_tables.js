@@ -2,20 +2,20 @@
 
 exports.up = function(knex) {
   return knex.schema
-    .createTable('users', function (table) {
+    .createTableIfNotExists('users', function (table) {
       table.increments('id').primary();
       table.string('username', 255).notNullable().unique();
       table.string('email', 255).notNullable().unique();
       table.string('password', 255).notNullable();
       table.timestamp('created_at').defaultTo(knex.fn.now());
     })
-    .createTable('app_usage_logs', function (table) {
+    .createTableIfNotExists('app_usage_logs', function (table) {
       table.increments('id').primary();
       table.string('user_id', 255).notNullable();
       table.bigInteger('launch_time').notNullable();
       table.timestamp('created_at').defaultTo(knex.fn.now());
     })
-    .createTable('user_operations', function (table) {
+    .createTableIfNotExists('user_operations', function (table) {
       table.increments('id').primary();
       table.string('user_id', 255).notNullable();
       table.string('user_name', 255);

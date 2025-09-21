@@ -35,3 +35,4 @@
 {"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/heartbeat'. Error: jwt expired","timestamp":"2025-09-20T14:22:58.528Z"}
 {"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/auth/logout-event'. Error: jwt expired","timestamp":"2025-09-20T14:22:59.219Z"}
 {"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-09-20T15:39:40.090Z"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-21T10:08:39.333Z"}
