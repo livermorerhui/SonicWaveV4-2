@@ -5,7 +5,8 @@ data class StartOperationRequest(
     val userId: String,
     val userName: String?,
     val email: String?,
-    val customer: String?,
+    val customer_id: Int?,
+    val customer_name: String?,
     val frequency: Int,
     val intensity: Int,
     val operationTime: Int

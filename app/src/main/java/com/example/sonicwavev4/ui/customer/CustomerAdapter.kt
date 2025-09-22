@@ -11,10 +11,13 @@ import com.example.sonicwavev4.network.Customer
 
 class CustomerAdapter(
     private val onEditClick: (Customer) -> Unit,
-    private val onItemSelected: (Customer) -> Unit
+    private val onItemSelected: (Customer) -> Unit,
+    private val onItemDoubleClick: (Customer) -> Unit
 ) : ListAdapter<Customer, CustomerAdapter.CustomerViewHolder>(CustomerDiffCallback()) {
 
     private var selectedPosition = RecyclerView.NO_POSITION
+    private var lastClickTime: Long = 0
+    private val DOUBLE_CLICK_TIME_DELTA: Long = 300 // milliseconds
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomerViewHolder {
         val binding = ItemCustomerBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -32,24 +35,32 @@ class CustomerAdapter(
         init {
             binding.editButton.setOnClickListener { onEditClick(getItem(adapterPosition)) }
             itemView.setOnClickListener {
-                val oldSelectedPosition = selectedPosition
-                selectedPosition = adapterPosition
+                val clickTime = System.currentTimeMillis()
+                if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA) {
+                    // Double click detected
+                    onItemDoubleClick(getItem(adapterPosition))
+                    lastClickTime = 0 // Reset to prevent triple clicks
+                } else {
+                    // Single click logic (highlighting)
+                    val oldSelectedPosition = selectedPosition
+                    selectedPosition = adapterPosition
 
-                // Notify old selected item to un-highlight
-                if (oldSelectedPosition != RecyclerView.NO_POSITION) {
-                    notifyItemChanged(oldSelectedPosition)
+                    // Notify old selected item to un-highlight
+                    if (oldSelectedPosition != RecyclerView.NO_POSITION) {
+                        notifyItemChanged(oldSelectedPosition)
+                    }
+                    // Notify new selected item to highlight
+                    notifyItemChanged(selectedPosition)
+
+                    onItemSelected(getItem(selectedPosition))
                 }
-                // Notify new selected item to highlight
-                notifyItemChanged(selectedPosition)
-
-                onItemSelected(getItem(selectedPosition))
+                lastClickTime = clickTime
             }
         }
 
         fun bind(customer: Customer, isSelected: Boolean) {
-            binding.customerNameTextView.text = "客户姓名: ${customer.name}"
-            binding.customerEmailTextView.text = "邮箱: ${customer.email}"
-            binding.customerPhoneTextView.text = "电话: ${customer.phone}"
+            binding.customerNameTextView.text = "${customer.name}"
+
 
             // Set background based on selection state
             itemView.isSelected = isSelected

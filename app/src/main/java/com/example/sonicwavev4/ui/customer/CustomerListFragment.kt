@@ -1,5 +1,6 @@
 package com.example.sonicwavev4.ui.customer
 
+import com.example.sonicwavev4.R
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -50,8 +51,15 @@ class CustomerListFragment : Fragment() {
             },
             onItemSelected = { customer ->
                 // Handle item selection: e.g., log it or update a ViewModel
-                // For now, we'll just log it.
-                println("Selected customer: ${customer.name}")
+                println("Selected customer (single click): ${customer.name}")
+            },
+            onItemDoubleClick = { customer ->
+                // Handle double click: select customer and navigate to detail
+                userViewModel.selectCustomer(customer)
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.customer_list_container, CustomerDetailFragment.newInstance(customer))
+                    .addToBackStack(null) // Allow back navigation
+                    .commit()
             }
         )
         binding.customerRecyclerView.apply {

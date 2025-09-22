@@ -27,6 +27,14 @@ class UserViewModel : ViewModel() {
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
+    // For Selected Customer
+    private val _selectedCustomer = MutableStateFlow<Customer?>(null)
+    val selectedCustomer: StateFlow<Customer?> = _selectedCustomer
+
+    fun selectCustomer(customer: Customer?) {
+        _selectedCustomer.value = customer
+    }
+
     fun fetchCustomers() {
         viewModelScope.launch {
             _loading.value = true

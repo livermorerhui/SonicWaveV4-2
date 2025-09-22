@@ -7,7 +7,9 @@ const startOperation = async (req, res) => {
     logger.info('Received request body for startOperation:', req.body);
 
     const {
-      userId, userName = null, email = null, customer = null, frequency, intensity, operationTime
+      userId, userName = null, email = null, 
+      customer_id = null, customer_name = null, // New fields
+      frequency, intensity, operationTime
     } = req.body;
 
     if (!userId || operationTime === undefined) {
@@ -17,11 +19,11 @@ const startOperation = async (req, res) => {
     const startTime = new Date();
 
     const sql = `INSERT INTO user_operations 
-      (user_id, user_name, email, customer, frequency, intensity, operation_time, start_time)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+      (user_id, user_name, email, customer_id, customer_name, frequency, intensity, operation_time, start_time)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const [result] = await dbPool.execute(sql, [
-      userId, userName, email, customer, frequency, intensity, operationTime, startTime
+      userId, userName, email, customer_id, customer_name, frequency, intensity, operationTime, startTime
     ]);
 
     res.status(201).json({
@@ -31,7 +33,7 @@ const startOperation = async (req, res) => {
 
   } catch (error) {
     logger.error('Error starting operation:', { error: error.message });
-    res.status(500).json({ message: 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.' });
   }
 };
 

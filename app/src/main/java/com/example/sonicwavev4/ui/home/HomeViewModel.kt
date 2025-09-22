@@ -1,9 +1,10 @@
 package com.example.sonicwavev4.ui.home
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.network.StartOperationRequest
@@ -12,8 +13,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.max
+import com.example.sonicwavev4.network.Customer
 
-class HomeViewModel (private val sessionManager: SessionManager) : ViewModel() {
+class HomeViewModel (application: Application) : AndroidViewModel(application) {
+    private val sessionManager = SessionManager(application.applicationContext)
     // --- 变量和状态 (无改动) ---
     private var currentOperationId: Long? = null
     private val _frequency = MutableLiveData(0)
@@ -155,13 +158,13 @@ class HomeViewModel (private val sessionManager: SessionManager) : ViewModel() {
         }
     }
 
-    fun startStopPlayback() {
+    fun startStopPlayback(selectedCustomer: Customer?) {
         commitInputBuffer()
         if (_isStarted.value == true) {
             forceStop()
         } else {
             if ((_frequency.value ?: 0) > 0 && (_timeInMinutes.value ?: 0) > 0) {
-                handleStartOperation()
+                handleStartOperation(selectedCustomer)
             }
         }
     }
@@ -186,13 +189,14 @@ class HomeViewModel (private val sessionManager: SessionManager) : ViewModel() {
         _isEditing.value = false
     }
 
-    private fun handleStartOperation() {
+    private fun handleStartOperation(selectedCustomer: Customer?) {
         val userId = sessionManager.fetchUserId() ?: "guest"
         val request = StartOperationRequest(
             userId = userId,
             userName = sessionManager.fetchUserName(),
             email = sessionManager.fetchEmail(),
-            customer = null,
+            customer_id = selectedCustomer?.id,
+            customer_name = selectedCustomer?.name,
             frequency = frequency.value ?: 0,
             intensity = intensity.value ?: 0,
             operationTime = timeInMinutes.value ?: 0

@@ -15,7 +15,8 @@ import androidx.lifecycle.lifecycleScope
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.databinding.FragmentHomeBinding
 import com.example.sonicwavev4.utils.SessionManager
-import com.example.sonicwavev4.ui.home.HomeViewModelFactory
+import androidx.fragment.app.activityViewModels
+import com.example.sonicwavev4.ui.user.UserViewModel
 import kotlinx.coroutines.*
 import java.util.Locale
 import kotlin.math.sin
@@ -23,6 +24,7 @@ import kotlin.math.sin
 class HomeFragment : Fragment() {
 
     private lateinit var viewModel: HomeViewModel
+    private val userViewModel: UserViewModel by activityViewModels()
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
@@ -43,19 +45,12 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 创建 SessionManager 实例
-        val sessionManager = SessionManager(requireContext())
+        // 通过 ViewModelProvider 获取 ViewModel 实例
+        viewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
 
-        // 创建 ViewModelFactory
-        val viewModelFactory = HomeViewModelFactory(sessionManager)
-
-        // 通过 Factory 获取 ViewModel 实例
-        viewModel = ViewModelProvider(this, viewModelFactory).get(HomeViewModel::class.java)
-
-        // ... 继续执行 setupClickListeners() 和 setupObservers() ...
         setupClickListeners()
         setupObservers()
-        initializeSoundPool() // 初始化SoundPool
+        initializeSoundPool()
     }
 
     override fun onDestroyView() { super.onDestroyView(); stopTonePlayback(); _binding = null }
@@ -165,7 +160,11 @@ class HomeFragment : Fragment() {
         binding.btnTimeDown.setOnClickListener { viewModel.decrementTime(); playTapSound() }
 
 
-        binding.btnStartStop.setOnClickListener { viewModel.startStopPlayback(); playTapSound() }
+        binding.btnStartStop.setOnClickListener { 
+            val selectedCustomer = userViewModel.selectedCustomer.value
+            viewModel.startStopPlayback(selectedCustomer)
+            playTapSound() 
+        }
         binding.btnClear.setOnClickListener { viewModel.clearAll(); playTapSound() }
 
         val numericClickListener = View.OnClickListener { view ->
