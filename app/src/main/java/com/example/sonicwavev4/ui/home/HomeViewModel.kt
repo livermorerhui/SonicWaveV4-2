@@ -194,7 +194,7 @@ class HomeViewModel (application: Application) : AndroidViewModel(application) {
         val request = StartOperationRequest(
             userId = userId,
             userName = sessionManager.fetchUserName(),
-            email = sessionManager.fetchEmail(),
+            user_email = sessionManager.fetchUserEmail(),
             customer_id = selectedCustomer?.id,
             customer_name = selectedCustomer?.name,
             frequency = frequency.value ?: 0,

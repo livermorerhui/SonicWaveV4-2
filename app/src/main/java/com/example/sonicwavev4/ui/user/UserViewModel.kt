@@ -6,6 +6,8 @@ import com.example.sonicwavev4.network.Customer
 import com.example.sonicwavev4.repository.CustomerRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class UserViewModel : ViewModel() {
@@ -20,19 +22,46 @@ class UserViewModel : ViewModel() {
     private val _updateCustomerResult = MutableStateFlow<Result<Unit>?>(null)
     val updateCustomerResult: StateFlow<Result<Unit>?> = _updateCustomerResult
 
-    // For Customer List
+    // For Customer List (unfiltered from server)
     private val _customers = MutableStateFlow<List<Customer>?>(null)
-    val customers: StateFlow<List<Customer>?> = _customers
+
+    // For filtered Customer List (displayed in UI)
+    private val _filteredCustomers = MutableStateFlow<List<Customer>?>(null)
+    val filteredCustomers: StateFlow<List<Customer>?> = _filteredCustomers.asStateFlow()
+
+    // For search query
+    private val _searchQuery = MutableStateFlow("")
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
     // For Selected Customer
     private val _selectedCustomer = MutableStateFlow<Customer?>(null)
-    val selectedCustomer: StateFlow<Customer?> = _selectedCustomer
+    val selectedCustomer: StateFlow<Customer?> = _selectedCustomer.asStateFlow()
+
+    init {
+        // Combine customers and searchQuery to produce filteredCustomers
+        viewModelScope.launch {
+            _customers.combine(_searchQuery) { customers, query ->
+                if (customers == null) {
+                    null
+                } else if (query.isBlank()) {
+                    customers
+                } else {
+                    customers.filter { it.name.contains(query, ignoreCase = true) }
+                }
+            }.collect { _filteredCustomers.value = it }
+        }
+    }
 
     fun selectCustomer(customer: Customer?) {
         _selectedCustomer.value = customer
+    }
+    fun clearSelectedCustomer() {
+        _selectedCustomer.value = null
+    }
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
     }
 
     fun fetchCustomers() {

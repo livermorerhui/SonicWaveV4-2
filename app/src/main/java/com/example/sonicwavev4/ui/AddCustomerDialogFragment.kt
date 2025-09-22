@@ -67,7 +67,10 @@ class AddCustomerDialogFragment : DialogFragment() {
 
         customerToEdit?.let { customer ->
             binding.nameEditText.setText(customer.name)
-            binding.dobEditText.setText(customer.dateOfBirth)
+            if (!customer.dateOfBirth.isNullOrEmpty()) {
+                val formattedDate = customer.dateOfBirth.take(10)
+                binding.dobEditText.setText(formattedDate)
+            }
             binding.genderEditText.setText(customer.gender, false) // Set text and prevent dropdown from showing immediately
             binding.phoneEditText.setText(customer.phone)
             binding.emailEditText.setText(customer.email)
@@ -156,10 +159,25 @@ class AddCustomerDialogFragment : DialogFragment() {
         val month = calendar.get(Calendar.MONTH)
         val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-        DatePickerDialog(requireContext(), { _, selectedYear, selectedMonth, selectedDay ->
-            val formattedDate = String.format("%d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
-            binding.dobEditText.setText(formattedDate)
-        }, year, month, day).show()
+        // 1. 先创建 DatePickerDialog 实例
+        val datePickerDialog = DatePickerDialog(
+            requireContext(),
+            R.style.SpinnerDatePickerDialogTheme, // 使用你的 spinner 主题
+            { _, selectedYear, selectedMonth, selectedDay ->
+                // 将月份加 1，并格式化为 YYYY-MM-DD
+                val formattedDate = String.format("%d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
+                binding.dobEditText.setText(formattedDate)
+            },
+            year,
+            month,
+            day
+        )
+
+        // 2. 在显示之前，设置最大日期为“今天”
+        datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
+
+        // 3. 最后再显示弹窗
+        datePickerDialog.show()
     }
 
     private fun observeViewModel() {
@@ -194,7 +212,14 @@ class AddCustomerDialogFragment : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val displayMetrics = resources.displayMetrics
+        val width = displayMetrics.widthPixels
+        val height = displayMetrics.heightPixels
+
+        val dialogWidth = (width * 0.5).toInt()
+        val dialogHeight = (height * 0.8).toInt()
+
+        dialog?.window?.setLayout(dialogWidth, dialogHeight)
     }
 
     override fun onDestroyView() {

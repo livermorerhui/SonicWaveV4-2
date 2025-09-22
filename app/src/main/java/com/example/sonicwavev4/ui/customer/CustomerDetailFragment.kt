@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels // 👈 1. 需要引入这个
 import com.example.sonicwavev4.databinding.FragmentCustomerDetailBinding
 import com.example.sonicwavev4.network.Customer
+import com.example.sonicwavev4.ui.user.UserViewModel // 👈 2. 需要引入你的 UserViewModel
 
 class CustomerDetailFragment : Fragment() {
 
@@ -15,6 +17,10 @@ class CustomerDetailFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var customer: Customer? = null
+
+    // --- 3. 添加这一行 ---
+    // 获取对 Activity 范围内的 UserViewModel 的引用
+    private val userViewModel: UserViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +57,12 @@ class CustomerDetailFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        // --- 4. 在这里添加清空逻辑 ---
+        // 当这个页面的视图被销毁时（例如用户按返回键），
+        // 调用 ViewModel 的方法来清空选中的客户信息。
+        userViewModel.clearSelectedCustomer()
+
         _binding = null
     }
 

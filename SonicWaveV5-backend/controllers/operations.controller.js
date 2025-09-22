@@ -7,7 +7,7 @@ const startOperation = async (req, res) => {
     logger.info('Received request body for startOperation:', req.body);
 
     const {
-      userId, userName = null, email = null, 
+      userId, userName = null, user_email = null, 
       customer_id = null, customer_name = null, // New fields
       frequency, intensity, operationTime
     } = req.body;
@@ -19,11 +19,11 @@ const startOperation = async (req, res) => {
     const startTime = new Date();
 
     const sql = `INSERT INTO user_operations 
-      (user_id, user_name, email, customer_id, customer_name, frequency, intensity, operation_time, start_time)
+      (user_id, user_name, user_email, customer_id, customer_name, frequency, intensity, operation_time, start_time)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const [result] = await dbPool.execute(sql, [
-      userId, userName, email, customer_id, customer_name, frequency, intensity, operationTime, startTime
+      userId, userName, user_email, customer_id, customer_name, frequency, intensity, operationTime, startTime
     ]);
 
     res.status(201).json({

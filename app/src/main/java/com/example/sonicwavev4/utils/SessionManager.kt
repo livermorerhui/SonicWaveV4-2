@@ -77,7 +77,7 @@ class SessionManager(context: Context) {
     fun fetchRefreshToken(): String? = prefs.getString(REFRESH_TOKEN, null)
     fun fetchUserId(): String? = prefs.getString(USER_ID, null)
     fun fetchUserName(): String? = prefs.getString(USER_NAME, null)
-    fun fetchEmail(): String? = prefs.getString(USER_EMAIL, null)
+    fun fetchUserEmail(): String? = prefs.getString(USER_EMAIL, null)
     fun fetchSessionId(): Long = prefs.getLong(SESSION_ID, -1L)
 
     fun initiateLogout(reason: LogoutReason) {

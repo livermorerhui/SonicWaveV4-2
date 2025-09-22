@@ -4,7 +4,7 @@ package com.example.sonicwavev4.network
 data class StartOperationRequest(
     val userId: String,
     val userName: String?,
-    val email: String?,
+    val user_email: String?,
     val customer_id: Int?,
     val customer_name: String?,
     val frequency: Int,

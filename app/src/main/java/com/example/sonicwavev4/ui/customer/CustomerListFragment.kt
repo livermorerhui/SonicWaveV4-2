@@ -2,6 +2,8 @@ package com.example.sonicwavev4.ui.customer
 
 import com.example.sonicwavev4.R
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,6 +39,7 @@ class CustomerListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
+        setupSearchBox()
         observeViewModel()
 
         // Fetch customers when the fragment is created
@@ -68,9 +71,19 @@ class CustomerListFragment : Fragment() {
         }
     }
 
+    private fun setupSearchBox() {
+        binding.searchBox.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                userViewModel.setSearchQuery(s.toString())
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            userViewModel.customers.collectLatest {
+            userViewModel.filteredCustomers.collectLatest {
                 customers ->
                 binding.loadingSpinner.visibility = View.GONE
                 if (customers.isNullOrEmpty()) {
