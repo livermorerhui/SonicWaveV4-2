@@ -43,10 +43,17 @@ class CustomerListFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        customerAdapter = CustomerAdapter { customer ->
-            // Handle edit click: open dialog in update mode
-            AddCustomerDialogFragment.newInstance(customer).show(parentFragmentManager, "AddCustomerDialog")
-        }
+        customerAdapter = CustomerAdapter(
+            onEditClick = { customer ->
+                // Handle edit click: open dialog in update mode
+                AddCustomerDialogFragment.newInstance(customer).show(parentFragmentManager, "AddCustomerDialog")
+            },
+            onItemSelected = { customer ->
+                // Handle item selection: e.g., log it or update a ViewModel
+                // For now, we'll just log it.
+                println("Selected customer: ${customer.name}")
+            }
+        )
         binding.customerRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = customerAdapter
