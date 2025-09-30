@@ -42,20 +42,68 @@
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/dob_layout"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/dob_label"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:hint="出生年月日">
+                android:text="出生年月日" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/dob_edit_text"
-                    android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/dob_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/year_layout"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:inputType="date" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_weight="1.2"
+                    android:hint="年">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/year_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="4" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/month_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:hint="月">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/month_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="2" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/day_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:hint="日">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/day_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:maxLength="2" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/gender_layout"

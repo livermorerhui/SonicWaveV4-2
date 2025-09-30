@@ -1,11 +1,32 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.io.ByteArrayOutputStream
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
 }
+
+// Function to get local IP address on macOS
+fun getLocalIpAddress(): String {
+    return try {
+        val process = ProcessBuilder("sh", "-c", "ipconfig getifaddr $(route -n get default | grep 'interface:' | awk '{print $2}')")
+            .redirectErrorStream(true)
+            .start()
+        val output = ByteArrayOutputStream()
+        process.inputStream.copyTo(output)
+        val ip = output.toString().trim()
+        if (ip.isNotEmpty() && !ip.contains("0.0.0.0")) {
+            ip
+        } else {
+            "10.0.2.2" // Fallback for emulator
+        }
+    } catch (e: Exception) {
+        "10.0.2.2" // Fallback for emulator
+    }
+}
+
 
 // Read properties from local.properties
 val localProperties = Properties()
@@ -39,8 +60,8 @@ android {
             buildConfigField("String", "SERVER_BASE_URL", "\"http://8.148.182.90:3000\"")
         }
         debug {
-            // Read server URL from local.properties or use a default value
-            val serverUrl = localProperties.getProperty("SERVER_BASE_URL") ?: "http://10.0.2.2:3000"
+            val localIp = getLocalIpAddress()
+            val serverUrl = "http://$localIp:3000"
             buildConfigField("String", "SERVER_BASE_URL", "\"$serverUrl\"")
         }
     }

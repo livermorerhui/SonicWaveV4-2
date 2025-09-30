@@ -35,6 +35,14 @@ class AddCustomerDialogFragment : DialogFragment() {
 
     private lateinit var genderOptions: Array<String>
 
+    private fun formatDoubleForDisplay(value: Double): String {
+        return if (value == value.toLong().toDouble()) {
+            value.toLong().toString()
+        } else {
+            value.toString()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let { bundle ->
@@ -68,19 +76,23 @@ class AddCustomerDialogFragment : DialogFragment() {
         customerToEdit?.let { customer ->
             binding.nameEditText.setText(customer.name)
             if (!customer.dateOfBirth.isNullOrEmpty()) {
-                val formattedDate = customer.dateOfBirth.take(10)
-                binding.dobEditText.setText(formattedDate)
+                val dateOnly = customer.dateOfBirth.take(10) // Take YYYY-MM-DD part
+                val dateParts = dateOnly.split("-")
+                if (dateParts.size == 3) {
+                    binding.yearEditText.setText(dateParts[0])
+                    binding.monthEditText.setText(dateParts[1])
+                    binding.dayEditText.setText(dateParts[2])
+                }
             }
-            binding.genderEditText.setText(customer.gender, false) // Set text and prevent dropdown from showing immediately
+            binding.genderEditText.setText(customer.gender, false)
             binding.phoneEditText.setText(customer.phone)
             binding.emailEditText.setText(customer.email)
-            binding.heightEditText.setText(customer.height.toString())
-            binding.weightEditText.setText(customer.weight.toString())
+            binding.heightEditText.setText(formatDoubleForDisplay(customer.height))
+            binding.weightEditText.setText(formatDoubleForDisplay(customer.weight))
             binding.saveButton.text = "更新"
         }
 
         setupClickListeners()
-        setupValidation()
         observeViewModel()
     }
 
@@ -89,17 +101,27 @@ class AddCustomerDialogFragment : DialogFragment() {
             dismiss()
         }
 
-        binding.dobEditText.setOnClickListener {
-            showDatePickerDialog()
-        }
-
         binding.genderEditText.setOnClickListener {
             binding.genderEditText.showDropDown()
         }
 
+        // --- Instant Validation Logic ---
+        binding.yearEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) validateYear()
+        }
+
+        binding.monthEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) validateMonth()
+        }
+
+        binding.dayEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) validateDay()
+        }
+
+        // --- Final Validation and Save Logic ---
         binding.saveButton.setOnClickListener {
             val name = binding.nameEditText.text.toString()
-            val email = binding.emailEditText.text.toString()
+            val email = binding.emailEditText.text?.toString() ?: ""
             val gender = binding.genderEditText.text.toString()
 
             if (name.isBlank() || email.isBlank()) {
@@ -118,15 +140,45 @@ class AddCustomerDialogFragment : DialogFragment() {
                 return@setOnClickListener
             }
 
+            // Run all validations before saving
+            val isYearValid = validateYear()
+            val isMonthValid = validateMonth()
+            val isDayValid = validateDay()
+            if (!isYearValid || !isMonthValid || !isDayValid) {
+                Toast.makeText(requireContext(), "请修正日期中的错误", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val yearStr = binding.yearEditText.text?.toString() ?: ""
+            val monthStr = binding.monthEditText.text?.toString() ?: ""
+            val dayStr = binding.dayEditText.text?.toString() ?: ""
+            var dateOfBirth = ""
+
+            if (yearStr.isNotBlank() || monthStr.isNotBlank() || dayStr.isNotBlank()) {
+                val year = yearStr.toInt()
+                val month = monthStr.toInt()
+                val day = dayStr.toInt()
+
+                val userDate = Calendar.getInstance().apply { set(year, month - 1, day) }
+                if (userDate.after(Calendar.getInstance())) {
+                    Toast.makeText(requireContext(), "出生日期不能是未来的日期", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                dateOfBirth = String.format("%d-%02d-%02d", year, month, day)
+            }
+
+            val finalHeight = binding.heightEditText.text?.toString()?.toDoubleOrNull() ?: 0.0
+            val finalWeight = binding.weightEditText.text?.toString()?.toDoubleOrNull() ?: 0.0
+
             val customer = Customer(
-                id = customerToEdit?.id, // Pass ID if in update mode
+                id = customerToEdit?.id,
                 name = name,
                 email = email,
-                dateOfBirth = binding.dobEditText.text.toString(),
+                dateOfBirth = dateOfBirth,
                 gender = gender,
-                phone = binding.phoneEditText.text.toString(),
-                height = binding.heightEditText.text.toString().toDoubleOrNull() ?: 0.0,
-                weight = binding.weightEditText.text.toString().toDoubleOrNull() ?: 0.0
+                phone = binding.phoneEditText.text?.toString() ?: "",
+                height = finalHeight,
+                weight = finalWeight
             )
 
             if (customerToEdit != null && customerToEdit?.id != null) {
@@ -137,48 +189,64 @@ class AddCustomerDialogFragment : DialogFragment() {
         }
     }
 
-    private fun setupValidation() {
-        binding.emailEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                val email = s.toString()
-                if (email.isNotBlank() && !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    binding.emailLayout.error = "Email格式不正确"
-                } else {
-                    binding.emailLayout.error = null
-                }
-            }
-        })
+    private fun validateYear(): Boolean {
+        val yearStr = binding.yearEditText.text?.toString() ?: ""
+        if (yearStr.isBlank() && binding.monthEditText.text?.isBlank() == true && binding.dayEditText.text?.isBlank() == true) return true // Allow empty date
+        val year = yearStr.toIntOrNull()
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        return if (year == null || year < 1900 || year > currentYear) {
+            binding.yearLayout.error = "年份无效"
+            false
+        } else {
+            binding.yearLayout.error = null
+            true
+        }
     }
 
-    @SuppressLint("DefaultLocale")
-    private fun showDatePickerDialog() {
-        val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-        // 1. 先创建 DatePickerDialog 实例
-        val datePickerDialog = DatePickerDialog(
-            requireContext(),
-            R.style.SpinnerDatePickerDialogTheme, // 使用你的 spinner 主题
-            { _, selectedYear, selectedMonth, selectedDay ->
-                // 将月份加 1，并格式化为 YYYY-MM-DD
-                val formattedDate = String.format("%d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
-                binding.dobEditText.setText(formattedDate)
-            },
-            year,
-            month,
-            day
-        )
-
-        // 2. 在显示之前，设置最大日期为“今天”
-        datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
-
-        // 3. 最后再显示弹窗
-        datePickerDialog.show()
+    private fun validateMonth(): Boolean {
+        val monthStr = binding.monthEditText.text?.toString() ?: ""
+        if (monthStr.isBlank() && binding.yearEditText.text!!.isBlank() && binding.dayEditText.text!!.isBlank()) return true // Allow empty date
+        val month = monthStr.toIntOrNull()
+        return if (month == null || month !in 1..12) {
+            binding.monthLayout.error = "月份必须是1-12"
+            false
+        } else {
+            binding.monthLayout.error = null
+            true
+        }
     }
+
+    private fun validateDay(): Boolean {
+        val dayStr = binding.dayEditText.text?.toString() ?: ""
+        if (dayStr.isBlank() && binding.yearEditText.text!!.isBlank() && binding.monthEditText.text!!.isBlank()) return true // Allow empty date
+
+        val day = dayStr.toIntOrNull()
+        val year = binding.yearEditText.text?.toString()?.toIntOrNull()
+        val month = binding.monthEditText.text?.toString()?.toIntOrNull()
+
+        if (day == null) {
+            binding.dayLayout.error = "日期无效"
+            return false
+        }
+        if (year == null || month == null || month !in 1..12) {
+             // Error already handled by other validators, just fail here
+            return false
+        }
+
+        val calendar = Calendar.getInstance().apply { set(year, month - 1, 1) }
+        val maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+        return if (day !in 1..maxDay) {
+            binding.dayLayout.error = "日期对于${month}月无效"
+            false
+        } else {
+            binding.dayLayout.error = null
+            true
+        }
+    }
+
+
+
+
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {

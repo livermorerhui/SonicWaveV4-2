@@ -38,3 +38,8 @@
 {"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error starting operation:","timestamp":"2025-09-21T10:08:39.333Z"}
 {"error":"Table 'sonicwave_db.app_usage_logs' doesn't exist","level":"error","message":"Error recording app usage:","timestamp":"2025-09-21T13:44:29.349Z"}
 {"error":"Table 'sonicwave_db.user_operations' doesn't exist","level":"error","message":"Error starting operation:","timestamp":"2025-09-21T13:48:42.375Z"}
+{"error":"Table 'sonicwave_db.app_usage_logs' doesn't exist","level":"error","message":"Error recording app usage:","timestamp":"2025-09-30T03:33:52.838Z"}
+{"error":"Table 'sonicwave_db.users' doesn't exist","level":"error","message":"Error during user login:","timestamp":"2025-09-30T03:34:17.127Z"}
+{"error":"Table 'sonicwave_db.users' doesn't exist","level":"error","message":"Error during user login:","timestamp":"2025-09-30T03:41:19.532Z"}
+{"error":"Table 'sonicwave_db.user_sessions' doesn't exist","level":"error","message":"Error recording login event:","timestamp":"2025-09-30T04:54:28.774Z","userId":1}
+{"error":"Table 'sonicwave_db.user_sessions' doesn't exist","level":"error","message":"Error recording login event:","timestamp":"2025-09-30T04:54:51.928Z","userId":1}
