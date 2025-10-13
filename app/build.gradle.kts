@@ -22,7 +22,7 @@ fun getLocalIpAddress(): String {
         } else {
             "10.0.2.2" // Fallback for emulator
         }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         "10.0.2.2" // Fallback for emulator
     }
 }
@@ -110,4 +110,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    implementation(files("libs/CH341PARV1.1.jar"))
 }

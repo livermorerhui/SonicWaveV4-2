@@ -5,6 +5,7 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import cn.wch.ch341lib.CH341Manager
 import com.example.sonicwavev4.logging.LogUploadWorker
 import com.example.sonicwavev4.network.RetrofitClient
 import java.util.concurrent.TimeUnit
@@ -13,6 +14,7 @@ class MainApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        CH341Manager.getInstance().init(this)
         RetrofitClient.initialize(this)
         scheduleLogUpload()
     }

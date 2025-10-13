@@ -1,13 +1,15 @@
 package com.example.sonicwavev4.ui.home
 
-import android.util.Log
+import android.hardware.usb.UsbDevice
 import android.os.Build
 import android.media.*
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +22,14 @@ import com.example.sonicwavev4.ui.user.UserViewModel
 import kotlinx.coroutines.*
 import java.util.Locale
 import kotlin.math.sin
+import java.util.concurrent.Executors
+import cn.wch.ch341lib.CH341Manager
+import cn.wch.ch341lib.exception.CH341LibException
+import cn.wch.ch347lib.callback.IUsbStateChange
+import cn.wch.ch347lib.exception.ChipException
+import cn.wch.ch347lib.exception.NoPermissionException
+import com.example.sonicwavev4.harddriver.Ad9833Controller
+import com.example.sonicwavev4.harddriver.Mcp41010Controller
 
 class HomeFragment : Fragment() {
 
@@ -27,6 +37,44 @@ class HomeFragment : Fragment() {
     private val userViewModel: UserViewModel by activityViewModels()
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+
+    private val ch341Manager: CH341Manager = CH341Manager.getInstance()
+    private val ioExecutor = Executors.newSingleThreadExecutor()
+    private var usbDevice: UsbDevice? = null
+    private var isDeviceOpen = false
+    private val ad9833Controller = Ad9833Controller()
+    private val mcpController = Mcp41010Controller()
+    private var lastAppliedFrequency = Double.NaN
+    private var lastAppliedIntensity = -1
+
+    private val usbStateListener = object : IUsbStateChange {
+        override fun usbDeviceDetach(device: UsbDevice?) {
+            if (device != null && device == usbDevice) {
+                requireActivity().runOnUiThread {
+                    showToast("CH341 已断开")
+                    releaseHardware()
+                }
+            }
+        }
+
+        override fun usbDeviceAttach(device: UsbDevice?) {
+            requireActivity().runOnUiThread { openDeviceIfNeeded() }
+        }
+
+        override fun usbDevicePermission(usbDevice: UsbDevice?, granted: Boolean) {
+            if (granted) {
+                requireActivity().runOnUiThread { openDeviceIfNeeded() }
+            } else {
+                requireActivity().runOnUiThread { showToast("USB 权限被拒绝") }
+            }
+        }
+    }
+
+    private val emptyUsbStateListener = object : IUsbStateChange {
+        override fun usbDeviceDetach(device: UsbDevice?) {}
+        override fun usbDeviceAttach(device: UsbDevice?) {}
+        override fun usbDevicePermission(usbDevice: UsbDevice?, granted: Boolean) {}
+    }
 
     // 音频资源
     private var audioManager: AudioManager? = null
@@ -51,6 +99,8 @@ class HomeFragment : Fragment() {
         setupClickListeners()
         setupObservers()
         initializeSoundPool()
+        ch341Manager.setUsbStateListener(usbStateListener)
+        openDeviceIfNeeded()
     }
 
     override fun onDestroyView() { super.onDestroyView(); stopTonePlayback(); _binding = null }
@@ -60,10 +110,35 @@ class HomeFragment : Fragment() {
         if (::soundPool.isInitialized) {
             soundPool.release()
         }
+        ch341Manager.setUsbStateListener(emptyUsbStateListener)
+        releaseHardware()
+        context?.let { ch341Manager.close(it) }
+        ioExecutor.shutdownNow()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        openDeviceIfNeeded()
     }
     private fun setupObservers() {
-        viewModel.frequency.observe(viewLifecycleOwner) { updateFrequencyDisplay() }
-        viewModel.intensity.observe(viewLifecycleOwner) { updateIntensityDisplay() }
+        viewModel.frequency.observe(viewLifecycleOwner) { value ->
+            updateFrequencyDisplay()
+            binding.root.post {
+                val editing = viewModel.isEditing.value == true && viewModel.currentInputType.value == "frequency"
+                if (!editing) {
+                    applyFrequencyToHardware(value ?: 0)
+                }
+            }
+        }
+        viewModel.intensity.observe(viewLifecycleOwner) { value ->
+            updateIntensityDisplay()
+            binding.root.post {
+                val editing = viewModel.isEditing.value == true && viewModel.currentInputType.value == "intensity"
+                if (!editing) {
+                    applyIntensityToHardware(value ?: 0)
+                }
+            }
+        }
         viewModel.timeInMinutes.observe(viewLifecycleOwner) { updateTimeDisplay() }
 
         viewModel.currentInputType.observe(viewLifecycleOwner) { type ->
@@ -76,7 +151,11 @@ class HomeFragment : Fragment() {
         viewModel.isStarted.observe(viewLifecycleOwner) { isPlaying ->
             binding.btnStartStop.text = if (isPlaying) getString(R.string.button_stop) else getString(R.string.button_start)
             updateTimeDisplay()
-            if (isPlaying) startTonePlayback() else stopTonePlayback()
+            if (isPlaying) {
+                sendStartCommand()
+            } else {
+                sendStopCommand()
+            }
         }
 
         viewModel.countdownSeconds.observe(viewLifecycleOwner) { seconds ->
@@ -192,6 +271,164 @@ class HomeFragment : Fragment() {
         soundPool.setOnLoadCompleteListener { _, _, status -> if (status == 0) isSoundPoolReady = true }
     }
     private fun playTapSound() { if (isSoundPoolReady) soundPool.play(tapSoundId, 1f, 1f, 1, 0, 1f) }
+
+private fun showToast(message: String) {
+    activity?.runOnUiThread {
+        val ctx = context?.applicationContext ?: return@runOnUiThread
+        Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
+    }
+}
+
+private fun openDeviceIfNeeded() {
+    if (isDeviceOpen) return
+    val devices = try {
+        ch341Manager.enumDevice()
+    } catch (e: CH341LibException) {
+        showToast("枚举设备失败: ${e.message}")
+        return
+    }
+    if (devices.isEmpty()) {
+        showToast("未找到 CH341 设备")
+        return
+    }
+    if (devices.size > 1) {
+        showToast("只支持连接一个 CH341 设备")
+        return
+    }
+    val target = devices[0]
+    try {
+        if (ch341Manager.hasPermission(target)) {
+            if (!ch341Manager.openDevice(target)) {
+                showToast("打开 CH341 设备失败")
+                return
+            }
+            onDeviceOpened(target)
+        } else {
+            ch341Manager.requestPermission(requireContext(), target)
+        }
+    } catch (e: CH341LibException) {
+        showToast("操作 CH341 异常: ${e.message}")
+    } catch (e: NoPermissionException) {
+        showToast("无 USB 权限")
+    } catch (e: ChipException) {
+        showToast("芯片错误: ${e.message}")
+    }
+}
+
+private fun onDeviceOpened(device: UsbDevice) {
+    usbDevice = device
+    isDeviceOpen = true
+    initializeAd9833Hardware()
+    initializeMcp41010Hardware()
+}
+
+private fun releaseHardware() {
+    val device = usbDevice
+    if (device != null && isDeviceOpen) {
+        try {
+            ch341Manager.closeDevice(device)
+        } catch (_: Exception) { }
+    }
+    usbDevice = null
+    isDeviceOpen = false
+    try {
+        ad9833Controller.detach()
+    } catch (_: Exception) { }
+    try {
+        mcpController.detach()
+    } catch (_: Exception) { }
+    lastAppliedFrequency = Double.NaN
+    lastAppliedIntensity = -1
+}
+
+private fun initializeAd9833Hardware() {
+    val device = usbDevice ?: return
+    ioExecutor.execute {
+        try {
+            ad9833Controller.attachDevice(device)
+            ad9833Controller.setCsChannel(0)
+            ad9833Controller.begin()
+            ad9833Controller.setFrequency(Ad9833Controller.CHANNEL_0, 0.0)
+            ad9833Controller.setActiveFrequency(Ad9833Controller.CHANNEL_0)
+            ad9833Controller.setMode(Ad9833Controller.MODE_BITS_OFF)
+            lastAppliedFrequency = 0.0
+            showToast("AD9833 已初始化")
+        } catch (e: CH341LibException) {
+            showToast("初始化 AD9833 失败: ${e.message}")
+        }
+    }
+}
+
+private fun initializeMcp41010Hardware() {
+    val device = usbDevice ?: return
+    ioExecutor.execute {
+        try {
+            mcpController.attachDevice(device)
+            mcpController.setCsChannel(1)
+            val value = viewModel.intensity.value ?: 0
+            val clamped = value.coerceIn(0, 255)
+            mcpController.writeValue(clamped)
+            lastAppliedIntensity = clamped
+            showToast("MCP41010 已初始化")
+        } catch (e: CH341LibException) {
+            showToast("初始化 MCP41010 失败: ${e.message}")
+        }
+    }
+}
+
+private fun applyFrequencyToHardware(freq: Int) {
+    if (!isDeviceOpen || usbDevice == null) return
+    val freqDouble = freq.toDouble()
+    if (freqDouble == lastAppliedFrequency) return
+    ioExecutor.execute {
+        try {
+            ad9833Controller.setFrequency(Ad9833Controller.CHANNEL_0, freqDouble)
+            ad9833Controller.setActiveFrequency(Ad9833Controller.CHANNEL_0)
+            lastAppliedFrequency = freqDouble
+        } catch (e: CH341LibException) {
+            showToast("设置频率失败: ${e.message}")
+        }
+    }
+}
+
+private fun applyIntensityToHardware(value: Int) {
+    if (!isDeviceOpen || usbDevice == null) return
+    val clamped = value.coerceIn(0, 255)
+    if (clamped == lastAppliedIntensity) return
+    ioExecutor.execute {
+        try {
+            mcpController.writeValue(clamped)
+            lastAppliedIntensity = clamped
+        } catch (e: CH341LibException) {
+            showToast("设置幅度失败: ${e.message}")
+        }
+    }
+}
+
+private fun sendStartCommand() {
+    if (!isDeviceOpen || usbDevice == null) return
+    val freq = viewModel.frequency.value ?: 0
+    applyFrequencyToHardware(freq)
+    applyIntensityToHardware(viewModel.intensity.value ?: 0)
+    ioExecutor.execute {
+        try {
+            ad9833Controller.setMode(Ad9833Controller.MODE_BITS_SINE)
+        } catch (e: CH341LibException) {
+            showToast("启动输出失败: ${e.message}")
+        }
+    }
+}
+
+private fun sendStopCommand() {
+    if (!isDeviceOpen || usbDevice == null) return
+    ioExecutor.execute {
+        try {
+            ad9833Controller.setMode(Ad9833Controller.MODE_BITS_OFF)
+        } catch (e: CH341LibException) {
+            showToast("停止输出失败: ${e.message}")
+        }
+    }
+}
 
     private fun startTonePlayback() {
         // --- FINAL SOLUTION: Best-effort audio focus request ---
