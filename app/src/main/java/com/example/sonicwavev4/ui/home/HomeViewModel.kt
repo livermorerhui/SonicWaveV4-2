@@ -1,22 +1,33 @@
 package com.example.sonicwavev4.ui.home
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.sonicwavev4.network.RetrofitClient
-import com.example.sonicwavev4.network.StartOperationRequest
-import com.example.sonicwavev4.utils.SessionManager
+import com.example.sonicwavev4.data.home.HardwareEvent
+import com.example.sonicwavev4.data.home.HomeHardwareRepository
+import com.example.sonicwavev4.data.home.HomeSessionRepository
+import com.example.sonicwavev4.network.Customer
+import com.example.sonicwavev4.ui.common.UiEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlin.math.max
-import com.example.sonicwavev4.network.Customer
 
-class HomeViewModel (application: Application) : AndroidViewModel(application) {
-    private val sessionManager = SessionManager(application.applicationContext)
+class HomeViewModel(
+    application: Application,
+    private val hardwareRepository: HomeHardwareRepository,
+    private val sessionRepository: HomeSessionRepository
+) : AndroidViewModel(application) {
+
     // --- 变量和状态 (无改动) ---
     private var currentOperationId: Long? = null
     private val _frequency = MutableLiveData(0)
@@ -37,6 +48,35 @@ class HomeViewModel (application: Application) : AndroidViewModel(application) {
     private val _isEditing = MutableLiveData(false)
     val isEditing: LiveData<Boolean> = _isEditing
 
+    val hardwareState = hardwareRepository.state.asLiveData()
+
+    private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 16)
+    val events: SharedFlow<UiEvent> = _events.asSharedFlow()
+
+    init {
+        hardwareRepository.start()
+        viewModelScope.launch {
+            var wasReady = false
+            hardwareRepository.state.collect { state ->
+                if (!state.isHardwareReady && wasReady) {
+                    resetUiStateToDefaults()
+                }
+                wasReady = state.isHardwareReady
+            }
+        }
+        viewModelScope.launch {
+            hardwareRepository.events.collect { event ->
+                when (event) {
+                    is HardwareEvent.Toast -> _events.emit(UiEvent.ShowToast(event.message))
+                    is HardwareEvent.Error -> {
+                        Log.e("HomeViewModel", "Hardware error", event.throwable)
+                        _events.emit(UiEvent.ShowError(event.throwable))
+                    }
+                }
+            }
+        }
+    }
+
     // --- 缓冲区和参数控制 (无改动) ---
     private fun commitInputBuffer() {
         val bufferValue = _inputBuffer.value
@@ -48,16 +88,16 @@ class HomeViewModel (application: Application) : AndroidViewModel(application) {
         }
         if (wasEditing && bufferValue.isNullOrEmpty()) {
             when (inputType) {
-                "frequency" -> _frequency.value = 0
-                "intensity" -> _intensity.value = 0
+                "frequency" -> updateFrequency(0)
+                "intensity" -> updateIntensity(0)
                 "time"      -> _timeInMinutes.value = 0
             }
         }
         else if (!bufferValue.isNullOrEmpty()) {
             val numericValue = bufferValue.toIntOrNull() ?: 0
             when (inputType) {
-                "frequency" -> _frequency.value = numericValue
-                "intensity" -> _intensity.value = numericValue
+                "frequency" -> updateFrequency(numericValue)
+                "intensity" -> updateIntensity(numericValue)
                 "time"      -> _timeInMinutes.value = numericValue
             }
         }
@@ -97,14 +137,17 @@ class HomeViewModel (application: Application) : AndroidViewModel(application) {
         _inputBuffer.value = ""
         _isEditing.value = false
         when (_currentInputType.value) {
-            "frequency" -> _frequency.value = 0
-            "intensity" -> _intensity.value = 0
+            "frequency" -> updateFrequency(0)
+            "intensity" -> updateIntensity(0)
             "time"      -> _timeInMinutes.value = 0
         }
     }
 
     fun commitAndCycleInputType() {
         commitInputBuffer()
+        if (_isStarted.value == true) {
+            return
+        }
         val nextType = when (_currentInputType.value) {
             "frequency" -> "intensity"
             "intensity" -> "time"
@@ -123,8 +166,8 @@ class HomeViewModel (application: Application) : AndroidViewModel(application) {
 
         // 步骤 3: 在最新的、已同步的值上进行安全的加减操作
         when (type) {
-            "frequency" -> _frequency.value = max(0, (_frequency.value ?: 0) + delta)
-            "intensity" -> _intensity.value = max(0, (_intensity.value ?: 0) + delta)
+            "frequency" -> updateFrequency(max(0, (_frequency.value ?: 0) + delta))
+            "intensity" -> updateIntensity(max(0, (_intensity.value ?: 0) + delta))
             "time"      -> _timeInMinutes.value = max(0, (_timeInMinutes.value ?: 0) + delta)
         }
     }
@@ -136,6 +179,8 @@ class HomeViewModel (application: Application) : AndroidViewModel(application) {
     fun decrementIntensity() = applyDelta("intensity", -1)
     fun incrementTime() = applyDelta("time", 1)
     fun decrementTime() = applyDelta("time", -1)
+    fun adjustFrequency(delta: Int) = applyDelta("frequency", delta)
+    fun adjustIntensity(delta: Int) = applyDelta("intensity", delta)
 
 
     // --- 播放控制和网络请求 (无改动) ---
@@ -163,7 +208,18 @@ class HomeViewModel (application: Application) : AndroidViewModel(application) {
         if (_isStarted.value == true) {
             forceStop()
         } else {
+            if (!hardwareRepository.state.value.isHardwareReady) {
+                viewModelScope.launch {
+                    _events.emit(UiEvent.ShowToast("硬件初始化中，请稍候"))
+                }
+                return
+            }
             if ((_frequency.value ?: 0) > 0 && (_timeInMinutes.value ?: 0) > 0) {
+                if (_currentInputType.value == "time") {
+                    _currentInputType.value = "frequency"
+                    _inputBuffer.value = ""
+                    _isEditing.value = false
+                }
                 handleStartOperation(selectedCustomer)
             }
         }
@@ -181,8 +237,8 @@ class HomeViewModel (application: Application) : AndroidViewModel(application) {
         if (_isStarted.value == true) {
             forceStop()
         }
-        _frequency.value = 0
-        _intensity.value = 0
+        updateFrequency(0)
+        updateIntensity(0)
         _timeInMinutes.value = 0
         _currentInputType.value = ""
         _inputBuffer.value = ""
@@ -190,26 +246,29 @@ class HomeViewModel (application: Application) : AndroidViewModel(application) {
     }
 
     private fun handleStartOperation(selectedCustomer: Customer?) {
-        val userId = sessionManager.fetchUserId() ?: "guest"
-        val request = StartOperationRequest(
-            userId = userId,
-            userName = sessionManager.fetchUserName(),
-            user_email = sessionManager.fetchUserEmail(),
-            customer_id = selectedCustomer?.id,
-            customer_name = selectedCustomer?.name,
-            frequency = frequency.value ?: 0,
-            intensity = intensity.value ?: 0,
-            operationTime = timeInMinutes.value ?: 0
-        )
-
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.api.startOperation(request)
-                currentOperationId = response.operationId
-                _isStarted.value = true
-                startCountdown()
+                val operationId = sessionRepository.startOperation(
+                    selectedCustomer = selectedCustomer,
+                    frequency = frequency.value ?: 0,
+                    intensity = intensity.value ?: 0,
+                    timeInMinutes = timeInMinutes.value ?: 0
+                )
+                val outputStarted = hardwareRepository.startOutput(
+                    targetFrequency = frequency.value ?: 0,
+                    targetIntensity = intensity.value ?: 0,
+                    playTone = false
+                )
+                if (outputStarted) {
+                    currentOperationId = operationId
+                    _isStarted.value = true
+                    startCountdown()
+                } else {
+                    sessionRepository.stopOperation(operationId)
+                }
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Failed to start operation", e)
+                _events.emit(UiEvent.ShowError(e))
             }
         }
     }
@@ -218,11 +277,66 @@ class HomeViewModel (application: Application) : AndroidViewModel(application) {
         val operationId = currentOperationId ?: return
         viewModelScope.launch {
             try {
-                RetrofitClient.api.stopOperation(operationId)
+                sessionRepository.stopOperation(operationId)
                 currentOperationId = null
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Failed to stop operation", e)
             }
         }
+        viewModelScope.launch {
+            hardwareRepository.stopOutput()
+        }
+    }
+
+    private fun updateFrequency(value: Int) {
+        if (_frequency.value != value) {
+            _frequency.value = value
+        }
+        viewModelScope.launch {
+            hardwareRepository.applyFrequency(value)
+        }
+    }
+
+    private fun updateIntensity(value: Int) {
+        if (_intensity.value != value) {
+            _intensity.value = value
+        }
+        viewModelScope.launch {
+            hardwareRepository.applyIntensity(value)
+        }
+    }
+
+    fun playTapSound() {
+        hardwareRepository.playTapSound()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        runBlocking {
+            hardwareRepository.stop()
+        }
+    }
+
+    private suspend fun resetUiStateToDefaults() {
+        countdownJob?.cancel()
+        _isStarted.value = false
+        currentOperationId = null
+        if ((_frequency.value ?: 0) != 0) {
+            _frequency.value = 0
+        }
+        hardwareRepository.applyFrequency(0)
+        if ((_intensity.value ?: 0) != 0) {
+            _intensity.value = 0
+        }
+        hardwareRepository.applyIntensity(0)
+        if ((_timeInMinutes.value ?: 0) != 0) {
+            _timeInMinutes.value = 0
+        } else {
+            _timeInMinutes.value = 0
+        }
+        _currentInputType.value = "frequency"
+        _inputBuffer.value = ""
+        _isEditing.value = false
+        _countdownSeconds.value = 0
     }
 }

@@ -1,19 +1,22 @@
 package com.example.sonicwavev4.harddriver;
 
 import android.hardware.usb.UsbDevice;
+import android.os.SystemClock;
 
 import cn.wch.ch341lib.CH341Manager;
 import cn.wch.ch341lib.exception.CH341LibException;
 
 /**
- * 使用 GPIO bit-bang 控制 AD9833 直接数字合成器。
- * 默认接线：D0=CS0、D3=SCLK、D5=MOSI。
- * SPI 模式：CPOL=1、CPHA=0。
+ * 控制 AD9833 的辅助类，仿照 Windows 版 pych341 实现，使用 GPIO bit-bang 发送 16bit 指令。
+ *
+ * 默认使用 CH341 的 D0 作为 CS，D3 作为 SCLK，D5 作为 MOSI。
+ * SPI 模式采用 MODE2（CPOL=1，CPHA=0），与 AD9833 数据手册相符。
  */
 public class Ad9833Controller {
 
     private static final int DEFAULT_MCLK = 25_000_000;
 
+    // 控制寄存器位定义
     private static final int AD_B28 = 13;
     private static final int AD_FSELECT = 11;
     private static final int AD_PSELECT = 10;
@@ -23,6 +26,8 @@ public class Ad9833Controller {
     private static final int AD_OPBITEN = 5;
     private static final int AD_DIV2 = 3;
     private static final int AD_MODE = 1;
+
+    // 频率和相位寄存器选择位
     private static final int AD_FREQ0 = 14;
     private static final int AD_FREQ1 = 15;
 
@@ -33,9 +38,11 @@ public class Ad9833Controller {
     public static final int MODE_BITS_SINE = 0;
 
     private static final int MODE_CLEAR_MASK = ~(MODE_BITS_OFF | MODE_BITS_TRIANGLE | MODE_BITS_SQUARE2 | MODE_BITS_SQUARE1);
+
     public static final int CHANNEL_0 = 0;
     public static final int CHANNEL_1 = 1;
 
+    // GPIO bit masks (D0-D5)
     private static final int GPIO_ENABLE_MASK = 0x3F;
     private static final int GPIO_DIR_MASK = 0x0000002F;
     private static final byte GPIO_CS0 = 0x01;
@@ -100,9 +107,14 @@ public class Ad9833Controller {
         }
         long freqReg = Math.round(frequencyHz * ((1L << 28) / (double) mclkHz));
         int addrMask = (channel == CHANNEL_0) ? (1 << AD_FREQ0) : (1 << AD_FREQ1);
+
         int lsbWord = addrMask | (int) (freqReg & 0x3FFF);
         int msbWord = addrMask | (int) ((freqReg >> 14) & 0x3FFF);
 
+        writeWord(controlRegister);
+        writeWord(lsbWord);
+        writeWord(msbWord);
+        delayMicroseconds(10);
         writeWord(controlRegister);
         writeWord(lsbWord);
         writeWord(msbWord);
@@ -125,8 +137,18 @@ public class Ad9833Controller {
         setMode(MODE_BITS_OFF);
     }
 
-    public void setCsChannel(int index) {
-        switch (index) {
+    public void initializeIdleState() throws CH341LibException {
+        ensureDevice();
+        controlRegister = (1 << AD_B28) | (1 << AD_RESET);
+        writeWord(controlRegister); // 0x2100
+        writePhaseRegisterRaw(CHANNEL_0, 0);
+        writeFrequencyWordsRaw(CHANNEL_0, 0);
+        controlRegister = (1 << AD_B28) | MODE_BITS_OFF;
+        writeWord(controlRegister); // 0x20C0
+    }
+
+    public void setCsChannel(int channelIndex) {
+        switch (channelIndex) {
             case 0:
                 activeCsMask = GPIO_CS0;
                 break;
@@ -143,7 +165,7 @@ public class Ad9833Controller {
 
     private void configureIdleState() throws CH341LibException {
         ensureDevice();
-        byte idleState = (byte) (GPIO_ALL_CS | GPIO_SCK);
+        byte idleState = (byte) (GPIO_ALL_CS | GPIO_SCK); // CPOL=1 -> SCK 高电平
         if (!manager.CH34xSetOutput(usbDevice, GPIO_ENABLE_MASK, GPIO_DIR_MASK, idleState & GPIO_DIR_MASK)) {
             throw new CH341LibException("CH34xSetOutput failed");
         }
@@ -203,6 +225,23 @@ public class Ad9833Controller {
                 delayMicroseconds(2);
             }
         }
+    }
+
+    private void writeFrequencyWordsRaw(int channel, long freqReg) throws CH341LibException {
+        int addrMask = (channel == CHANNEL_0) ? (1 << AD_FREQ0) : (1 << AD_FREQ1);
+        int lsbWord = addrMask | (int) (freqReg & 0x3FFF);
+        int msbWord = addrMask | (int) ((freqReg >> 14) & 0x3FFF);
+        writeWord(lsbWord);
+        writeWord(msbWord);
+    }
+
+    private void writePhaseRegisterRaw(int channel, int phase) throws CH341LibException {
+        if (phase < 0) {
+            phase = 0;
+        }
+        int base = (channel == CHANNEL_0) ? 0xC000 : 0xE000;
+        int word = base | (phase & 0x0FFF);
+        writeWord(word);
     }
 
     private void driveLines(byte state) throws CH341LibException {
