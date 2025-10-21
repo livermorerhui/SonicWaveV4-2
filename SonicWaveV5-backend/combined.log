@@ -14652,3 +14652,7 @@
 {"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-10-15T04:37:55.079Z"}
 {"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-10-15T04:37:55.079Z"}
 {"level":"info","message":"[Heartbeat] Received from user: 1, session: 66","timestamp":"2025-10-15T04:37:55.079Z"}
+{"error":"Connection lost: The server closed the connection.","level":"error","message":"❌ Failed to connect to the database.","timestamp":"2025-10-21T13:37:38.763Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-10-21T14:00:04.548Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-10-21T14:00:04.550Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-10-21T14:00:04.550Z"}

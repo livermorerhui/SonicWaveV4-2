@@ -43,3 +43,4 @@
 {"error":"Table 'sonicwave_db.users' doesn't exist","level":"error","message":"Error during user login:","timestamp":"2025-09-30T03:41:19.532Z"}
 {"error":"Table 'sonicwave_db.user_sessions' doesn't exist","level":"error","message":"Error recording login event:","timestamp":"2025-09-30T04:54:28.774Z","userId":1}
 {"error":"Table 'sonicwave_db.user_sessions' doesn't exist","level":"error","message":"Error recording login event:","timestamp":"2025-09-30T04:54:51.928Z","userId":1}
+{"error":"Connection lost: The server closed the connection.","level":"error","message":"❌ Failed to connect to the database.","timestamp":"2025-10-21T13:37:38.763Z"}
