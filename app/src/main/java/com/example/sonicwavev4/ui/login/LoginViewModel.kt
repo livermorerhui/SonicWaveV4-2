@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.sonicwavev4.util.Event
+import com.example.sonicwavev4.network.ErrorMessageResolver
 import com.example.sonicwavev4.network.LoginEventRequest
 import com.example.sonicwavev4.network.LoginRequest
 import com.example.sonicwavev4.network.LoginResponse
@@ -63,11 +64,17 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                         throw Exception("Failed to record login event after a successful login. Code: ${loginEventResponse.code()}")
                     }
                 } else {
-                    throw Exception("Login failed: ${loginApiResponse.errorBody()?.string()}")
+                    val message = ErrorMessageResolver.fromResponse(loginApiResponse.errorBody(), loginApiResponse.code())
+                    throw Exception(message)
                 }
             } catch (e: Exception) {
                 Log.e("DEBUG_FLOW", "Exception in login flow", e)
-                _loginResult.postValue(Event(Result.failure(e)))
+                val message = if (e is java.io.IOException) {
+                    ErrorMessageResolver.networkFailure(e)
+                } else {
+                    ErrorMessageResolver.unexpectedFailure(e)
+                }
+                _loginResult.postValue(Event(Result.failure(Exception(message))))
             }
         }
     }

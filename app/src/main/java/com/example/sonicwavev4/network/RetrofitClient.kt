@@ -57,7 +57,7 @@ object RetrofitClient {
 
                     // 3. Create the Retrofit instance
                     val retrofit = Retrofit.Builder()
-                        .baseUrl(BuildConfig.SERVER_BASE_URL)
+                        .baseUrl("${EndpointProvider.baseUrl}/")
                         .client(okHttpClient)
                         .addConverterFactory(GsonConverterFactory.create())
                         .build()

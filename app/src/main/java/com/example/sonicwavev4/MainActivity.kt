@@ -39,6 +39,7 @@ import com.example.sonicwavev4.databinding.ActivityMainBinding
 
 import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
 import com.example.sonicwavev4.network.AppUsageRequest
+import com.example.sonicwavev4.network.EndpointProvider
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.CoroutineScope
@@ -142,8 +143,9 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
             // 使用 withContext 将网络和文件操作切换到后台IO线程
             withContext(Dispatchers.IO) {
+                val baseUrl = EndpointProvider.baseUrl
                 files.forEach { fileName ->
-                    val musicUrl = "${BuildConfig.SERVER_BASE_URL}music/$fileName"
+                    val musicUrl = "$baseUrl/music/$fileName"
                     val downloadedFile = musicDownloader.downloadMusic(musicUrl, fileName)
                     if (downloadedFile != null) {
                         val downloadedItem = DownloadedMusicItem(

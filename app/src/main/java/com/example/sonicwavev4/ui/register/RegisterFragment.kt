@@ -49,10 +49,10 @@ class RegisterFragment : Fragment() {
                     binding.registerButton.isEnabled = false
                     registerViewModel.register(username, email, password)
                 } else {
-                    Toast.makeText(requireContext(), "Passwords do not match", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "两次输入的密码不一致", Toast.LENGTH_SHORT).show()
                 }
             } else {
-                Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "请填写完整的注册信息", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -61,13 +61,13 @@ class RegisterFragment : Fragment() {
         // Observe registration result
         registerViewModel.registerResult.observe(viewLifecycleOwner) { result ->
             result.onSuccess {
-                Toast.makeText(requireContext(), "Registration successful! Logging in...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "注册成功，正在登录...", Toast.LENGTH_SHORT).show()
                 val email = binding.emailEditText.text.toString().trim()
                 val password = binding.passwordEditText.text.toString()
                 // Trigger the complete login flow in the ViewModel
                 loginViewModel.login(email, password)
             }.onFailure {
-                Toast.makeText(requireContext(), "Registration failed: ${it.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), it.message ?: "注册失败，请稍后再试", Toast.LENGTH_LONG).show()
                 binding.registerButton.isEnabled = true
             }
         }
@@ -96,7 +96,7 @@ class RegisterFragment : Fragment() {
     }
 
     private fun navigateToUserFragment() {
-        Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "登录成功！", Toast.LENGTH_SHORT).show()
         parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_right_main, UserFragment())
@@ -105,7 +105,7 @@ class RegisterFragment : Fragment() {
 
     private fun handleLoginFailure(error: Throwable) {
         Log.e("RegisterFragment", "Auto-login after registration failed", error)
-        Toast.makeText(requireContext(), "Auto-login failed: ${error.message}", Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), error.message ?: "自动登录失败，请稍后再试", Toast.LENGTH_LONG).show()
         binding.registerButton.isEnabled = true
     }
 

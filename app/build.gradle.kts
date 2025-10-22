@@ -1,6 +1,10 @@
-import java.util.Properties
-import java.io.FileInputStream
 import java.io.ByteArrayOutputStream
+import java.io.FileInputStream
+import java.net.Inet4Address
+import java.net.NetworkInterface
+import java.util.Collections
+import java.util.Locale
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -27,6 +31,68 @@ fun getLocalIpAddress(): String {
     }
 }
 
+fun pickHostIp(): String {
+    return try {
+        val interfaces = NetworkInterface.getNetworkInterfaces() ?: return ""
+        val candidates = Collections.list(interfaces)
+            .filter { iface ->
+                iface.isUp &&
+                    !iface.isLoopback &&
+                    !iface.displayName.lowercase(Locale.US).contains("awdl") &&
+                    !iface.displayName.lowercase(Locale.US).contains("utun") &&
+                    !iface.displayName.lowercase(Locale.US).contains("docker") &&
+                    !iface.displayName.lowercase(Locale.US).contains("vmnet")
+            }
+            .flatMap { iface -> Collections.list(iface.inetAddresses).map { iface to it } }
+            .firstOrNull { (_, address) -> address is Inet4Address }
+            ?: return ""
+        (candidates.second as Inet4Address).hostAddress ?: ""
+    } catch (_: Exception) {
+        ""
+    }
+}
+
+data class DebugServerUrls(val lan: String, val emulator: String)
+
+fun resolveDebugServerUrls(localProperties: Properties): DebugServerUrls {
+    val tag = "[SonicWave]"
+    val override = localProperties.getProperty("SERVER_BASE_URL")?.trim()?.takeIf { it.isNotEmpty() }
+    if (override != null) {
+        val sanitized = override.trimEnd('/')
+        println("$tag Debug server URL -> $sanitized (from local.properties override)")
+        return DebugServerUrls(lan = sanitized, emulator = sanitized)
+    }
+
+    val emulatorOverride = localProperties.getProperty("SERVER_BASE_URL_EMULATOR")?.trim()?.takeIf { it.isNotEmpty() }
+    val emulatorUrl = if (emulatorOverride != null) {
+        val sanitized = emulatorOverride.trimEnd('/')
+        println("$tag Emulator server URL -> $sanitized (from local.properties override)")
+        sanitized
+    } else {
+        val fallback = "http://10.0.2.2:3000"
+        println("$tag Emulator server URL -> $fallback (default emulator loopback)")
+        fallback
+    }
+
+    val networkIp = pickHostIp()
+    if (networkIp.isNotEmpty()) {
+        val url = "http://$networkIp:3000"
+        println("$tag LAN server URL -> $url (from NetworkInterface)")
+        return DebugServerUrls(lan = url, emulator = emulatorUrl)
+    }
+
+    val shellIp = getLocalIpAddress()
+    if (shellIp.isNotEmpty() && shellIp != "10.0.2.2") {
+        val url = "http://$shellIp:3000"
+        println("$tag LAN server URL -> $url (from shell fallback)")
+        return DebugServerUrls(lan = url, emulator = emulatorUrl)
+    }
+
+    val fallback = "http://10.0.2.2:3000"
+    println("$tag LAN server URL -> $fallback (fallback to emulator loopback)")
+    return DebugServerUrls(lan = fallback, emulator = emulatorUrl)
+}
+
 
 // Read properties from local.properties
 val localProperties = Properties()
@@ -48,6 +114,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://8.148.182.90:3000\"")
+        buildConfigField("String", "SERVER_BASE_URL_LAN", "\"http://10.0.2.2:3000\"")
+        buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"http://10.0.2.2:3000\"")
     }
 
     buildTypes {
@@ -57,12 +126,15 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "SERVER_BASE_URL", "\"http://8.148.182.90:3000\"")
+            buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://8.148.182.90:3000\"")
+            buildConfigField("String", "SERVER_BASE_URL_LAN", "\"http://8.148.182.90:3000\"")
+            buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"http://8.148.182.90:3000\"")
         }
         debug {
-            val localIp = getLocalIpAddress()
-            val serverUrl = "http://$localIp:3000"
-            buildConfigField("String", "SERVER_BASE_URL", "\"$serverUrl\"")
+            val serverUrls = resolveDebugServerUrls(localProperties)
+            buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://8.148.182.90:3000\"")
+            buildConfigField("String", "SERVER_BASE_URL_LAN", "\"${serverUrls.lan}\"")
+            buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"${serverUrls.emulator}\"")
         }
     }
     compileOptions {

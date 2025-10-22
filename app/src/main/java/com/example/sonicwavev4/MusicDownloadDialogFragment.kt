@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.example.sonicwavev4.network.EndpointProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,7 +67,8 @@ class MusicDownloadDialogFragment : DialogFragment() {
     }
 
     private fun fetchMusicList() {
-        val request = Request.Builder().url("${BuildConfig.SERVER_BASE_URL}/api/music").build()
+        val baseUrl = EndpointProvider.baseUrl
+        val request = Request.Builder().url("$baseUrl/api/music").build()
 
         CoroutineScope(Dispatchers.IO).launch {
             try {

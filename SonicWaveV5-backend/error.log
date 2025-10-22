@@ -44,3 +44,5 @@
 {"error":"Table 'sonicwave_db.user_sessions' doesn't exist","level":"error","message":"Error recording login event:","timestamp":"2025-09-30T04:54:28.774Z","userId":1}
 {"error":"Table 'sonicwave_db.user_sessions' doesn't exist","level":"error","message":"Error recording login event:","timestamp":"2025-09-30T04:54:51.928Z","userId":1}
 {"error":"Connection lost: The server closed the connection.","level":"error","message":"❌ Failed to connect to the database.","timestamp":"2025-10-21T13:37:38.763Z"}
+{"error":"Connection lost: The server closed the connection.","level":"error","message":"Error during user registration:","timestamp":"2025-10-22T04:19:55.693Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-22T08:49:25.010Z"}

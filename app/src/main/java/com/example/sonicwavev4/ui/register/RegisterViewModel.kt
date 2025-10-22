@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sonicwavev4.network.ErrorMessageResolver
 import com.example.sonicwavev4.network.RegisterRequest
 import com.example.sonicwavev4.network.RegisterResponse
 import com.example.sonicwavev4.network.RetrofitClient
@@ -21,10 +22,16 @@ class RegisterViewModel : ViewModel() {
                 if (response.isSuccessful && response.body() != null) {
                     _registerResult.postValue(Result.success(response.body()!!))
                 } else {
-                    _registerResult.postValue(Result.failure(Exception("Registration failed: ${response.errorBody()?.string()}")))
+                    val message = ErrorMessageResolver.fromResponse(response.errorBody(), response.code())
+                    _registerResult.postValue(Result.failure(Exception(message)))
                 }
             } catch (e: Exception) {
-                _registerResult.postValue(Result.failure(e))
+                val message = if (e is java.io.IOException) {
+                    ErrorMessageResolver.networkFailure(e)
+                } else {
+                    ErrorMessageResolver.unexpectedFailure(e)
+                }
+                _registerResult.postValue(Result.failure(Exception(message)))
             }
         }
     }

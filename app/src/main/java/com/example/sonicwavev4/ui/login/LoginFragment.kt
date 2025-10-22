@@ -80,7 +80,7 @@ class LoginFragment : Fragment() {
 
     private fun handleLoginFailure(error: Throwable) {
         Log.e("LoginFragment", "登录失败", error)
-        Toast.makeText(requireContext(), "登录失败: ${error.message}", Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), error.message ?: "登录失败，请稍后再试", Toast.LENGTH_LONG).show()
         binding.loginButton.isEnabled = true
     }
 

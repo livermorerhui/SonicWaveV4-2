@@ -93,6 +93,13 @@
     * UI 布局**必须**是 XML 格式。
     * 我提供的代码**必须**包含符合日志记录规范的日志输出。
 
+#### 5.3 调试后端地址配置
+
+* `local.properties` 中的 `SERVER_BASE_URL`（可选的 `SERVER_BASE_URL_EMULATOR`）拥有最高优先级，设置后需重新编译。
+* 缺省时，Gradle 会检测局域网 IPv4 生成 `SERVER_BASE_URL_LAN`，并将 `SERVER_BASE_URL_EMULATOR` 设为 `http://10.0.2.2:3000`；失败则回退到 emulator loopback。
+* 每次构建都会在 Gradle 控制台打印已选 URL 及来源，便于确认。
+* 运行时 `EndpointProvider` 会根据 `BuildConfig.DEBUG` 与 `EmulatorDetector` 判断使用 LAN 或 Emulator 地址，Release 固定使用 `SERVER_BASE_URL_RELEASE`。
+
 ### 6. Node.js 后端开发规范
 
 #### 6.1 编码规范
