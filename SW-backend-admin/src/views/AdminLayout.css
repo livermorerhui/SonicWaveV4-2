@@ -1,0 +1,103 @@
+.admin-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+.admin-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-accent {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.brand-subtitle {
+  font-size: 0.85rem;
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.admin-nav {
+  display: inline-flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.nav-link {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.9);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-link.active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.35) 100%);
+  color: #60a5fa;
+}
+
+.nav-link:hover:not(.active) {
+  background: rgba(148, 163, 184, 0.12);
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.admin-session {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.session-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.85rem;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.session-email {
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.session-role {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+.logout-button {
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.logout-button:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 900px) {
+  .admin-header {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .admin-session {
+    justify-content: center;
+  }
+}

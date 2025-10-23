@@ -1,0 +1,245 @@
+const router = require('express').Router();
+const { query, body, param } = require('express-validator');
+const adminController = require('../controllers/admin.controller');
+const authenticateToken = require('../middleware/auth');
+const adminAuth = require('../middleware/adminAuth');
+const validate = require('../middleware/validate');
+
+const paginationValidators = [
+  query('page').optional().isInt({ min: 1 }).withMessage('page 必须为正整数'),
+  query('pageSize')
+    .optional()
+    .isInt({ min: 1, max: 200 })
+    .withMessage('pageSize 范围需在 1~200 之间'),
+  query('keyword').optional().trim().isLength({ max: 100 }).withMessage('keyword 最长 100 个字符')
+];
+
+const usersFilterValidators = [
+  query('role').optional().isIn(['user', 'admin', 'all']).withMessage('role 仅支持 user/admin/all'),
+  query('accountType')
+    .optional()
+    .isIn(['normal', 'test', 'all'])
+    .withMessage('accountType 仅支持 normal/test/all'),
+  query('sortBy')
+    .optional()
+    .isIn(['createdAt', 'email', 'username', 'role'])
+    .withMessage('sortBy 非法'),
+  query('sortOrder')
+    .optional()
+    .isIn(['asc', 'ASC', 'desc', 'DESC'])
+    .withMessage('sortOrder 仅支持 asc/desc')
+];
+
+const customersFilterValidators = [
+  query('sortBy').optional().isIn(['createdAt', 'name', 'email']).withMessage('sortBy 非法'),
+  query('sortOrder')
+    .optional()
+    .isIn(['asc', 'ASC', 'desc', 'DESC'])
+    .withMessage('sortOrder 仅支持 asc/desc')
+];
+
+router.use(authenticateToken);
+router.use(adminAuth);
+
+/**
+ * @swagger
+ * /api/admin/users:
+ *   get:
+ *     summary: 管理员获取用户列表
+ *     tags: [Admin]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *           description: 支持邮箱或用户名模糊搜索
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [user, admin, all]
+ *       - in: query
+ *         name: accountType
+ *         schema:
+ *           type: string
+ *           enum: [normal, test, all]
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [createdAt, email, username, role]
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *     responses:
+ *       200:
+ *         description: 用户分页数据
+ *       403:
+ *         description: 未授权的访问
+ */
+router.get('/users', [...paginationValidators, ...usersFilterValidators], validate, adminController.getAllUsers);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}/role:
+ *   patch:
+ *     summary: 更新用户角色
+ *     tags: [Admin]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [user, admin]
+ *     responses:
+ *       200:
+ *         description: 更新成功
+ *       404:
+ *         description: 用户不存在
+ */
+router.patch(
+  '/users/:id/role',
+  [
+    param('id').isInt({ min: 1 }).withMessage('id 必须为正整数'),
+    body('role').isIn(['user', 'admin']).withMessage('role 仅支持 user 或 admin')
+  ],
+  validate,
+  adminController.updateUserRole
+);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}/account-type:
+ *   patch:
+ *     summary: 更新用户账号类型
+ *     tags: [Admin]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               accountType:
+ *                 type: string
+ *                 enum: [normal, test]
+ *     responses:
+ *       200:
+ *         description: 更新成功
+ *       404:
+ *         description: 用户不存在
+ */
+router.patch(
+  '/users/:id/account-type',
+  [
+    param('id').isInt({ min: 1 }).withMessage('id 必须为正整数'),
+    body('accountType').isIn(['normal', 'test']).withMessage('accountType 仅支持 normal 或 test')
+  ],
+  validate,
+  adminController.updateUserAccountType
+);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}:
+ *   delete:
+ *     summary: 删除用户
+ *     tags: [Admin]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: force
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *     responses:
+ *       200:
+ *         description: 删除完成
+ *       404:
+ *         description: 用户不存在
+ */
+router.delete(
+  '/users/:id',
+  [
+    param('id').isInt({ min: 1 }).withMessage('id 必须为正整数'),
+    query('force').optional().isBoolean().withMessage('force 需为布尔值').toBoolean()
+  ],
+  validate,
+  adminController.deleteUser
+);
+
+/**
+ * @swagger
+ * /api/admin/customers:
+ *   get:
+ *     summary: 管理员获取客户列表
+ *     tags: [Admin]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [createdAt, name, email]
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *     responses:
+ *       200:
+ *         description: 客户分页数据
+ */
+router.get(
+  '/customers',
+  [...paginationValidators, ...customersFilterValidators],
+  validate,
+  adminController.getAllCustomers
+);
+
+module.exports = router;

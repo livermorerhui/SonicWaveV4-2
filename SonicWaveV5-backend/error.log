@@ -46,3 +46,43 @@
 {"error":"Connection lost: The server closed the connection.","level":"error","message":"❌ Failed to connect to the database.","timestamp":"2025-10-21T13:37:38.763Z"}
 {"error":"Connection lost: The server closed the connection.","level":"error","message":"Error during user registration:","timestamp":"2025-10-22T04:19:55.693Z"}
 {"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-22T08:49:25.010Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T10:46:59.705Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:34:24.944Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:34:24.953Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch customers","timestamp":"2025-10-22T12:34:58.055Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch customers","timestamp":"2025-10-22T12:34:58.063Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:35:02.117Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:35:02.124Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch customers","timestamp":"2025-10-22T12:37:02.157Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch customers","timestamp":"2025-10-22T12:37:02.171Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:37:04.233Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:37:04.238Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch customers","timestamp":"2025-10-22T12:37:05.510Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch customers","timestamp":"2025-10-22T12:37:05.516Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:37:41.304Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:37:41.311Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch customers","timestamp":"2025-10-22T12:38:01.960Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch customers","timestamp":"2025-10-22T12:38:01.966Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch customers","timestamp":"2025-10-22T12:42:45.286Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch customers","timestamp":"2025-10-22T12:44:17.608Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:44:27.745Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:44:27.749Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:46:07.234Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:47:51.465Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:52:50.468Z"}
+{"error":"Incorrect arguments to mysqld_stmt_execute","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:52:50.477Z"}
+{"error":"Cannot access 'limit' before initialization","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:55:24.083Z"}
+{"error":"Cannot access 'limit' before initialization","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:55:24.090Z"}
+{"error":"Cannot access 'limit' before initialization","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:55:24.299Z"}
+{"error":"Cannot access 'limit' before initialization","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T12:55:24.305Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T13:45:45.657Z"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error recording login event:","timestamp":"2025-10-22T15:42:05.340Z"}
+{"error":"Bind parameters must not contain undefined. To pass SQL NULL specify JS null","level":"error","message":"Error recording login event:","timestamp":"2025-10-22T15:42:50.951Z"}
+{"error":"Duplicate entry '111@qq.com' for key 'customers.customers_email_unique'","level":"error","message":"Error creating customer","timestamp":"2025-10-22T16:02:12.431Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T16:07:10.812Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T16:12:51.210Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T16:16:26.045Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T16:54:39.534Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T17:07:08.842Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T17:08:43.427Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T17:15:33.917Z"}

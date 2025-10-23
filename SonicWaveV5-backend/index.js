@@ -3,15 +3,18 @@ require('dotenv').config();
 console.log("--- Backend service starting ---");
 
 const express = require('express');
+const cors = require('cors');
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const jwt = require('jsonwebtoken');
 const url = require('url');
+const swaggerUi = require('swagger-ui-express');
 
 const logger = require('./logger');
 const { checkDbConnection } = require('./config/db');
 const { startManagerIntervals } = require('./onlineStatusManager');
 const config = require('./config/config'); // 引入新的配置
+const swaggerSpec = require('./docs/swagger');
 
 // 引入路由模块
 const userRouter = require('./routes/users.routes.js');
@@ -23,6 +26,8 @@ const operationsRouter = require('./routes/operations.routes.js');
 const heartbeatRouter = require('./routes/heartbeat.routes.js');
 const authEventRouter = require('./routes/auth.routes.js');
 const tokenRouter = require('./routes/token.routes.js');
+const adminRouter = require('./routes/admin.routes.js');
+const { ensureSeedAdmin } = require('./services/admin.service');
 const customerRouter = require('./routes/customer.routes.js');
 
 // 初始化
@@ -31,6 +36,12 @@ const PORT = config.port; // 从配置中获取端口
 
 // 全局中间件
 app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.ADMIN_WEB_ORIGIN || 'http://localhost:5173',
+    credentials: true
+  })
+);
 
 // 创建 HTTP 和 WebSocket 服务器
 const server = http.createServer(app);
@@ -85,11 +96,14 @@ app.use('/api/v1/heartbeat', heartbeatRouter);
 app.use('/api/v1/auth', authEventRouter);
 app.use('/api/v1/token', tokenRouter); // 新增
 app.use('/api/v1/customers', customerRouter);
+app.use('/api/admin', adminRouter);
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // 启动应用
 async function startApp() {
   // 检查数据库连接
   await checkDbConnection();
+  await ensureSeedAdmin();
 
   // 启动服务器
   server.listen(PORT, () => {

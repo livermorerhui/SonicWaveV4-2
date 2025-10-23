@@ -5,9 +5,14 @@ const logger = require('../logger');
 // recordLoginEvent 函数保持不变
 const recordLoginEvent = async (req, res) => {
   try {
-    const { userId } = req.user;
-    const ipAddress = req.ip;
-    const userAgent = req.headers['user-agent'];
+    const userId = req.user?.id || req.user?.userId;
+    if (!userId) {
+      logger.warn('[Login Event] Missing user identifier on request, aborting login event record.');
+      return res.status(400).json({ message: '用户信息缺失，无法记录登录事件' });
+    }
+
+    const ipAddress = req.ip || null;
+    const userAgent = req.headers['user-agent'] || null;
 
     const sql = `INSERT INTO user_sessions (user_id, login_time, last_heartbeat_time, ip_address, device_info) VALUES (?, NOW(), NOW(), ?, ?)`;
     const [result] = await dbPool.execute(sql, [userId, ipAddress, userAgent]);
@@ -16,7 +21,8 @@ const recordLoginEvent = async (req, res) => {
 
     res.status(201).json({ message: 'Login event recorded', sessionId: result.insertId });
   } catch (error) {
-    logger.error('Error recording login event:', { userId: req.user?.userId, error: error.message });
+    const userId = req.user?.id || req.user?.userId;
+    logger.error('Error recording login event:', { userId, error: error.message });
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -24,7 +30,7 @@ const recordLoginEvent = async (req, res) => {
 // 记录用户登出事件 (增加了更详细的日志)
 const recordLogoutEvent = async (req, res) => {
   try {
-    const { userId } = req.user;
+    const userId = req.user?.id || req.user?.userId;
     const { sessionId } = req.body;
 
     // [日志步骤 1] 记录收到的登出请求，这是所有操作的起点。
@@ -61,7 +67,8 @@ const recordLogoutEvent = async (req, res) => {
 
     res.status(200).json({ message: 'Logout event recorded' });
   } catch (error) {
-    logger.error('Error during recordLogoutEvent process:', { userId: req.user?.userId, sessionId, error: error.message });
+    const userId = req.user?.id || req.user?.userId;
+    logger.error('Error during recordLogoutEvent process:', { userId, sessionId, error: error.message });
     res.status(500).json({ message: 'Internal server error' });
   }
 };
