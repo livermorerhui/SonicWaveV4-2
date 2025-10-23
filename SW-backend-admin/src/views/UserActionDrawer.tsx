@@ -101,10 +101,6 @@ export const UserActionDrawer = ({
                     <span className="drawer-sub-label">账号类型</span>
                     <span className="drawer-value">{detail.accountType === 'test' ? '测试账号' : '正式账号'}</span>
                   </div>
-                  <div>
-                    <span className="drawer-sub-label">密码哈希</span>
-                    <span className="drawer-value password-hash">{detail.passwordHash || '未知'}</span>
-                  </div>
                 </div>
               ) : (
                 <span className="drawer-value">未加载到用户详情</span>

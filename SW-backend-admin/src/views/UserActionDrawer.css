@@ -133,11 +133,6 @@
   letter-spacing: 0.05em;
 }
 
-.password-hash {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  word-break: break-all;
-  color: rgba(226, 232, 240, 0.75);
-}
 
 .drawer-primary {
   align-self: flex-start;

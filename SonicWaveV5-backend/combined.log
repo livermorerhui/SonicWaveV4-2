@@ -16830,3 +16830,20 @@
 {"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:25:04.332Z"}
 {"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:25:04.341Z"}
 {"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users/8'.","timestamp":"2025-10-23T02:25:09.222Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/v1/users/me'.","timestamp":"2025-10-23T02:29:02.425Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/v1/users/me'.","timestamp":"2025-10-23T02:29:02.448Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:29:02.453Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:29:02.478Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users/8'.","timestamp":"2025-10-23T02:29:04.837Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:29:57.737Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:29:57.740Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/v1/users/me'.","timestamp":"2025-10-23T02:30:02.836Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:30:02.856Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:30:02.880Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users/8'.","timestamp":"2025-10-23T02:30:17.707Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:30:33.923Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:30:33.939Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/customers/5'.","timestamp":"2025-10-23T02:30:41.088Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:31:17.689Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T02:31:17.715Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users/8'.","timestamp":"2025-10-23T02:34:54.792Z"}
