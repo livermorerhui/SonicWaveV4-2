@@ -16555,3 +16555,19 @@
 {"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T00:59:30.916Z"}
 {"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users/1/account-type'.","timestamp":"2025-10-23T00:59:38.878Z"}
 {"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T00:59:38.925Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-10-23T01:27:26.524Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-10-23T01:27:26.541Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-10-23T01:27:26.542Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-10-23T01:27:26.542Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/v1/users/me'.","timestamp":"2025-10-23T01:31:01.321Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/v1/users/me'.","timestamp":"2025-10-23T01:31:01.331Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/v1/users/me'.","timestamp":"2025-10-23T01:31:03.505Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T01:31:03.530Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T01:31:03.542Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users/1/account-type'.","timestamp":"2025-10-23T01:31:13.114Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T01:31:13.224Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users/1/account-type'.","timestamp":"2025-10-23T01:31:25.916Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T01:31:25.953Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/v1/users/me'.","timestamp":"2025-10-23T01:31:39.549Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T01:31:39.568Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 7. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-10-23T01:31:39.573Z"}

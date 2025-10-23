@@ -35,7 +35,23 @@ const app = express();
 const PORT = config.port; // 从配置中获取端口
 
 // 全局中间件
-app.use(express.json());
+const PAYLOAD_WARN_LIMIT = Number(process.env.PAYLOAD_WARN_LIMIT_BYTES || 50 * 1024);
+
+app.use((req, res, next) => {
+  const lengthHeader = req.headers['content-length'];
+  const length = lengthHeader ? Number(lengthHeader) : 0;
+  if (Number.isFinite(length) && length > 0) {
+    const message = `${req.method} ${req.originalUrl} payload=${length}B`;
+    if (length > PAYLOAD_WARN_LIMIT) {
+      logger.warn(`⚠️ Large payload detected: ${message}`);
+    } else {
+      logger.debug(`Payload size: ${message}`);
+    }
+  }
+  next();
+});
+
+app.use(express.json({ limit: process.env.BODY_LIMIT || '100kb' }));
 app.use(
   cors({
     origin: process.env.ADMIN_WEB_ORIGIN || 'http://localhost:5173',
