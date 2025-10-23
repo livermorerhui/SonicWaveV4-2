@@ -1,16 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { AccountType, UserDTO, UserRole } from '@/models/UserDTO';
+import type { AccountType, UserDTO, UserRole, UserDetail } from '@/models/UserDTO';
 import './UserActionDrawer.css';
 
 interface UserActionDrawerProps {
   open: boolean;
   user: UserDTO | null;
+  detail: UserDetail | null;
   onClose: () => void;
   onChangeRole: (role: UserRole) => void;
   onChangeAccountType: (accountType: AccountType) => void;
   onSoftDelete: () => void;
   onHardDelete: () => void;
   isProcessing: boolean;
+  isDetailLoading: boolean;
+  onResetPassword: (password: string) => void;
   error?: string | null;
 }
 
@@ -27,21 +30,30 @@ const accountTypeOptions: Array<{ value: AccountType; label: string }> = [
 export const UserActionDrawer = ({
   open,
   user,
+  detail,
   onClose,
   onChangeRole,
   onChangeAccountType,
   onSoftDelete,
   onHardDelete,
   isProcessing,
+  isDetailLoading,
+  onResetPassword,
   error
 }: UserActionDrawerProps) => {
   const [nextRole, setNextRole] = useState<UserRole>('user');
   const [nextAccountType, setNextAccountType] = useState<AccountType>('normal');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && user) {
       setNextRole(user.role);
       setNextAccountType(user.accountType);
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordError(null);
     }
   }, [open, user]);
 
@@ -71,6 +83,33 @@ export const UserActionDrawer = ({
         </header>
         {user && (
           <div className="drawer-body">
+            <section className="drawer-section">
+              <span className="drawer-label">基本信息</span>
+              {isDetailLoading ? (
+                <span className="drawer-value">加载中...</span>
+              ) : detail ? (
+                <div className="drawer-grid">
+                  <div>
+                    <span className="drawer-sub-label">用户名</span>
+                    <span className="drawer-value">{detail.username || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="drawer-sub-label">邮箱</span>
+                    <span className="drawer-value">{detail.email}</span>
+                  </div>
+                  <div>
+                    <span className="drawer-sub-label">账号类型</span>
+                    <span className="drawer-value">{detail.accountType === 'test' ? '测试账号' : '正式账号'}</span>
+                  </div>
+                  <div>
+                    <span className="drawer-sub-label">密码哈希</span>
+                    <span className="drawer-value password-hash">{detail.passwordHash || '未知'}</span>
+                  </div>
+                </div>
+              ) : (
+                <span className="drawer-value">未加载到用户详情</span>
+              )}
+            </section>
             <section className="drawer-section">
               <span className="drawer-label">创建时间</span>
               <span className="drawer-value">{formattedCreatedAt}</span>
@@ -119,6 +158,51 @@ export const UserActionDrawer = ({
                 disabled={isProcessing}
               >
                 保存账号类型
+              </button>
+            </section>
+            <section className="drawer-section">
+              <span className="drawer-label">密码管理</span>
+              <div className="drawer-field">
+                <span>新密码</span>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={event => setNewPassword(event.target.value)}
+                  placeholder="请输入新密码"
+                  disabled={isProcessing}
+                />
+              </div>
+              <div className="drawer-field">
+                <span>确认新密码</span>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={event => setConfirmPassword(event.target.value)}
+                  placeholder="请再次输入新密码"
+                  disabled={isProcessing}
+                />
+              </div>
+              {passwordError && <div className="drawer-error">{passwordError}</div>}
+              <button
+                type="button"
+                className="drawer-primary"
+                onClick={async () => {
+                  if (newPassword.trim().length < 8) {
+                    setPasswordError('密码长度至少 8 位');
+                    return;
+                  }
+                  if (newPassword !== confirmPassword) {
+                    setPasswordError('两次输入的密码不一致');
+                    return;
+                  }
+                  setPasswordError(null);
+                  await onResetPassword(newPassword.trim());
+                  setNewPassword('');
+                  setConfirmPassword('');
+                }}
+                disabled={isProcessing}
+              >
+                重置密码
               </button>
             </section>
             <section className="drawer-section danger">

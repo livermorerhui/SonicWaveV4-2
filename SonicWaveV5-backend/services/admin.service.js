@@ -5,10 +5,14 @@ const {
   listUsers,
   listCustomers,
   findUserById,
+  findUserDetailedById,
   updateUserRole,
   updateUserAccountType,
   softDeleteUser,
-  hardDeleteUser
+  hardDeleteUser,
+  updateUserPasswordInternal,
+  findCustomerById,
+  updateCustomerById
 } = require('../repositories/admin.repository');
 const { hasColumn } = require('../utils/schema');
 const auditService = require('./audit.service');
@@ -25,6 +29,10 @@ async function getAllUsers(params) {
 
 async function getAllCustomers(params) {
   return listCustomers(params);
+}
+
+async function getUserDetail(userId) {
+  return findUserDetailedById(userId);
 }
 
 async function changeUserRole({ actorId, userId, role, ip, userAgent }) {
@@ -93,6 +101,32 @@ async function changeUserAccountType({ actorId, userId, accountType, ip, userAge
   return updated;
 }
 
+async function resetUserPassword({ actorId, userId, password, ip, userAgent }) {
+  const existing = await findUserById(userId);
+  if (!existing) {
+    throw ServiceError('USER_NOT_FOUND', '目标用户不存在');
+  }
+
+  const hashed = await bcrypt.hash(password, 10);
+  const affected = await updateUserPasswordInternal(userId, hashed);
+
+  if (!affected) {
+    throw ServiceError('PASSWORD_UPDATE_FAILED', '更新密码失败');
+  }
+
+  await auditService.logAction({
+    actorId,
+    action: 'USER_PASSWORD_RESET',
+    targetType: 'user',
+    targetId: userId,
+    metadata: {
+      passwordLength: password.length
+    },
+    ip,
+    userAgent
+  });
+}
+
 async function deleteUser({ actorId, userId, force = false, ip, userAgent }) {
   const existing = await findUserById(userId);
   if (!existing) {
@@ -118,6 +152,51 @@ async function deleteUser({ actorId, userId, force = false, ip, userAgent }) {
     ip,
     userAgent
   });
+}
+
+async function getCustomerDetail(customerId) {
+  return findCustomerById(customerId);
+}
+
+async function updateCustomer({ actorId, customerId, payload, ip, userAgent }) {
+  const existing = await findCustomerById(customerId);
+  if (!existing) {
+    throw ServiceError('CUSTOMER_NOT_FOUND', '目标客户不存在');
+  }
+
+  const normalizedPayload = {};
+  if (payload.name !== undefined) normalizedPayload.name = payload.name;
+  if (payload.dateOfBirth !== undefined) normalizedPayload.dateOfBirth = payload.dateOfBirth;
+  if (payload.gender !== undefined) normalizedPayload.gender = payload.gender;
+  if (payload.phone !== undefined) normalizedPayload.phone = payload.phone;
+  if (payload.email !== undefined) normalizedPayload.email = payload.email;
+  if (payload.height !== undefined) normalizedPayload.height = payload.height;
+  if (payload.weight !== undefined) normalizedPayload.weight = payload.weight;
+
+  let affected;
+  try {
+    affected = await updateCustomerById(customerId, normalizedPayload);
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      throw ServiceError('CUSTOMER_EXISTS', '该邮箱已存在于其它客户记录中');
+    }
+    throw error;
+  }
+  const updated = affected ? await findCustomerById(customerId) : existing;
+
+  await auditService.logAction({
+    actorId,
+    action: 'CUSTOMER_UPDATED',
+    targetType: 'customer',
+    targetId: customerId,
+    metadata: {
+      changes: normalizedPayload
+    },
+    ip,
+    userAgent
+  });
+
+  return updated;
 }
 
 async function ensureSeedAdmin() {
@@ -167,8 +246,12 @@ async function ensureSeedAdmin() {
 module.exports = {
   getAllUsers,
   getAllCustomers,
+  getUserDetail,
   changeUserRole,
   changeUserAccountType,
+  resetUserPassword,
   deleteUser,
+  getCustomerDetail,
+  updateCustomer,
   ensureSeedAdmin
 };

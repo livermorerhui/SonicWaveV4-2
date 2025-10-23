@@ -91,6 +91,13 @@ router.use(adminAuth);
  */
 router.get('/users', [...paginationValidators, ...usersFilterValidators], validate, adminController.getAllUsers);
 
+router.get(
+  '/users/:id',
+  [param('id').isInt({ min: 1 }).withMessage('id 必须为正整数')],
+  validate,
+  adminController.getUserDetail
+);
+
 /**
  * @swagger
  * /api/admin/users/{id}/role:
@@ -167,6 +174,19 @@ router.patch(
   adminController.updateUserAccountType
 );
 
+router.patch(
+  '/users/:id/password',
+  [
+    param('id').isInt({ min: 1 }).withMessage('id 必须为正整数'),
+    body('password')
+      .isString()
+      .isLength({ min: 8, max: 100 })
+      .withMessage('密码长度应在 8~100 之间')
+  ],
+  validate,
+  adminController.updateUserPassword
+);
+
 /**
  * @swagger
  * /api/admin/users/{id}:
@@ -241,5 +261,35 @@ router.get(
   validate,
   adminController.getAllCustomers
 );
+
+router.get(
+  '/customers/:id',
+  [param('id').isInt({ min: 1 }).withMessage('id 必须为正整数')],
+  validate,
+  adminController.getCustomerDetail
+);
+
+const customerUpdateValidators = [
+  param('id').isInt({ min: 1 }).withMessage('id 必须为正整数'),
+  body('name').optional().isString().isLength({ max: 255 }).withMessage('姓名长度需小于 255 个字符'),
+  body('dateOfBirth').optional().isString().isLength({ max: 10 }).withMessage('出生日期格式不正确'),
+  body('gender').optional().isString().isLength({ max: 50 }).withMessage('性别长度过长'),
+  body('phone').optional().isString().isLength({ max: 100 }).withMessage('联系方式长度过长'),
+  body('email').optional().isEmail().withMessage('邮箱格式不正确').bail().isLength({ max: 255 }),
+  body('height')
+    .optional({ nullable: true })
+    .custom(value => value === null || typeof value === 'number')
+    .withMessage('身高需为数字或留空')
+    .custom(value => value === null || value >= 0)
+    .withMessage('身高需为非负数字'),
+  body('weight')
+    .optional({ nullable: true })
+    .custom(value => value === null || typeof value === 'number')
+    .withMessage('体重需为数字或留空')
+    .custom(value => value === null || value >= 0)
+    .withMessage('体重需为非负数字')
+];
+
+router.patch('/customers/:id', customerUpdateValidators, validate, adminController.updateCustomer);
 
 module.exports = router;

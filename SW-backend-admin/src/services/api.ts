@@ -1,6 +1,6 @@
 import type { ErrorEnvelope } from '@/models/ErrorEnvelope';
-import type { UserDTO } from '@/models/UserDTO';
-import type { CustomerDTO } from '@/models/CustomerDTO';
+import type { UserDTO, UserDetail } from '@/models/UserDTO';
+import type { CustomerDTO, CustomerDetail } from '@/models/CustomerDTO';
 import type { PaginatedResponse } from '@/models/PaginatedResponse';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
@@ -146,6 +146,12 @@ export const fetchUsers = (query: UserQuery, token: string) =>
     token
   });
 
+export const fetchUserDetail = (id: number, token: string) =>
+  request<UserDetail>(`/api/admin/users/${id}`, {
+    method: 'GET',
+    token
+  });
+
 export const fetchCustomers = (query: CustomerQuery, token: string) =>
   request<PaginatedResponse<CustomerDTO>>(`/api/admin/customers${buildQueryString(query)}`, {
     method: 'GET',
@@ -166,6 +172,13 @@ export const patchUserAccountType = (id: number, accountType: 'normal' | 'test',
     body: JSON.stringify({ accountType })
   });
 
+export const patchUserPassword = (id: number, payload: { password: string }, token: string) =>
+  request<{ message: string }>(`/api/admin/users/${id}/password`, {
+    method: 'PATCH',
+    token,
+    body: JSON.stringify(payload)
+  });
+
 export const deleteUser = (id: number, force: boolean, token: string) =>
   request<{ message: string; force: boolean }>(
     `/api/admin/users/${id}${force ? buildQueryString({ force }) : ''}`,
@@ -174,3 +187,28 @@ export const deleteUser = (id: number, force: boolean, token: string) =>
       token
     }
   );
+
+export const fetchCustomerDetail = (id: number, token: string) =>
+  request<CustomerDetail>(`/api/admin/customers/${id}`, {
+    method: 'GET',
+    token
+  });
+
+export const patchCustomer = (
+  id: number,
+  payload: {
+    name?: string | null;
+    dateOfBirth?: string | null;
+    gender?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    height?: number;
+    weight?: number;
+  },
+  token: string
+) =>
+  request<{ message: string; customer: CustomerDetail }>(`/api/admin/customers/${id}`, {
+    method: 'PATCH',
+    token,
+    body: JSON.stringify(payload)
+  });

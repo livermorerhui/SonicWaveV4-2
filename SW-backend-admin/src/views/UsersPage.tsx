@@ -64,8 +64,11 @@ export const UsersPage = () => {
     handleRoleChange,
     handleAccountTypeChange,
     deleteUser,
+    resetPassword,
     drawerError,
-    isActionLoading
+    isActionLoading,
+    isDetailLoading,
+    selectedUserDetail
   } = useUsersVM();
 
   const handleSoftDelete = () => {
@@ -197,12 +200,15 @@ export const UsersPage = () => {
       <UserActionDrawer
         open={isDrawerOpen}
         user={selectedUser}
+        detail={selectedUserDetail}
         onClose={closeDrawer}
         onChangeRole={handleRoleChange}
         onChangeAccountType={handleAccountTypeChange}
         onSoftDelete={handleSoftDelete}
         onHardDelete={handleHardDelete}
         isProcessing={isActionLoading}
+        isDetailLoading={isDetailLoading}
+        onResetPassword={resetPassword}
         error={drawerError}
       />
     </div>

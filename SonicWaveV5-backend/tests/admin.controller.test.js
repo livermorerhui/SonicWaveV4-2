@@ -3,9 +3,13 @@ const assert = require('node:assert/strict');
 const {
   getAllUsers,
   getAllCustomers,
+  getUserDetail,
   updateUserRole,
   updateUserAccountType,
+  updateUserPassword,
   deleteUser,
+  getCustomerDetail,
+  updateCustomer,
   setAdminService
 } = require('../controllers/admin.controller');
 const realService = require('../services/admin.service');
@@ -76,6 +80,33 @@ test('admin controller returns customers data envelope', async () => {
   assert.deepEqual(res.jsonPayload, expected);
 });
 
+test('get user detail returns payload when found', async () => {
+  const expected = { id: 1, email: 'admin@example.com' };
+  setAdminService({
+    getUserDetail: async () => expected
+  });
+
+  const req = { params: { id: '1' } };
+  const res = createMockRes();
+  await getUserDetail(req, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.jsonPayload, expected);
+});
+
+test('get user detail returns 404 when missing', async () => {
+  setAdminService({
+    getUserDetail: async () => null
+  });
+
+  const req = { params: { id: '99' } };
+  const res = createMockRes();
+  await getUserDetail(req, res);
+
+  assert.equal(res.statusCode, 404);
+  assert.equal(res.jsonPayload?.error?.code, 'USER_NOT_FOUND');
+});
+
 test('update user role propagates success payload', async () => {
   const expectedUser = { id: 7, role: 'admin' };
   setAdminService({
@@ -119,6 +150,25 @@ test('update user account type handles service errors', async () => {
   assert.equal(res.jsonPayload?.error?.code, 'USER_NOT_FOUND');
 });
 
+test('update user password returns success message', async () => {
+  setAdminService({
+    resetUserPassword: async () => {}
+  });
+
+  const req = {
+    params: { id: '5' },
+    body: { password: 'Secret123!' },
+    user: { id: 2 },
+    headers: {},
+    ip: '127.0.0.1'
+  };
+  const res = createMockRes();
+  await updateUserPassword(req, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.jsonPayload?.message, '密码已重置');
+});
+
 test('delete user returns confirmation', async () => {
   setAdminService({
     deleteUser: async () => {}
@@ -136,4 +186,39 @@ test('delete user returns confirmation', async () => {
 
   assert.equal(res.statusCode, 200);
   assert.equal(res.jsonPayload?.force, false);
+});
+
+test('get customer detail returns data', async () => {
+  const expected = { id: 3, name: '客户A' };
+  setAdminService({
+    getCustomerDetail: async () => expected
+  });
+
+  const req = { params: { id: '3' } };
+  const res = createMockRes();
+  await getCustomerDetail(req, res);
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.jsonPayload, expected);
+});
+
+test('update customer wraps service errors', async () => {
+  setAdminService({
+    updateCustomer: async () => {
+      throw new Error('unexpected');
+    }
+  });
+
+  const req = {
+    params: { id: '8' },
+    body: { name: '新的名字' },
+    user: { id: 1 },
+    headers: {},
+    ip: '127.0.0.1'
+  };
+  const res = createMockRes();
+  await updateCustomer(req, res);
+
+  assert.equal(res.statusCode, 500);
+  assert.equal(res.jsonPayload?.error?.code, 'INTERNAL_ERROR');
 });

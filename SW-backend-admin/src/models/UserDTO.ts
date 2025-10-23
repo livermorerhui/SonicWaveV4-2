@@ -11,3 +11,7 @@ export interface UserDTO {
   updatedAt: string;
   deletedAt?: string | null;
 }
+
+export interface UserDetail extends UserDTO {
+  passwordHash?: string;
+}

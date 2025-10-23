@@ -4,6 +4,7 @@ import { SearchInput } from '@/components/SearchInput';
 import { Table, type TableColumn } from '@/components/Table';
 import { Pagination } from '@/components/Pagination';
 import type { CustomerDTO } from '@/models/CustomerDTO';
+import { CustomerActionDrawer } from './CustomerActionDrawer';
 import './CustomersPage.css';
 
 const formatDate = (value: string) => {
@@ -34,7 +35,16 @@ export const CustomersPage = () => {
     updateSortBy,
     sortOrder,
     updateSortOrder,
-    refresh
+    refresh,
+    selectedCustomer,
+    selectedCustomerDetail,
+    isDrawerOpen,
+    openDrawer,
+    closeDrawer,
+    saveCustomer,
+    drawerError,
+    isDetailLoading,
+    isSaving
   } = useCustomersVM();
 
   const columns: TableColumn<CustomerDTO>[] = useMemo(
@@ -42,9 +52,18 @@ export const CustomersPage = () => {
       { key: 'name', header: '姓名', accessor: 'name' },
       { key: 'email', header: '邮箱', accessor: 'email' },
       { key: 'phone', header: '电话', render: item => item.phone || '—' },
-      { key: 'createdAt', header: '创建时间', render: item => formatDate(item.createdAt) }
+      { key: 'createdAt', header: '创建时间', render: item => formatDate(item.createdAt) },
+      {
+        key: 'actions',
+        header: '操作',
+        render: item => (
+          <button type="button" className="customers-action" onClick={() => openDrawer(item)}>
+            查看
+          </button>
+        )
+      }
     ],
-    []
+    [openDrawer]
   );
 
   return (
@@ -90,6 +109,17 @@ export const CustomersPage = () => {
         <span className="customers-meta">共 {total} 位客户</span>
         <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
+
+      <CustomerActionDrawer
+        open={isDrawerOpen}
+        customer={selectedCustomer}
+        detail={selectedCustomerDetail}
+        onClose={closeDrawer}
+        onSave={saveCustomer}
+        isProcessing={isSaving}
+        isDetailLoading={isDetailLoading}
+        error={drawerError}
+      />
     </div>
   );
 };

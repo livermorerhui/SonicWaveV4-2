@@ -86,3 +86,5 @@
 {"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T17:07:08.842Z"}
 {"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T17:08:43.427Z"}
 {"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T17:15:33.917Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-23T02:06:56.510Z"}
+{"error":"unexpected","level":"error","message":"[AdminController] Failed to update customer","timestamp":"2025-10-23T02:06:56.520Z"}

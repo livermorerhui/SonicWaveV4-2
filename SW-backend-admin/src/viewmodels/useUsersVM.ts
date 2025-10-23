@@ -3,11 +3,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ApiError,
   fetchUsers,
+  fetchUserDetail,
   patchUserRole,
   patchUserAccountType,
+  patchUserPassword,
   deleteUser as deleteUserRequest
 } from '@/services/api';
-import type { AccountType, UserDTO, UserRole } from '@/models/UserDTO';
+import type { AccountType, UserDTO, UserRole, UserDetail } from '@/models/UserDTO';
 
 const DEFAULT_PAGE_SIZE = 20;
 const DEFAULT_SORT = 'createdAt';
@@ -31,6 +33,8 @@ export const useUsersVM = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerError, setDrawerError] = useState<string | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [selectedUserDetail, setSelectedUserDetail] = useState<UserDetail | null>(null);
 
   const load = useCallback(async () => {
     if (!token) {
@@ -99,11 +103,32 @@ export const useUsersVM = () => {
     setPage(1);
   }, []);
 
+  const loadDetail = useCallback(async (userId: number) => {
+    if (!token) return;
+    setIsDetailLoading(true);
+    try {
+      const detail = await fetchUserDetail(userId, token);
+      setSelectedUserDetail(detail);
+    } catch (err) {
+      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+        logout();
+        return;
+      }
+      setDrawerError(err instanceof Error ? err.message : '加载用户详情失败');
+    } finally {
+      setIsDetailLoading(false);
+    }
+  }, [token, logout]);
+
   const openDrawer = useCallback((user: UserDTO) => {
     setSelectedUser(user);
     setDrawerError(null);
     setIsDrawerOpen(true);
-  }, []);
+    setSelectedUserDetail(null);
+    if (user?.id) {
+      loadDetail(user.id);
+    }
+  }, [loadDetail]);
 
   const closeDrawer = useCallback(() => {
     setIsDrawerOpen(false);
@@ -185,6 +210,29 @@ export const useUsersVM = () => {
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
+  const resetPassword = useCallback(
+    async (nextPassword: string) => {
+      if (!token || !selectedUser) {
+        return;
+      }
+      setIsActionLoading(true);
+      setDrawerError(null);
+      try {
+        await patchUserPassword(selectedUser.id, { password: nextPassword }, token);
+        await loadDetail(selectedUser.id);
+      } catch (err) {
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+          logout();
+          return;
+        }
+        setDrawerError(err instanceof Error ? err.message : '重置密码失败');
+      } finally {
+        setIsActionLoading(false);
+      }
+    },
+    [token, selectedUser, loadDetail, logout]
+  );
+
   return useMemo(
     () => ({
       items,
@@ -215,8 +263,11 @@ export const useUsersVM = () => {
       handleRoleChange,
       handleAccountTypeChange,
       deleteUser,
+      resetPassword,
       drawerError,
-      isActionLoading
+      isActionLoading,
+      isDetailLoading,
+      selectedUserDetail
     }),
     [
       items,
@@ -246,8 +297,11 @@ export const useUsersVM = () => {
       handleRoleChange,
       handleAccountTypeChange,
       deleteUser,
+      resetPassword,
       drawerError,
-      isActionLoading
+      isActionLoading,
+      isDetailLoading,
+      selectedUserDetail
     ]
   );
 };

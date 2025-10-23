@@ -58,6 +58,8 @@ const mapUserRow = row => ({
   deletedAt: row.deleted_at ?? null
 });
 
+const numericOrNull = value => (value === null || value === undefined ? null : Number(value));
+
 const mapCustomerRow = row => ({
   id: row.id,
   name: row.name,
@@ -65,6 +67,8 @@ const mapCustomerRow = row => ({
   phone: row.phone,
   gender: row.gender,
   dateOfBirth: row.date_of_birth,
+  height: numericOrNull(row.height),
+  weight: numericOrNull(row.weight),
   createdAt: row.created_at,
   updatedAt: row.updated_at
 });
@@ -169,7 +173,7 @@ async function listCustomers({ page, pageSize, keyword, sortBy, sortOrder }) {
   const offsetValue = Math.max(0, Math.trunc(offset));
 
   const dataSql = `
-    SELECT id, name, email, phone, gender, date_of_birth, created_at, updated_at
+    SELECT id, name, email, phone, gender, date_of_birth, height, weight, created_at, updated_at
     FROM customers
     ${whereClause}
     ORDER BY ${sortColumn} ${order}
@@ -194,6 +198,137 @@ async function listCustomers({ page, pageSize, keyword, sortBy, sortOrder }) {
   };
 }
 
+async function findUserDetailedById(id) {
+  const hasRoleColumn = await hasColumn('users', 'role');
+  const hasAccountTypeColumn = await hasColumn('users', 'account_type');
+  const hasDeletedAt = await hasColumn('users', 'deleted_at');
+  const hasUpdatedAt = await hasColumn('users', 'updated_at');
+
+  const projections = [
+    'id',
+    'username',
+    'email',
+    hasRoleColumn ? 'role' : "'user' AS role",
+    hasAccountTypeColumn ? 'account_type' : "'normal' AS account_type",
+    'password',
+    'created_at'
+  ];
+
+  projections.push(hasUpdatedAt ? 'updated_at' : 'created_at AS updated_at');
+  projections.push(hasDeletedAt ? 'deleted_at' : 'NULL AS deleted_at');
+
+  const sql = `
+    SELECT ${projections.join(', ')}
+    FROM users
+    WHERE id = ?
+    LIMIT 1
+  `;
+
+  const [rows] = await dbPool.execute(sql, [id]);
+  if (!rows.length) {
+    return null;
+  }
+
+  const row = rows[0];
+  return {
+    id: row.id,
+    username: row.username,
+    email: row.email,
+    role: row.role,
+    accountType: row.account_type,
+    passwordHash: row.password,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    deletedAt: row.deleted_at ?? null
+  };
+}
+
+async function updateUserPasswordInternal(id, passwordHash) {
+  const hasUpdatedAt = await hasColumn('users', 'updated_at');
+  const sql = hasUpdatedAt
+    ? `
+      UPDATE users
+      SET password = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `
+    : `
+      UPDATE users
+      SET password = ?
+      WHERE id = ?
+    `;
+  const [result] = await dbPool.execute(sql, [passwordHash, id]);
+  return result.affectedRows;
+}
+
+async function findCustomerById(id) {
+  const sql = `
+    SELECT
+      id,
+      name,
+      DATE_FORMAT(date_of_birth, '%Y-%m-%d') AS dateOfBirth,
+      gender,
+      phone,
+      email,
+      height,
+      weight,
+      created_at,
+      updated_at
+    FROM customers
+    WHERE id = ?
+    LIMIT 1
+  `;
+
+  const [rows] = await dbPool.execute(sql, [id]);
+  if (!rows.length) {
+    return null;
+  }
+  const row = rows[0];
+  return {
+    id: row.id,
+    name: row.name,
+    dateOfBirth: row.dateOfBirth,
+    gender: row.gender,
+    phone: row.phone,
+    email: row.email,
+    height: numericOrNull(row.height),
+    weight: numericOrNull(row.weight),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+async function updateCustomerById(id, payload) {
+  const fields = [];
+  const values = [];
+
+  const push = (column, value) => {
+    if (value !== undefined) {
+      fields.push(`${column} = ?`);
+      values.push(value);
+    }
+  };
+
+  push('name', payload.name);
+  push('date_of_birth', payload.dateOfBirth);
+  push('gender', payload.gender);
+  push('phone', payload.phone);
+  push('email', payload.email);
+  push('height', payload.height);
+  push('weight', payload.weight);
+
+  if (!fields.length) {
+    return 0;
+  }
+
+  const sql = `
+    UPDATE customers
+    SET ${fields.join(', ')}
+    WHERE id = ?
+  `;
+
+  const [result] = await dbPool.execute(sql, [...values, id]);
+  return result.affectedRows;
+}
 async function findUserById(id) {
   const hasAccountTypeColumn = await hasColumn('users', 'account_type');
   const hasRoleColumn = await hasColumn('users', 'role');
@@ -266,8 +401,12 @@ module.exports = {
   listUsers,
   listCustomers,
   findUserById,
+  findUserDetailedById,
   updateUserRole,
   updateUserAccountType,
   softDeleteUser,
-  hardDeleteUser
+  hardDeleteUser,
+  updateUserPasswordInternal,
+  findCustomerById,
+  updateCustomerById
 };

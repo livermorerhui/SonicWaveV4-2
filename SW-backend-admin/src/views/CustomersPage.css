@@ -86,6 +86,22 @@
   font-size: 0.95rem;
 }
 
+.customers-action {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.customers-action:hover {
+  opacity: 0.85;
+}
+
 @media (max-width: 720px) {
   .customers-toolbar {
     flex-direction: column;
