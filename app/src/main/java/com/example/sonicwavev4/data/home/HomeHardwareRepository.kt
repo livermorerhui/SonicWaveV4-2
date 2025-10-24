@@ -167,6 +167,39 @@ class HomeHardwareRepository(
         setOutputModeInternal(false)
     }
 
+    suspend fun playStandaloneTone(frequency: Int, intensity: Int): Boolean = mutex.withLock {
+        val clampedFrequency = frequency.coerceAtLeast(0)
+        val clampedIntensity = intensity.coerceIn(0, 255)
+        desiredState = desiredState.copy(
+            frequency = clampedFrequency,
+            intensity = clampedIntensity,
+            isOutputEnabled = false,
+            playTone = true
+        )
+        return if (state.value.isHardwareReady) {
+            desiredState = desiredState.copy(isOutputEnabled = true)
+            applyFrequencyInternal(clampedFrequency, force = false)
+            applyIntensityInternal(clampedIntensity, force = false)
+            val success = setOutputModeInternal(true)
+            if (!success) {
+                desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
+            }
+            success
+        } else {
+            startTonePlayback(clampedFrequency, clampedIntensity)
+            true
+        }
+    }
+
+    suspend fun stopStandaloneTone() = mutex.withLock {
+        desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
+        if (state.value.isHardwareReady) {
+            setOutputModeInternal(false)
+        } else {
+            stopTonePlayback()
+        }
+    }
+
     fun playTapSound() {
         if (enableTapSound && isSoundPoolReady) {
             soundPool.play(tapSoundId, 1f, 1f, 1, 0, 1f)

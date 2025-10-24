@@ -57,7 +57,11 @@ class SessionManager(context: Context) {
         }
     }
 
-    fun saveUserSession(userId: String, userName: String, email: String) {
+    fun saveUserSession(
+        userId: String,
+        userName: String,
+        email: String
+    ) {
         prefs.edit().apply {
             putString(USER_ID, userId)
             putString(USER_NAME, userName)
@@ -79,6 +83,12 @@ class SessionManager(context: Context) {
     fun fetchUserName(): String? = prefs.getString(USER_NAME, null)
     fun fetchUserEmail(): String? = prefs.getString(USER_EMAIL, null)
     fun fetchSessionId(): Long = prefs.getLong(SESSION_ID, -1L)
+
+    fun hasActiveSession(): Boolean {
+        val accessToken = fetchAccessToken()
+        val userId = fetchUserId()
+        return !accessToken.isNullOrBlank() && !userId.isNullOrBlank()
+    }
 
     fun initiateLogout(reason: LogoutReason) {
         Log.w("SessionManager", "Logout initiated with reason: ${reason::class.simpleName}")

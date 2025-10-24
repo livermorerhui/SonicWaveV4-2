@@ -14,6 +14,9 @@ class UserViewModel : ViewModel() {
 
     private val customerRepository = CustomerRepository()
 
+    private val _accountType = MutableStateFlow<String?>(null)
+    val accountType: StateFlow<String?> = _accountType.asStateFlow()
+
     // For Add Customer operation
     private val _addCustomerResult = MutableStateFlow<Result<Unit>?>(null)
     val addCustomerResult: StateFlow<Result<Unit>?> = _addCustomerResult
@@ -122,5 +125,14 @@ class UserViewModel : ViewModel() {
 
     fun resetUpdateCustomerResult() {
         _updateCustomerResult.value = null
+    }
+
+    fun updateAccountType(type: String?) {
+        _accountType.value = type
+    }
+
+    fun clearSessionState() {
+        _selectedCustomer.value = null
+        _accountType.value = null
     }
 }

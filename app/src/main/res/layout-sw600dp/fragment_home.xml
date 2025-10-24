@@ -160,6 +160,20 @@
         app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
         android:layout_marginEnd="8dp"/>
 
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switch_sine_tone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_sine_toggle"
+        android:padding="12dp"
+        android:text="@string/label_sine_tone_switch"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/tv_time_value"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"/>
+
 
     <!-- ===================================================== -->
     <!-- ===    [REFACTORED] Right Side: Keypad            === -->

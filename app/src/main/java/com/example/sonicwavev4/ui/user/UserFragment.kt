@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.databinding.FragmentUserBinding
@@ -14,6 +15,7 @@ import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.login.LoginFragment
 import com.example.sonicwavev4.ui.AddCustomerDialogFragment
 import com.example.sonicwavev4.ui.customer.CustomerListFragment
+import com.example.sonicwavev4.ui.user.UserViewModel
 import com.example.sonicwavev4.utils.HeartbeatManager
 import com.example.sonicwavev4.utils.LogoutReason
 import com.example.sonicwavev4.utils.SessionManager
@@ -24,6 +26,7 @@ class UserFragment : Fragment() {
     private lateinit var sessionManager: SessionManager
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
+    private val userViewModel: UserViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -96,6 +99,7 @@ class UserFragment : Fragment() {
         HeartbeatManager.stop()
         // 清理本地会话并通知
         sessionManager.initiateLogout(LogoutReason.UserInitiated)
+        userViewModel.clearSessionState()
         // 导航回登录页
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_right_main, LoginFragment())

@@ -48,10 +48,18 @@ class HomeViewModel(
     private val _isEditing = MutableLiveData(false)
     val isEditing: LiveData<Boolean> = _isEditing
 
+    private val _isTestAccount = MutableLiveData(false)
+    val isTestAccount: LiveData<Boolean> = _isTestAccount
+    private val _playSineTone = MutableLiveData(false)
+    val playSineTone: LiveData<Boolean> = _playSineTone
+    private val _startButtonEnabled = MutableLiveData(false)
+    val startButtonEnabled: LiveData<Boolean> = _startButtonEnabled
+
     val hardwareState = hardwareRepository.state.asLiveData()
 
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 16)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
+    private var runningWithoutHardware = false
 
     init {
         hardwareRepository.start()
@@ -62,6 +70,7 @@ class HomeViewModel(
                     resetUiStateToDefaults()
                 }
                 wasReady = state.isHardwareReady
+                recomputeStartButtonEnabled()
             }
         }
         viewModelScope.launch {
@@ -75,6 +84,61 @@ class HomeViewModel(
                 }
             }
         }
+        _isTestAccount.value = false
+        recomputeStartButtonEnabled()
+    }
+
+    fun setPlaySineTone(enabled: Boolean) {
+        if (_playSineTone.value == enabled) return
+        _playSineTone.value = enabled
+        if (_isStarted.value == true) {
+            viewModelScope.launch {
+                val success = try {
+                    if (runningWithoutHardware) {
+                        if (enabled) {
+                            hardwareRepository.playStandaloneTone(
+                                frequency = frequency.value ?: 0,
+                                intensity = intensity.value ?: 0
+                            )
+                        } else {
+                            hardwareRepository.stopStandaloneTone()
+                            true
+                        }
+                    } else {
+                        hardwareRepository.startOutput(
+                            targetFrequency = frequency.value ?: 0,
+                            targetIntensity = intensity.value ?: 0,
+                            playTone = enabled
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeViewModel", "Failed to toggle sine tone", e)
+                    _events.emit(UiEvent.ShowError(e))
+                    false
+                }
+                if (!success) {
+                    _playSineTone.value = !enabled
+                }
+            }
+        }
+    }
+
+    fun updateAccountAccess(isTestAccount: Boolean) {
+        if (_isTestAccount.value == isTestAccount) {
+            return
+        }
+        _isTestAccount.value = isTestAccount
+        if (!isTestAccount && _playSineTone.value == true) {
+            _playSineTone.value = false
+        }
+        recomputeStartButtonEnabled()
+    }
+
+    private fun recomputeStartButtonEnabled() {
+        val hardwareReady = hardwareRepository.state.value.isHardwareReady
+        val started = _isStarted.value == true
+        val testAccount = _isTestAccount.value == true
+        _startButtonEnabled.value = started || hardwareReady || testAccount
     }
 
     // --- 缓冲区和参数控制 (无改动) ---
@@ -205,10 +269,12 @@ class HomeViewModel(
 
     fun startStopPlayback(selectedCustomer: Customer?) {
         commitInputBuffer()
+        val hardwareReady = hardwareRepository.state.value.isHardwareReady
         if (_isStarted.value == true) {
             forceStop()
         } else {
-            if (!hardwareRepository.state.value.isHardwareReady) {
+            val isTestAccount = _isTestAccount.value == true
+            if (!hardwareReady && !isTestAccount) {
                 viewModelScope.launch {
                     _events.emit(UiEvent.ShowToast("硬件初始化中，请稍候"))
                 }
@@ -220,7 +286,12 @@ class HomeViewModel(
                     _inputBuffer.value = ""
                     _isEditing.value = false
                 }
-                handleStartOperation(selectedCustomer)
+                val shouldPlayTone = _playSineTone.value == true
+                handleStartOperation(
+                    selectedCustomer = selectedCustomer,
+                    useHardware = hardwareReady,
+                    playTone = shouldPlayTone
+                )
             }
         }
     }
@@ -230,6 +301,7 @@ class HomeViewModel(
             handleStopOperation()
             _isStarted.value = false
             stopCountdown()
+            recomputeStartButtonEnabled()
         }
     }
 
@@ -245,28 +317,45 @@ class HomeViewModel(
         _isEditing.value = false
     }
 
-    private fun handleStartOperation(selectedCustomer: Customer?) {
+    private fun handleStartOperation(selectedCustomer: Customer?, useHardware: Boolean, playTone: Boolean) {
         viewModelScope.launch {
+            val targetFrequency = frequency.value ?: 0
+            val targetIntensity = intensity.value ?: 0
             try {
                 val operationId = sessionRepository.startOperation(
                     selectedCustomer = selectedCustomer,
-                    frequency = frequency.value ?: 0,
-                    intensity = intensity.value ?: 0,
+                    frequency = targetFrequency,
+                    intensity = targetIntensity,
                     timeInMinutes = timeInMinutes.value ?: 0
                 )
-                val outputStarted = hardwareRepository.startOutput(
-                    targetFrequency = frequency.value ?: 0,
-                    targetIntensity = intensity.value ?: 0,
-                    playTone = false
-                )
+                val outputStarted = if (useHardware) {
+                    hardwareRepository.startOutput(
+                        targetFrequency = targetFrequency,
+                        targetIntensity = targetIntensity,
+                        playTone = playTone
+                    )
+                } else {
+                    if (playTone) {
+                        hardwareRepository.playStandaloneTone(
+                            frequency = targetFrequency,
+                            intensity = targetIntensity
+                        )
+                    } else {
+                        true
+                    }
+                }
                 if (outputStarted) {
+                    runningWithoutHardware = !useHardware
                     currentOperationId = operationId
                     _isStarted.value = true
+                    recomputeStartButtonEnabled()
                     startCountdown()
                 } else {
+                    runningWithoutHardware = false
                     sessionRepository.stopOperation(operationId)
                 }
             } catch (e: Exception) {
+                runningWithoutHardware = false
                 Log.e("HomeViewModel", "Failed to start operation", e)
                 _events.emit(UiEvent.ShowError(e))
             }
@@ -274,17 +363,28 @@ class HomeViewModel(
     }
 
     private fun handleStopOperation() {
-        val operationId = currentOperationId ?: return
-        viewModelScope.launch {
-            try {
-                sessionRepository.stopOperation(operationId)
-                currentOperationId = null
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Failed to stop operation", e)
+        val operationId = currentOperationId
+        val wasSoftwareOnly = runningWithoutHardware
+        runningWithoutHardware = false
+        if (operationId != null) {
+            viewModelScope.launch {
+                try {
+                    sessionRepository.stopOperation(operationId)
+                } catch (e: Exception) {
+                    Log.e("HomeViewModel", "Failed to stop operation", e)
+                } finally {
+                    currentOperationId = null
+                }
             }
+        } else {
+            currentOperationId = null
         }
         viewModelScope.launch {
-            hardwareRepository.stopOutput()
+            if (wasSoftwareOnly) {
+                hardwareRepository.stopStandaloneTone()
+            } else {
+                hardwareRepository.stopOutput()
+            }
         }
     }
 
@@ -321,6 +421,7 @@ class HomeViewModel(
         countdownJob?.cancel()
         _isStarted.value = false
         currentOperationId = null
+        runningWithoutHardware = false
         if ((_frequency.value ?: 0) != 0) {
             _frequency.value = 0
         }
@@ -338,5 +439,6 @@ class HomeViewModel(
         _inputBuffer.value = ""
         _isEditing.value = false
         _countdownSeconds.value = 0
+        recomputeStartButtonEnabled()
     }
 }

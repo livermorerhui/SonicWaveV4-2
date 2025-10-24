@@ -88,3 +88,13 @@
 {"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-22T17:15:33.917Z"}
 {"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-23T02:06:56.510Z"}
 {"error":"unexpected","level":"error","message":"[AdminController] Failed to update customer","timestamp":"2025-10-23T02:06:56.520Z"}
+{"error":"boom","level":"error","message":"[AdminController] Failed to fetch users","timestamp":"2025-10-24T02:31:45.202Z"}
+{"error":"unexpected","level":"error","message":"[AdminController] Failed to update customer","timestamp":"2025-10-24T02:31:45.206Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-24T03:51:47.881Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-24T05:26:08.001Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-24T05:26:11.292Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/stop/463'. Error: jwt malformed","timestamp":"2025-10-24T05:28:20.222Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-24T05:28:21.045Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-24T05:28:21.780Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-24T05:28:22.507Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-24T05:28:22.538Z"}

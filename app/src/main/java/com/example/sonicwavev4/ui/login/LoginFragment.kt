@@ -7,15 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.databinding.FragmentLoginBinding
 import com.example.sonicwavev4.ui.register.RegisterFragment
 import com.example.sonicwavev4.ui.user.UserFragment
+import com.example.sonicwavev4.ui.user.UserViewModel
 
 class LoginFragment : Fragment() {
 
     private val loginViewModel: LoginViewModel by viewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
 
@@ -56,6 +59,7 @@ class LoginFragment : Fragment() {
         loginViewModel.loginResult.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { result ->
                 result.onSuccess { loginResponse ->
+                    userViewModel.updateAccountType(loginResponse.accountType)
                     // Login success is handled by the navigation event
                     Log.d("LoginFragment", "Login API call successful.")
                 }.onFailure { error ->

@@ -2,7 +2,6 @@ package com.example.sonicwavev4.network
 
 import android.content.Context
 import com.example.sonicwavev4.BuildConfig
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -45,6 +44,7 @@ object RetrofitClient {
                             requestBuilder.addHeader("X-Client-Version", BuildConfig.VERSION_NAME)
                             chain.proceed(requestBuilder.build())
                         }
+                        .addInterceptor(GzipRequestInterceptor())
                         .addInterceptor(NetworkLoggingInterceptor(appContext))
                         .addInterceptor(HttpLoggingInterceptor().apply {
                             level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE

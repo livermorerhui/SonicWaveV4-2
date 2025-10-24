@@ -17,5 +17,8 @@ data class LoginResponse(
     val username: String,
 
     @SerializedName("userId")
-    val userId: Int
+    val userId: Int,
+
+    @SerializedName("accountType")
+    val accountType: String?
 )

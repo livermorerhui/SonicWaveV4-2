@@ -8,30 +8,62 @@ import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 
+private const val MAX_BATCH_ENTRIES = 50
+private const val MAX_BATCH_BYTES = 80 * 1024 // 80KB per payload
+
 class LogUploadWorker(appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
-        val logs = LogRepository.readLogs(applicationContext)
-
-        if (logs.isEmpty()) {
+        val allLogs = LogRepository.readLogs(applicationContext)
+        if (allLogs.isEmpty()) {
             return Result.success()
         }
 
-        return try {
-            val gson = Gson()
-            val jsonLogs = gson.toJson(logs)
-            val requestBody = jsonLogs.toRequestBody("application/json".toMediaType())
+        val gson = Gson()
+        var processedCount = 0
 
-            val response = RetrofitClient.api.createClientLogs(requestBody)
+        try {
+            while (processedCount < allLogs.size) {
+                val batch = mutableListOf<LogEntry>()
+                var approximateBytes = 2 // for the surrounding []
+                var index = processedCount
 
-            if (response.isSuccessful) {
-                LogRepository.clearLogs(applicationContext)
-                Result.success()
-            } else {
-                Result.retry()
+                while (index < allLogs.size && batch.size < MAX_BATCH_ENTRIES) {
+                    val entry = allLogs[index]
+                    val entryJson = gson.toJson(entry)
+                    val entrySize = entryJson.toByteArray(Charsets.UTF_8).size + 1
+                    if (batch.isNotEmpty() && approximateBytes + entrySize > MAX_BATCH_BYTES) {
+                        break
+                    }
+                    batch.add(entry)
+                    approximateBytes += entrySize
+                    index++
+                }
+
+                if (batch.isEmpty()) {
+                    // Single entry too large, still attempt to upload once after truncation rules
+                    batch.add(allLogs[processedCount])
+                    index = processedCount + 1
+                }
+
+                val requestBody = gson
+                    .toJson(batch)
+                    .toRequestBody("application/json".toMediaType())
+
+                val response = RetrofitClient.api.createClientLogs(requestBody)
+
+                if (response.isSuccessful) {
+                    LogRepository.removeLogs(applicationContext, batch.size)
+                    processedCount += batch.size
+                } else {
+                    // stop and retry later without losing already uploaded batches
+                    return Result.retry()
+                }
             }
+
+            return Result.success()
         } catch (e: Exception) {
-            Result.retry()
+            return Result.retry()
         }
     }
 }

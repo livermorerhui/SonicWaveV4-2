@@ -13,6 +13,7 @@ class HomeSessionRepository(
     fun fetchUserId(): String? = sessionManager.fetchUserId()
     fun fetchUserName(): String? = sessionManager.fetchUserName()
     fun fetchUserEmail(): String? = sessionManager.fetchUserEmail()
+    fun hasActiveSession(): Boolean = sessionManager.hasActiveSession()
 
     suspend fun startOperation(
         selectedCustomer: Customer?,
