@@ -18,7 +18,15 @@ data class StartOperationResponse(
     val operationId: Long
 )
 
-// 发送到 /stop/:id 接口的数据
+data class OperationEventRequest(
+    val eventType: String,
+    val frequency: Int? = null,
+    val intensity: Int? = null,
+    val timeRemaining: Int? = null,
+    val extraDetail: String? = null
+)
+
 data class StopOperationRequest(
-    val stopTime: String // ISO 8601 format, e.g., "2025-09-17T10:00:00Z"
+    val reason: String,
+    val detail: String? = null
 )

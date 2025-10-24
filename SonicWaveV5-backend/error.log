@@ -98,3 +98,9 @@
 {"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-24T05:28:21.780Z"}
 {"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-24T05:28:22.507Z"}
 {"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/start'. Error: jwt malformed","timestamp":"2025-10-24T05:28:22.538Z"}
+{"error":"Table 'sonicwave_db.user_operation_events' doesn't exist","level":"error","message":"Error recording operation event:","timestamp":"2025-10-24T07:11:36.862Z"}
+{"error":"Table 'sonicwave_db.user_operation_events' doesn't exist","level":"error","message":"Error recording operation event:","timestamp":"2025-10-24T07:11:44.115Z"}
+{"error":"Table 'sonicwave_db.user_operation_events' doesn't exist","level":"error","message":"Error recording operation event:","timestamp":"2025-10-24T07:11:46.556Z"}
+{"error":"Unknown column 'stop_reason' in 'field list'","level":"error","message":"Error stopping operation:","timestamp":"2025-10-24T07:11:49.254Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/stop/472'. Error: jwt malformed","timestamp":"2025-10-24T07:24:50.222Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/stop/474'. Error: jwt malformed","timestamp":"2025-10-24T07:27:04.434Z"}

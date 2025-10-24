@@ -2,7 +2,9 @@ package com.example.sonicwavev4.data.home
 
 import com.example.sonicwavev4.network.ApiService
 import com.example.sonicwavev4.network.Customer
+import com.example.sonicwavev4.network.OperationEventRequest
 import com.example.sonicwavev4.network.StartOperationRequest
+import com.example.sonicwavev4.network.StopOperationRequest
 import com.example.sonicwavev4.utils.SessionManager
 
 class HomeSessionRepository(
@@ -35,7 +37,12 @@ class HomeSessionRepository(
         return response.operationId
     }
 
-    suspend fun stopOperation(operationId: Long) {
-        apiService.stopOperation(operationId)
+    suspend fun logOperationEvent(operationId: Long, request: OperationEventRequest) {
+        apiService.logOperationEvent(operationId, request)
+    }
+
+    suspend fun stopOperation(operationId: Long, reason: String, detail: String?) {
+        val request = StopOperationRequest(reason = reason, detail = detail)
+        apiService.stopOperation(operationId, request)
     }
 }

@@ -6,9 +6,7 @@ import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.sonicwavev4.network.RetrofitClient
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 // Sealed class for defining logout reasons, allowing for future expansion.
 sealed class LogoutReason {
@@ -103,11 +101,10 @@ class SessionManager(context: Context) {
     }
 
     private fun clearSessionAndNotify() {
-        prefs.edit().clear().apply()
-        RetrofitClient.updateToken(null)
-        // Launch a coroutine on a global scope to call the suspend function
-        CoroutineScope(Dispatchers.IO).launch {
+        runBlocking {
             GlobalLogoutManager.logout()
         }
+        prefs.edit().clear().apply()
+        RetrofitClient.updateToken(null)
     }
 }

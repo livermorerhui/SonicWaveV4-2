@@ -9,6 +9,9 @@ router.use(authMiddleware);
 // 开始一个新操作
 router.post('/start', operationsController.startOperation);
 
+// 记录实时事件
+router.post('/:id/events', operationsController.logOperationEvent);
+
 // 停止一个操作
 router.put('/stop/:id', operationsController.stopOperation);
 

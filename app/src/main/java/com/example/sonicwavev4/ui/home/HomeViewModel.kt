@@ -10,7 +10,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.sonicwavev4.data.home.HardwareEvent
 import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
+import com.example.sonicwavev4.network.OperationEventRequest
 import com.example.sonicwavev4.network.Customer
+import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.ui.common.UiEvent
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -66,12 +68,27 @@ class HomeViewModel(
         private const val HARDWARE_NOT_READY_MESSAGE = "硬件初始化中，请稍候"
     }
 
+    private enum class StopReason(val apiValue: String) {
+        MANUAL("manual"),
+        LOGOUT("logout"),
+        COUNTDOWN_COMPLETE("countdown_complete"),
+        HARDWARE_ERROR("hardware_error"),
+        UNKNOWN("unknown")
+    }
+
+    private enum class OperationEventType(val apiValue: String) {
+        ADJUST_FREQUENCY("adjust_frequency"),
+        ADJUST_INTENSITY("adjust_intensity"),
+        ADJUST_TIME("adjust_time")
+    }
+
     init {
         hardwareRepository.start()
         viewModelScope.launch {
             var wasReady = false
             hardwareRepository.state.collect { state ->
                 if (!state.isHardwareReady && wasReady) {
+                    forceStop(StopReason.HARDWARE_ERROR, "CH341 disconnected or unavailable")
                     resetUiStateToDefaults()
                 }
                 wasReady = state.isHardwareReady
@@ -87,6 +104,12 @@ class HomeViewModel(
                         _events.emit(UiEvent.ShowError(event.throwable))
                     }
                 }
+            }
+        }
+        viewModelScope.launch {
+            GlobalLogoutManager.logoutEvent.collect {
+                isSessionActive = false
+                forceStop(StopReason.LOGOUT)
             }
         }
         _isTestAccount.value = false
@@ -145,7 +168,7 @@ class HomeViewModel(
         if (!active) {
             updateAccountAccess(false)
             if (_isStarted.value == true) {
-                forceStop()
+                forceStop(StopReason.LOGOUT)
             } else {
                 recomputeStartButtonEnabled()
             }
@@ -181,7 +204,7 @@ class HomeViewModel(
             when (inputType) {
                 "frequency" -> updateFrequency(0)
                 "intensity" -> updateIntensity(0)
-                "time"      -> _timeInMinutes.value = 0
+                "time"      -> updateTime(0)
             }
         }
         else if (!bufferValue.isNullOrEmpty()) {
@@ -189,7 +212,7 @@ class HomeViewModel(
             when (inputType) {
                 "frequency" -> updateFrequency(numericValue)
                 "intensity" -> updateIntensity(numericValue)
-                "time"      -> _timeInMinutes.value = numericValue
+                "time"      -> updateTime(numericValue)
             }
         }
         _inputBuffer.value = ""
@@ -217,9 +240,18 @@ class HomeViewModel(
             _inputBuffer.value = buffer.dropLast(1)
         } else {
             when (_currentInputType.value) {
-                "frequency" -> _frequency.value = (_frequency.value ?: 0).toString().dropLast(1).toIntOrNull() ?: 0
-                "intensity" -> _intensity.value = (_intensity.value ?: 0).toString().dropLast(1).toIntOrNull() ?: 0
-                "time"      -> _timeInMinutes.value = (_timeInMinutes.value ?: 0).toString().dropLast(1).toIntOrNull() ?: 0
+                "frequency" -> {
+                    val newValue = (_frequency.value ?: 0).toString().dropLast(1).toIntOrNull() ?: 0
+                    updateFrequency(newValue)
+                }
+                "intensity" -> {
+                    val newValue = (_intensity.value ?: 0).toString().dropLast(1).toIntOrNull() ?: 0
+                    updateIntensity(newValue)
+                }
+                "time"      -> {
+                    val newValue = (_timeInMinutes.value ?: 0).toString().dropLast(1).toIntOrNull() ?: 0
+                    updateTime(newValue)
+                }
             }
         }
     }
@@ -230,7 +262,7 @@ class HomeViewModel(
         when (_currentInputType.value) {
             "frequency" -> updateFrequency(0)
             "intensity" -> updateIntensity(0)
-            "time"      -> _timeInMinutes.value = 0
+            "time"      -> updateTime(0)
         }
     }
 
@@ -259,7 +291,7 @@ class HomeViewModel(
         when (type) {
             "frequency" -> updateFrequency(max(0, (_frequency.value ?: 0) + delta))
             "intensity" -> updateIntensity(max(0, (_intensity.value ?: 0) + delta))
-            "time"      -> _timeInMinutes.value = max(0, (_timeInMinutes.value ?: 0) + delta)
+            "time"      -> updateTime(max(0, (_timeInMinutes.value ?: 0) + delta))
         }
     }
 
@@ -289,7 +321,7 @@ class HomeViewModel(
                 delay(1000)
             }
             if (_isStarted.value == true) {
-                forceStop()
+                forceStop(StopReason.COUNTDOWN_COMPLETE)
             }
         }
     }
@@ -304,7 +336,7 @@ class HomeViewModel(
         }
         val hardwareReady = hardwareRepository.state.value.isHardwareReady
         if (_isStarted.value == true) {
-            forceStop()
+            forceStop(StopReason.MANUAL)
         } else {
             val isTestAccount = _isTestAccount.value == true
             if (!hardwareReady && !isTestAccount) {
@@ -329,22 +361,26 @@ class HomeViewModel(
         }
     }
 
-    fun forceStop() {
-        if (_isStarted.value == true) {
-            handleStopOperation()
-            _isStarted.value = false
-            stopCountdown()
-            recomputeStartButtonEnabled()
+    private fun forceStop(reason: StopReason = StopReason.MANUAL, detail: String? = null) {
+        val wasRunning = _isStarted.value == true
+        val hadOperation = currentOperationId != null
+        if (wasRunning || hadOperation) {
+            handleStopOperation(reason, detail)
         }
+        if (wasRunning) {
+            _isStarted.value = false
+        }
+        stopCountdown()
+        recomputeStartButtonEnabled()
     }
 
     fun clearAll() {
         if (_isStarted.value == true) {
-            forceStop()
+            forceStop(StopReason.MANUAL)
         }
         updateFrequency(0)
         updateIntensity(0)
-        _timeInMinutes.value = 0
+        updateTime(0)
         _currentInputType.value = ""
         _inputBuffer.value = ""
         _isEditing.value = false
@@ -385,7 +421,11 @@ class HomeViewModel(
                     startCountdown()
                 } else {
                     runningWithoutHardware = false
-                    sessionRepository.stopOperation(operationId)
+                    sessionRepository.stopOperation(
+                        operationId,
+                        StopReason.HARDWARE_ERROR.apiValue,
+                        "Failed to start hardware output"
+                    )
                 }
             } catch (e: Exception) {
                 runningWithoutHardware = false
@@ -395,14 +435,14 @@ class HomeViewModel(
         }
     }
 
-    private fun handleStopOperation() {
+    private fun handleStopOperation(reason: StopReason, detail: String?) {
         val operationId = currentOperationId
         val wasSoftwareOnly = runningWithoutHardware
         runningWithoutHardware = false
-        if (operationId != null && isSessionActive) {
+        if (operationId != null) {
             viewModelScope.launch {
                 try {
-                    sessionRepository.stopOperation(operationId)
+                    sessionRepository.stopOperation(operationId, reason.apiValue, detail)
                 } catch (e: Exception) {
                     Log.e("HomeViewModel", "Failed to stop operation", e)
                 } finally {
@@ -428,6 +468,9 @@ class HomeViewModel(
         viewModelScope.launch {
             hardwareRepository.applyFrequency(value)
         }
+        if (shouldLogOperationEvents()) {
+            logOperationEvent(OperationEventType.ADJUST_FREQUENCY)
+        }
     }
 
     private fun updateIntensity(value: Int) {
@@ -436,6 +479,47 @@ class HomeViewModel(
         }
         viewModelScope.launch {
             hardwareRepository.applyIntensity(value)
+        }
+        if (shouldLogOperationEvents()) {
+            logOperationEvent(OperationEventType.ADJUST_INTENSITY)
+        }
+    }
+
+    private fun updateTime(value: Int) {
+        if (_timeInMinutes.value != value) {
+            _timeInMinutes.value = value
+            if (shouldLogOperationEvents()) {
+                logOperationEvent(OperationEventType.ADJUST_TIME)
+            }
+        }
+    }
+
+    private fun shouldLogOperationEvents(): Boolean {
+        return isSessionActive && currentOperationId != null && (_isStarted.value == true)
+    }
+
+    private fun logOperationEvent(type: OperationEventType, detail: String? = null) {
+        if (!shouldLogOperationEvents()) return
+        val operationId = currentOperationId ?: return
+        val currentFrequency = _frequency.value
+        val currentIntensity = _intensity.value
+        val remainingSeconds = _countdownSeconds.value
+
+        viewModelScope.launch {
+            try {
+                sessionRepository.logOperationEvent(
+                    operationId,
+                    OperationEventRequest(
+                        eventType = type.apiValue,
+                        frequency = currentFrequency,
+                        intensity = currentIntensity,
+                        timeRemaining = remainingSeconds,
+                        extraDetail = detail
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Failed to log operation event", e)
+            }
         }
     }
 

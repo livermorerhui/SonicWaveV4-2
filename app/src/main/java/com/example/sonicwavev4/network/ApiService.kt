@@ -30,8 +30,17 @@ interface ApiService {
     @POST("api/v1/operations/start")
     suspend fun startOperation(@Body request: StartOperationRequest): StartOperationResponse
 
+    @POST("api/v1/operations/{id}/events")
+    suspend fun logOperationEvent(
+        @Path("id") id: Long,
+        @Body request: OperationEventRequest
+    ): Response<Unit>
+
     @PUT("api/v1/operations/stop/{id}")
-    suspend fun stopOperation(@Path("id") id: Long): Response<Unit>
+    suspend fun stopOperation(
+        @Path("id") id: Long,
+        @Body request: StopOperationRequest
+    ): Response<Unit>
 
     // --- 心跳与会话管理 ---
     @POST("api/v1/heartbeat")
