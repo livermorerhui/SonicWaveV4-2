@@ -60,6 +60,11 @@ class HomeViewModel(
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 16)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
     private var runningWithoutHardware = false
+    private var isSessionActive = false
+    companion object {
+        private const val LOGIN_REQUIRED_MESSAGE = "请先登录账号"
+        private const val HARDWARE_NOT_READY_MESSAGE = "硬件初始化中，请稍候"
+    }
 
     init {
         hardwareRepository.start()
@@ -134,11 +139,33 @@ class HomeViewModel(
         recomputeStartButtonEnabled()
     }
 
+    fun setSessionActive(active: Boolean) {
+        if (isSessionActive == active) return
+        isSessionActive = active
+        if (!active) {
+            updateAccountAccess(false)
+            if (_isStarted.value == true) {
+                forceStop()
+            } else {
+                recomputeStartButtonEnabled()
+            }
+        } else {
+            recomputeStartButtonEnabled()
+        }
+    }
+
     private fun recomputeStartButtonEnabled() {
         val hardwareReady = hardwareRepository.state.value.isHardwareReady
         val started = _isStarted.value == true
         val testAccount = _isTestAccount.value == true
-        _startButtonEnabled.value = started || hardwareReady || testAccount
+        _startButtonEnabled.value =
+            if (started) {
+                true
+            } else if (!isSessionActive) {
+                false
+            } else {
+                hardwareReady || testAccount
+            }
     }
 
     // --- 缓冲区和参数控制 (无改动) ---
@@ -269,6 +296,12 @@ class HomeViewModel(
 
     fun startStopPlayback(selectedCustomer: Customer?) {
         commitInputBuffer()
+        if (!isSessionActive) {
+            viewModelScope.launch {
+                _events.emit(UiEvent.ShowToast(LOGIN_REQUIRED_MESSAGE))
+            }
+            return
+        }
         val hardwareReady = hardwareRepository.state.value.isHardwareReady
         if (_isStarted.value == true) {
             forceStop()
@@ -276,7 +309,7 @@ class HomeViewModel(
             val isTestAccount = _isTestAccount.value == true
             if (!hardwareReady && !isTestAccount) {
                 viewModelScope.launch {
-                    _events.emit(UiEvent.ShowToast("硬件初始化中，请稍候"))
+                    _events.emit(UiEvent.ShowToast(HARDWARE_NOT_READY_MESSAGE))
                 }
                 return
             }
@@ -366,7 +399,7 @@ class HomeViewModel(
         val operationId = currentOperationId
         val wasSoftwareOnly = runningWithoutHardware
         runningWithoutHardware = false
-        if (operationId != null) {
+        if (operationId != null && isSessionActive) {
             viewModelScope.launch {
                 try {
                     sessionRepository.stopOperation(operationId)

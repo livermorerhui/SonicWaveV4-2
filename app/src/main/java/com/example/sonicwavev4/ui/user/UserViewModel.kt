@@ -16,6 +16,8 @@ class UserViewModel : ViewModel() {
 
     private val _accountType = MutableStateFlow<String?>(null)
     val accountType: StateFlow<String?> = _accountType.asStateFlow()
+    private val _isLoggedIn = MutableStateFlow(false)
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
     // For Add Customer operation
     private val _addCustomerResult = MutableStateFlow<Result<Unit>?>(null)
@@ -127,12 +129,14 @@ class UserViewModel : ViewModel() {
         _updateCustomerResult.value = null
     }
 
-    fun updateAccountType(type: String?) {
-        _accountType.value = type
+    fun onLoginSuccess(accountType: String?) {
+        _accountType.value = accountType
+        _isLoggedIn.value = true
     }
 
     fun clearSessionState() {
         _selectedCustomer.value = null
         _accountType.value = null
+        _isLoggedIn.value = false
     }
 }

@@ -124,9 +124,16 @@ class HomeFragment : Fragment() {
     private fun observeAccountPrivileges() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
-                userViewModel.accountType.collect { accountType ->
-                    val isTestAccount = accountType.equals("test", ignoreCase = true)
-                    viewModel.updateAccountAccess(isTestAccount)
+                launch {
+                    userViewModel.accountType.collect { accountType ->
+                        val isTestAccount = accountType.equals("test", ignoreCase = true)
+                        viewModel.updateAccountAccess(isTestAccount)
+                    }
+                }
+                launch {
+                    userViewModel.isLoggedIn.collect { loggedIn ->
+                        viewModel.setSessionActive(loggedIn)
+                    }
                 }
             }
         }

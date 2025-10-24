@@ -59,7 +59,7 @@ class LoginFragment : Fragment() {
         loginViewModel.loginResult.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { result ->
                 result.onSuccess { loginResponse ->
-                    userViewModel.updateAccountType(loginResponse.accountType)
+                    userViewModel.onLoginSuccess(loginResponse.accountType)
                     // Login success is handled by the navigation event
                     Log.d("LoginFragment", "Login API call successful.")
                 }.onFailure { error ->
