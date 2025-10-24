@@ -410,31 +410,53 @@ class HomeHardwareRepository(
     }
 
     private suspend fun applyFrequencyInternal(value: Int, force: Boolean) {
-        if (!state.value.isHardwareReady) return
+        val hardwareReady = state.value.isHardwareReady
         val freqDouble = value.toDouble()
-        if (!force && freqDouble == lastAppliedFrequency) return
-        try {
-            ad9833Controller.setFrequency(Ad9833Controller.CHANNEL_0, freqDouble)
-            ad9833Controller.setActiveFrequency(Ad9833Controller.CHANNEL_0)
-            lastAppliedFrequency = freqDouble
-        } catch (e: CH341LibException) {
-            emitToast("设置频率失败: ${e.message}")
-            emitError(e)
+        val shouldRefreshTone = desiredState.playTone && (!hardwareReady || force || freqDouble != lastAppliedFrequency)
+
+        if (hardwareReady) {
+            if (force || freqDouble != lastAppliedFrequency) {
+                try {
+                    ad9833Controller.setFrequency(Ad9833Controller.CHANNEL_0, freqDouble)
+                    ad9833Controller.setActiveFrequency(Ad9833Controller.CHANNEL_0)
+                    lastAppliedFrequency = freqDouble
+                } catch (e: CH341LibException) {
+                    emitToast("设置频率失败: ${e.message}")
+                    emitError(e)
+                }
+                if (!desiredState.isOutputEnabled) {
+                    forceModeOff()
+                }
+            }
         }
-        if (!desiredState.isOutputEnabled) {
-            forceModeOff()
+
+        if (!desiredState.playTone) {
+            stopTonePlayback()
+        } else if (shouldRefreshTone) {
+            startTonePlayback(desiredState.frequency, desiredState.intensity)
         }
     }
 
     private suspend fun applyIntensityInternal(value: Int, force: Boolean) {
-        if (!state.value.isHardwareReady) return
-        if (!force && value == lastAppliedIntensity) return
-        try {
-            mcp41010Controller.writeValue(value)
-            lastAppliedIntensity = value
-        } catch (e: CH341LibException) {
-            emitToast("设置幅度失败: ${e.message}")
-            emitError(e)
+        val hardwareReady = state.value.isHardwareReady
+        val shouldRefreshTone = desiredState.playTone && (!hardwareReady || force || value != lastAppliedIntensity)
+
+        if (hardwareReady) {
+            if (force || value != lastAppliedIntensity) {
+                try {
+                    mcp41010Controller.writeValue(value)
+                    lastAppliedIntensity = value
+                } catch (e: CH341LibException) {
+                    emitToast("设置幅度失败: ${e.message}")
+                    emitError(e)
+                }
+            }
+        }
+
+        if (!desiredState.playTone) {
+            stopTonePlayback()
+        } else if (shouldRefreshTone) {
+            startTonePlayback(desiredState.frequency, desiredState.intensity)
         }
     }
 
