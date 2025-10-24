@@ -81,6 +81,7 @@ class HomeFragment : Fragment() {
 
         viewModel.isStarted.observe(viewLifecycleOwner) { isPlaying ->
             binding.btnStartStop.text = if (isPlaying) getString(R.string.button_stop) else getString(R.string.button_start)
+            binding.tvTimeValue.isEnabled = !isPlaying
             updateTimeDisplay()
         }
 
