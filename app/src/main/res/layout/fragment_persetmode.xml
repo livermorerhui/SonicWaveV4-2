@@ -1,22 +1,248 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.persetmode.PersetmodeFragment">
 
-    <TextView
-        android:id="@+id/text_persetmode"
-        android:layout_width="match_parent"
+    <!-- 两条纵向参考线：左 22%，右 78%，把屏幕分成三列 -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_left"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.22"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.78"/>
+
+    <!-- 左侧：模式按钮 -->
+    <LinearLayout
+        android:id="@+id/panel_modes"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="top|center_horizontal"
+        android:padding="12dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toStartOf="@id/guide_left"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+            android:id="@+id/btn_whole_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_preset_mode_button"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="全身模式"
+            android:textAllCaps="false"
+            android:textColor="@color/color_preset_mode_button_text"/>
+
+        <Button
+            android:id="@+id/btn_upper_head"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_preset_mode_button"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="头部上肢"
+            android:textAllCaps="false"
+            android:textColor="@color/color_preset_mode_button_text"/>
+
+        <Button
+            android:id="@+id/btn_chest_abdomen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_preset_mode_button"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="胸部腹部"
+            android:textAllCaps="false"
+            android:textColor="@color/color_preset_mode_button_text"/>
+
+        <Button
+            android:id="@+id/btn_lower_limb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_preset_mode_button"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="下肢模式"
+            android:textAllCaps="false"
+            android:textColor="@color/color_preset_mode_button_text"/>
+    </LinearLayout>
+
+    <!-- 中间：人形轮廓 + 高亮层 + 开始/停止按钮 -->
+    <LinearLayout
+        android:id="@+id/panel_center"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:padding="12dp"
+        app:layout_constraintStart_toStartOf="@id/guide_left"
+        app:layout_constraintEnd_toStartOf="@id/guide_right"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <FrameLayout
+            android:id="@+id/body_canvas"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <!-- 底图：人形轮廓（请放置你自己的轮廓图片到 res/drawable/） -->
+            <ImageView
+                android:id="@+id/img_body_outline"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:contentDescription="人体轮廓"
+                android:src="@drawable/ic_body_outline"
+                tools:ignore="ContentDescription"/>
+
+            <!-- 叠加的高亮层（默认隐藏；代码里根据模式 setVisibility(View.VISIBLE)） -->
+            <ImageView
+                android:id="@+id/img_highlight_whole"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:alpha="0.6"
+                android:visibility="gone"
+                android:src="@drawable/ic_highlight_whole"/>
+
+            <ImageView
+                android:id="@+id/img_highlight_upper_head"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:alpha="0.6"
+                android:visibility="gone"
+                android:src="@drawable/ic_highlight_upper_head"/>
+
+            <ImageView
+                android:id="@+id/img_highlight_chest_abdomen"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:alpha="0.6"
+                android:visibility="gone"
+                android:src="@drawable/ic_highlight_chest_abdomen"/>
+
+            <ImageView
+                android:id="@+id/img_highlight_lower_limb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:alpha="0.6"
+                android:visibility="gone"
+                android:src="@drawable/ic_highlight_lower_limb"/>
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/btn_start_stop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/button_start"/>
+    </LinearLayout>
+
+    <!-- 右侧：状态窗口（频率/强度/剩余时间） -->
+    <LinearLayout
+        android:id="@+id/panel_status"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="top"
+        android:padding="12dp"
+        app:layout_constraintStart_toStartOf="@id/guide_right"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- 频率 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/selectableItemBackground">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="频率(Hz)"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/tv_frequency_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                tools:text="110"/>
+        </LinearLayout>
+
+        <!-- 强度 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/selectableItemBackground">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="强度(0.01V)"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/tv_intensity_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                tools:text="120"/>
+        </LinearLayout>
+
+        <!-- 剩余时间 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:background="?android:attr/selectableItemBackground">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="剩余时间"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/tv_remaining_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                tools:text="09:42"/>
+        </LinearLayout>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_sine_tone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_sine_toggle"
+            android:padding="12dp"
+            android:text="@string/label_sine_tone_switch"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

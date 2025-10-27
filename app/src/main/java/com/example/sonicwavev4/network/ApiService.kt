@@ -42,6 +42,15 @@ interface ApiService {
         @Body request: StopOperationRequest
     ): Response<Unit>
 
+    @POST("api/v1/preset-modes/start")
+    suspend fun startPresetMode(@Body request: StartPresetModeRequest): StartPresetModeResponse
+
+    @PUT("api/v1/preset-modes/stop/{id}")
+    suspend fun stopPresetMode(
+        @Path("id") id: Long,
+        @Body request: StopPresetModeRequest
+    ): Response<Unit>
+
     // --- 心跳与会话管理 ---
     @POST("api/v1/heartbeat")
     suspend fun sendHeartbeat(@Body request: HeartbeatRequest): Response<Unit>

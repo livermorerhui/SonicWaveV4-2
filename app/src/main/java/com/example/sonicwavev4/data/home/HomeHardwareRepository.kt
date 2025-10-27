@@ -62,6 +62,17 @@ class HomeHardwareRepository(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
 
+    companion object {
+        @Volatile
+        private var instance: HomeHardwareRepository? = null
+
+        fun getInstance(application: Application): HomeHardwareRepository {
+            return instance ?: synchronized(this) {
+                instance ?: HomeHardwareRepository(application).also { instance = it }
+            }
+        }
+    }
+
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
     private val enableTapSound = false
     private val _state = MutableStateFlow(HardwareState())

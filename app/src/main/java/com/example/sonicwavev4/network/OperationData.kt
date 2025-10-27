@@ -30,3 +30,25 @@ data class StopOperationRequest(
     val reason: String,
     val detail: String? = null
 )
+
+data class StartPresetModeRequest(
+    val userId: String,
+    val userName: String?,
+    val user_email: String?,
+    val customer_id: Int?,
+    val customer_name: String?,
+    val presetModeId: String,
+    val presetModeName: String,
+    val intensityScalePct: Int?,
+    val totalDurationSec: Int?
+)
+
+data class StartPresetModeResponse(
+    val message: String,
+    val runId: Long
+)
+
+data class StopPresetModeRequest(
+    val reason: String,
+    val detail: String? = null
+)

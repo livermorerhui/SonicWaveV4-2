@@ -29,6 +29,7 @@ const tokenRouter = require('./routes/token.routes.js');
 const adminRouter = require('./routes/admin.routes.js');
 const { ensureSeedAdmin } = require('./services/admin.service');
 const customerRouter = require('./routes/customer.routes.js');
+const presetModesRouter = require('./routes/presetModes.routes.js');
 
 // 初始化
 const app = express();
@@ -112,6 +113,7 @@ app.use('/api/v1/heartbeat', heartbeatRouter);
 app.use('/api/v1/auth', authEventRouter);
 app.use('/api/v1/token', tokenRouter); // 新增
 app.use('/api/v1/customers', customerRouter);
+app.use('/api/v1/preset-modes', presetModesRouter);
 app.use('/api/admin', adminRouter);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

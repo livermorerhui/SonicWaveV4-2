@@ -361,6 +361,28 @@ class HomeViewModel(
         }
     }
 
+    fun stopPlaybackIfRunning() {
+        if (_isStarted.value == true || currentOperationId != null) {
+            forceStop(StopReason.MANUAL)
+        }
+    }
+
+    fun prepareHardwareForEntry() {
+        hardwareRepository.start()
+        viewModelScope.launch {
+            try {
+                hardwareRepository.stopStandaloneTone()
+            } catch (e: Exception) {
+                Log.w("HomeViewModel", "Failed to stop standalone tone during prepare", e)
+            }
+            try {
+                hardwareRepository.stopOutput()
+            } catch (e: Exception) {
+                Log.w("HomeViewModel", "Failed to stop hardware output during prepare", e)
+            }
+        }
+    }
+
     private fun forceStop(reason: StopReason = StopReason.MANUAL, detail: String? = null) {
         val wasRunning = _isStarted.value == true
         val hadOperation = currentOperationId != null
@@ -529,9 +551,7 @@ class HomeViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        runBlocking {
-            hardwareRepository.stop()
-        }
+        stopPlaybackIfRunning()
     }
 
     private suspend fun resetUiStateToDefaults() {

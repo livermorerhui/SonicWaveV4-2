@@ -37,7 +37,7 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels {
         val application = requireActivity().application
-        val hardwareRepository = HomeHardwareRepository(application)
+        val hardwareRepository = HomeHardwareRepository.getInstance(application)
         val sessionRepository = HomeSessionRepository(
             SessionManager(application.applicationContext),
             RetrofitClient.api
@@ -58,9 +58,19 @@ class HomeFragment : Fragment() {
         observeAccountPrivileges()
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.prepareHardwareForEntry()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.stopPlaybackIfRunning()
     }
 
     private fun setupObservers() {

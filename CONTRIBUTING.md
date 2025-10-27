@@ -1,10 +1,28 @@
 # SonicWave 开发约定
 
-本文档适用于 SonicWave 项目的所有开发者与协作式 AI。开始任何开发任务前，请通读并遵守以下原则与流程。
+> **适用对象**：所有 SonicWave 项目的开发者，尤其是协作式 AI。  
+> **执行要求**：在开始任何开发任务前，务必阅读本约定，并在对话中显式说明“将遵循 `CONTRIBUTING.md`”后再动手。
 
 ---
 
-## 1. 总体原则
+## 0. 核心原则速查卡（必读）
+
+| 领域 | 指令 |
+| :-- | :-- |
+| **架构边界** | **UI 无业务；ViewModel 无 I/O；Repository 无 UI 类型。** |
+| **状态/事件** | **`StateFlow` 承载可重建状态；`SharedFlow` 承载一次性事件。** |
+| **数据模型** | **DTO ≠ Domain ≠ UI Model；映射在 Repository/Mapper 层完成。** |
+| **并发协程** | **仅用 `viewModelScope` + 结构化并发；异常在 ViewModel 内捕获并转为 UI 状态。** |
+| **硬件抽象** | **所有硬件经 HAL；参数更新即时生效；断连统一上报 `hardware_error`。** |
+| **接口稳定** | **后端接口签名稳定后再动前端；破坏性变更须版本化并提供过渡期。** |
+| **可测试性** | **ViewModel 可用 Fake/Mock 依赖独立跑核心流程。** |
+| **安全/日志** | **Token 加密存储；日志脱敏；通过 `trace_id` 串联关键链路。** |
+| **导航/恢复** | **首选单 Activity + Navigation；跨进程恢复依赖 `SavedStateHandle`。** |
+| **例外说明** | **若需偏离规范，必须在提交/PR 中说明原因、风险与后续偿还计划。** |
+
+---
+
+## 1. 总体原则（详细说明）
 
 1. **先理解、后动手**  
    - 在编码前先梳理“UI → ViewModel → Repository → 网络接口 → 后端控制器 → 数据库”完整流程。  
@@ -20,6 +38,9 @@
    - Android 端：UI 仅负责展示与交互；业务逻辑集中在 ViewModel；Repository 负责 I/O；状态使用 LiveData/Flow，事件使用 SharedFlow。  
    - 后端：保持 routes → controllers → services/repositories 的清晰分层，避免跨层直接访问数据库。
 
+4. **数据模型隔离**  
+   - 严格区分 DTO/Entity（持久层）、Domain Model（业务层）、UI Model（展示层）；映射逻辑放在 Repository 或专门的 Mapper 中。
+
 4. **单一会话来源**  
    - `SessionManager` 仅负责 token 与用户基础信息的持久化；运行期账号态统一由 `UserViewModel` 或对应模块的 ViewModel 缓存。  
    - 登出流程：先广播状态变化（例如通过 `GlobalLogoutManager`），让前端/硬件有机会清理，再清除本地缓存和 token。
@@ -31,6 +52,12 @@
 6. **防御式错误处理**  
    - 所有网络、数据库、硬件调用都要使用 try/catch 包裹，失败时打日志并回滚本地状态。  
    - 后端捕获异常时需记录上下文信息（用户、接口、参数），以便排查。
+
+7. **并发与生命周期**  
+   - ViewModel 中的所有协程必须使用 `viewModelScope`；I/O 任务切换到 `Dispatchers.IO`；异常在 ViewModel 内捕获并转换为 UI 状态/事件。
+
+8. **可测试性优先**  
+   - ViewModel 禁止直接引用 Android 框架组件；所有依赖通过构造函数注入，以便引入 Fake/Mock 进行单元测试。
 
 ---
 
@@ -48,11 +75,13 @@
 3. **Android 客户端实现**  
    - 更新网络模型（`OperationData.kt` 等）、`ApiService`、Repository。  
    - 在 ViewModel 中实现业务逻辑与状态管理；UI 只做展示、观察 ViewModel 状态。  
-   - 确保 `UserViewModel` / `SessionManager` 的登录态变化会及时传递到业务模块。
+   - 确保 `UserViewModel` / `SessionManager` 的登录态变化会及时传递到业务模块。  
+   - 状态使用 `StateFlow`；一次性事件使用 `SharedFlow` 或 `Channel`，避免 LiveData 事件重放。
 
 4. **音频/硬件联动**  
    - 播放期间的频率、强度、时间调整需立即影响硬件与本地模拟音频。  
-   - 确保硬件断开或异常时，能够停止播放并上报 `hardware_error`。
+    - 确保硬件断开或异常时，能够停止播放并上报 `hardware_error`。  
+    - 硬件交互统一由 HAL 负责；ViewModel 仅调用 HAL 暴露的原子接口。
 
 5. **验证与回归**  
    - 后端：启动服务并检查日志；确认数据表结构正确。  
@@ -74,7 +103,17 @@
 
 ---
 
-## 3. 与 AI 协作的要求
+## 3. Git 工作流与版本要求
+
+- **工作模式**：采用短分支 + 主干开发（Trunk-Based Development）。  
+- **分支命名**：`feature/SW-123-description`、`fix/SW-456-login-crash` 等。  
+- **提交规范**：遵循 [Conventional Commits](https://www.conventionalcommits.org/)；提交信息简洁明了。  
+- **合并流程**：所有变更通过 Pull Request，由至少一位人类开发者 Code Review 通过后方可合并。  
+- **CI/质量门槛**：后续引入自动化校验时，PR 必须通过编译、lint、测试等步骤。
+
+---
+
+## 4. 与 AI 协作的要求
 
 1. 每次启动 AI 助手（如 Gemini CLI）前，明确指出需遵循本 `CONTRIBUTING.md`。  
 2. AI 给出方案前必须先分析现状、列出修改点；未经确认不得擅自变更。  
@@ -84,7 +123,7 @@
 
 ---
 
-## 4. 适用范围
+## 5. 适用范围
 
 本约定适用于：
 
