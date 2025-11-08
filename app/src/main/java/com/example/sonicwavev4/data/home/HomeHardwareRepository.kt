@@ -265,6 +265,7 @@ class HomeHardwareRepository(
         initializeAd9833Hardware()
     }
 
+    // ----  AD9833初始化  ----
     private suspend fun initializeAd9833Hardware() {
         try {
             val device = usbDevice ?: return
@@ -297,6 +298,7 @@ class HomeHardwareRepository(
         }
     }
 
+    // ----  MCP41010初始化  ----
     private suspend fun initializeMcp41010Hardware() {
         try {
             val device = usbDevice ?: return

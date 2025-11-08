@@ -13,6 +13,10 @@ object HeartbeatManager {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     fun start(context: Context) {
+        if (OfflineTestModeManager.isOfflineMode()) {
+            Log.d("DEBUG_FLOW", "HeartbeatManager: offline test mode active, skipping heartbeat start.")
+            return
+        }
         Log.d("DEBUG_FLOW", "HeartbeatManager: start() CALLED.")
         if (heartbeatJob?.isActive == true) {
             Log.d("DEBUG_FLOW", "HeartbeatManager: Heartbeat is already running. Exiting.")

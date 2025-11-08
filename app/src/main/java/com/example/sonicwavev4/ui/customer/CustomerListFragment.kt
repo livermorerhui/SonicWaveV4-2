@@ -15,6 +15,7 @@ import com.example.sonicwavev4.databinding.FragmentCustomerListBinding
 import com.example.sonicwavev4.network.Customer
 import com.example.sonicwavev4.ui.AddCustomerDialogFragment
 import com.example.sonicwavev4.ui.user.UserViewModel
+import com.example.sonicwavev4.utils.OfflineTestModeManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -41,6 +42,13 @@ class CustomerListFragment : Fragment() {
         setupRecyclerView()
         setupSearchBox()
         observeViewModel()
+
+        if (OfflineTestModeManager.isOfflineMode()) {
+            binding.loadingSpinner.visibility = View.GONE
+            binding.emptyView.visibility = View.VISIBLE
+            binding.emptyView.text = getString(R.string.offline_mode_hint)
+            return
+        }
 
         // Fetch customers when the fragment is created
         userViewModel.fetchCustomers()

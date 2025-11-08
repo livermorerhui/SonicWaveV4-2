@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sonicwavev4.network.Customer
 import com.example.sonicwavev4.repository.CustomerRepository
+import com.example.sonicwavev4.utils.OfflineTestModeManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -71,6 +72,12 @@ class UserViewModel : ViewModel() {
 
     fun fetchCustomers() {
         viewModelScope.launch {
+            if (OfflineTestModeManager.isOfflineMode()) {
+                _customers.value = emptyList()
+                _filteredCustomers.value = emptyList()
+                _loading.value = false
+                return@launch
+            }
             _loading.value = true
             try {
                 val response = customerRepository.getCustomers()
@@ -91,6 +98,10 @@ class UserViewModel : ViewModel() {
 
     fun addCustomer(customer: Customer) {
         viewModelScope.launch {
+            if (OfflineTestModeManager.isOfflineMode()) {
+                _addCustomerResult.value = Result.failure(IllegalStateException("离线测试模式下无法添加客户"))
+                return@launch
+            }
             try {
                 val response = customerRepository.addCustomer(customer)
                 if (response.isSuccessful) {
@@ -107,6 +118,10 @@ class UserViewModel : ViewModel() {
 
     fun updateCustomer(customerId: Int, customer: Customer) {
         viewModelScope.launch {
+            if (OfflineTestModeManager.isOfflineMode()) {
+                _updateCustomerResult.value = Result.failure(IllegalStateException("离线测试模式下无法更新客户"))
+                return@launch
+            }
             try {
                 val response = customerRepository.updateCustomer(customerId, customer)
                 if (response.isSuccessful) {

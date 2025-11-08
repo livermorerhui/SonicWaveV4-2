@@ -124,13 +124,15 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         // Record app launch time
         val launchTime = System.currentTimeMillis()
         val userId = sessionManager.fetchUserId()
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val request = AppUsageRequest(launchTime = launchTime, userId = userId)
-                RetrofitClient.api.recordAppUsage(request)
-            } catch (e: Exception) {
-                // Log error or handle it appropriately
-                e.printStackTrace()
+        if (!sessionManager.isOfflineTestMode()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val request = AppUsageRequest(launchTime = launchTime, userId = userId)
+                    RetrofitClient.api.recordAppUsage(request)
+                } catch (e: Exception) {
+                    // Log error or handle it appropriately
+                    e.printStackTrace()
+                }
             }
         }
     }

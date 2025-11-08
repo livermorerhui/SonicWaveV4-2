@@ -3,9 +3,9 @@
     <item
         android:id="@+id/navigation_home"
         android:icon="@drawable/ic_home_black_24dp"
-        android:title="自选设置" />
+        android:title="自选模式" />
     <item
         android:id="@+id/navigation_persetmode"
         android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="预定设置" />
+        android:title="预设模式" />
 </menu>

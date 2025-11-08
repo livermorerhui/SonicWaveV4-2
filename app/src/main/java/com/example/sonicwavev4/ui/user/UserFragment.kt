@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -12,13 +13,14 @@ import com.example.sonicwavev4.R
 import com.example.sonicwavev4.databinding.FragmentUserBinding
 import com.example.sonicwavev4.network.LogoutEventRequest
 import com.example.sonicwavev4.network.RetrofitClient
-import com.example.sonicwavev4.ui.login.LoginFragment
 import com.example.sonicwavev4.ui.AddCustomerDialogFragment
 import com.example.sonicwavev4.ui.customer.CustomerListFragment
-import com.example.sonicwavev4.ui.user.UserViewModel
+import com.example.sonicwavev4.ui.login.LoginFragment
 import com.example.sonicwavev4.utils.HeartbeatManager
 import com.example.sonicwavev4.utils.LogoutReason
+import com.example.sonicwavev4.utils.OfflineTestModeManager
 import com.example.sonicwavev4.utils.SessionManager
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class UserFragment : Fragment() {
@@ -42,13 +44,7 @@ class UserFragment : Fragment() {
         setupUsernameDisplay()
         setupLogoutButton()
         setupAddCustomerButton()
-
-        // Add CustomerListFragment dynamically
-        if (savedInstanceState == null) {
-            childFragmentManager.beginTransaction()
-                .replace(R.id.customer_list_container, CustomerListFragment())
-                .commit()
-        }
+        observeOfflineMode()
     }
 
     private fun setupUsernameDisplay() {
@@ -59,6 +55,29 @@ class UserFragment : Fragment() {
     private fun setupAddCustomerButton() {
         binding.addCustomerButton.setOnClickListener {
             AddCustomerDialogFragment.newInstance().show(childFragmentManager, "AddCustomerDialog")
+        }
+    }
+
+    private fun observeOfflineMode() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            OfflineTestModeManager.isOfflineTestMode.collectLatest { offline ->
+                binding.addCustomerButton.isVisible = !offline
+                binding.customerListContainer.isVisible = !offline
+                binding.offlineModeHint.isVisible = offline
+                if (offline) {
+                    removeCustomerListFragmentIfNeeded()
+                } else if (childFragmentManager.findFragmentById(R.id.customer_list_container) == null) {
+                    childFragmentManager.beginTransaction()
+                        .replace(R.id.customer_list_container, CustomerListFragment())
+                        .commit()
+                }
+            }
+        }
+    }
+
+    private fun removeCustomerListFragmentIfNeeded() {
+        childFragmentManager.findFragmentById(R.id.customer_list_container)?.let {
+            childFragmentManager.beginTransaction().remove(it).commit()
         }
     }
 
@@ -99,6 +118,7 @@ class UserFragment : Fragment() {
         HeartbeatManager.stop()
         // 清理本地会话并通知
         sessionManager.initiateLogout(LogoutReason.UserInitiated)
+        OfflineTestModeManager.setOfflineTestMode(false)
         userViewModel.clearSessionState()
         // 导航回登录页
         parentFragmentManager.beginTransaction()

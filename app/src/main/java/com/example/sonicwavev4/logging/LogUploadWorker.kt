@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.sonicwavev4.network.RetrofitClient
+import com.example.sonicwavev4.utils.SessionManager
 import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -14,6 +15,10 @@ private const val MAX_BATCH_BYTES = 80 * 1024 // 80KB per payload
 class LogUploadWorker(appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
+        val sessionManager = SessionManager(applicationContext)
+        if (sessionManager.isOfflineTestMode()) {
+            return Result.success()
+        }
         val allLogs = LogRepository.readLogs(applicationContext)
         if (allLogs.isEmpty()) {
             return Result.success()

@@ -6,17 +6,26 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.sonicwavev4.util.Event
 import com.example.sonicwavev4.network.ErrorMessageResolver
 import com.example.sonicwavev4.network.LoginEventRequest
 import com.example.sonicwavev4.network.LoginRequest
 import com.example.sonicwavev4.network.LoginResponse
 import com.example.sonicwavev4.network.RetrofitClient
+import com.example.sonicwavev4.util.Event
 import com.example.sonicwavev4.utils.HeartbeatManager
+import com.example.sonicwavev4.utils.OfflineTestModeManager
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.launch
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
+
+    companion object {
+        private const val OFFLINE_USERNAME = "test"
+        private const val OFFLINE_PASSWORD = "test123"
+        private const val OFFLINE_USER_ID = "offline-test"
+        private const val OFFLINE_EMAIL = "test@test.local"
+        private const val OFFLINE_USERNAME_DISPLAY = "测试账号"
+    }
 
     private val _loginResult = MutableLiveData<Event<Result<LoginResponse>>>()
     val loginResult: LiveData<Event<Result<LoginResponse>>> = _loginResult
@@ -27,6 +36,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val sessionManager = SessionManager(application)
 
     fun login(email: String, password: String) {
+        if (isOfflineTestCredential(email, password)) {
+            viewModelScope.launch { handleOfflineLogin() }
+            return
+        }
         viewModelScope.launch {
             try {
                 // Step 1: Login with credentials
@@ -34,7 +47,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (loginApiResponse.isSuccessful && loginApiResponse.body() != null) {
                     val loginResponse = loginApiResponse.body()!!
-                    
+
                     // Step 2: Save Access and Refresh tokens immediately
                     sessionManager.saveTokens(loginResponse.accessToken, loginResponse.refreshToken)
                     // Save user details (userId, username, email) to SessionManager
@@ -43,6 +56,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                         loginResponse.username,
                         email
                     ) // Assuming email is the login email
+                    sessionManager.setOfflineTestMode(false)
+                    OfflineTestModeManager.setOfflineTestMode(false)
                     RetrofitClient.updateToken(loginResponse.accessToken)
                     Log.d("DEBUG_FLOW", "LoginViewModel: Tokens and user details saved.")
 
@@ -81,5 +96,34 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 _loginResult.postValue(Event(Result.failure(Exception(message))))
             }
         }
+    }
+
+    private fun isOfflineTestCredential(email: String, password: String): Boolean {
+        return email.equals(OFFLINE_USERNAME, ignoreCase = true) && password == OFFLINE_PASSWORD
+    }
+
+    private suspend fun handleOfflineLogin() {
+        sessionManager.setOfflineTestMode(true)
+        OfflineTestModeManager.setOfflineTestMode(true)
+        sessionManager.saveUserSession(
+            userId = OFFLINE_USER_ID,
+            userName = OFFLINE_USERNAME_DISPLAY,
+            email = OFFLINE_EMAIL
+        )
+        sessionManager.saveSessionId(-1L)
+        RetrofitClient.updateToken(null)
+        HeartbeatManager.stop()
+
+        val offlineResponse = LoginResponse(
+            message = "Offline login success",
+            accessToken = "",
+            refreshToken = "",
+            username = OFFLINE_USERNAME_DISPLAY,
+            userId = -1,
+            accountType = "test"
+        )
+
+        _loginResult.postValue(Event(Result.success(offlineResponse)))
+        _navigationEvent.postValue(Event(offlineResponse.username))
     }
 }

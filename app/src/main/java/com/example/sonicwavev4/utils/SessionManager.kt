@@ -45,6 +45,7 @@ class SessionManager(context: Context) {
         const val USER_NAME = "user_name"
         const val USER_EMAIL = "user_email"
         const val SESSION_ID = "session_id"
+        const val OFFLINE_TEST_MODE = "offline_test_mode"
     }
 
     fun saveTokens(accessToken: String, refreshToken: String) {
@@ -75,6 +76,12 @@ class SessionManager(context: Context) {
         }
     }
 
+    fun setOfflineTestMode(enabled: Boolean) {
+        prefs.edit().putBoolean(OFFLINE_TEST_MODE, enabled).apply()
+    }
+
+    fun isOfflineTestMode(): Boolean = prefs.getBoolean(OFFLINE_TEST_MODE, false)
+
     fun fetchAccessToken(): String? = prefs.getString(ACCESS_TOKEN, null)
     fun fetchRefreshToken(): String? = prefs.getString(REFRESH_TOKEN, null)
     fun fetchUserId(): String? = prefs.getString(USER_ID, null)
@@ -83,6 +90,9 @@ class SessionManager(context: Context) {
     fun fetchSessionId(): Long = prefs.getLong(SESSION_ID, -1L)
 
     fun hasActiveSession(): Boolean {
+        if (isOfflineTestMode()) {
+            return true
+        }
         val accessToken = fetchAccessToken()
         val userId = fetchUserId()
         return !accessToken.isNullOrBlank() && !userId.isNullOrBlank()
@@ -105,6 +115,7 @@ class SessionManager(context: Context) {
             GlobalLogoutManager.logout()
         }
         prefs.edit().clear().apply()
+        OfflineTestModeManager.setOfflineTestMode(false)
         RetrofitClient.updateToken(null)
     }
 }
