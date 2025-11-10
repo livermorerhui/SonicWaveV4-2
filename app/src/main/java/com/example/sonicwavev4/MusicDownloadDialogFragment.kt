@@ -1,5 +1,6 @@
 package com.example.sonicwavev4
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,12 +8,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.example.sonicwavev4.network.EndpointProvider
-import kotlinx.coroutines.CoroutineScope
+import com.example.sonicwavev4.utils.SessionManager
+import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,10 +29,13 @@ class MusicDownloadDialogFragment : DialogFragment() {
     private lateinit var downloadableMusicAdapter: DownloadableMusicAdapter
     private val client = OkHttpClient()
     private val gson = Gson()
+    private var sessionManager: SessionManager? = null
+    private lateinit var appContext: Context
 
     interface DownloadListener {
-        fun onDownloadSelected(files: List<String>)
+        fun onDownloadSelected(files: List<DownloadableFile>)
     }
+
     var listener: DownloadListener? = null
 
     override fun onCreateView(
@@ -42,6 +47,8 @@ class MusicDownloadDialogFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        sessionManager = SessionManager(requireContext())
+        appContext = requireContext().applicationContext
 
         recyclerView = view.findViewById(R.id.download_music_recyclerview)
         downloadButton = view.findViewById(R.id.download_button)
@@ -67,40 +74,64 @@ class MusicDownloadDialogFragment : DialogFragment() {
     }
 
     private fun fetchMusicList() {
-        val baseUrl = EndpointProvider.baseUrl
-        val request = Request.Builder().url("$baseUrl/api/music").build()
+        val session = sessionManager
+        val accessToken = session?.fetchAccessToken()
+        if (session != null && !session.isOfflineTestMode() && accessToken.isNullOrBlank()) {
+            Toast.makeText(context, "请先登录后再下载音乐", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = client.newCall(request).execute()
-                if (response.isSuccessful) {
-                    val responseBody = response.body?.string()
-                    if (responseBody != null) {
-                        val type = object : TypeToken<List<String>>() {}.type
-                        val musicFiles: List<String> = gson.fromJson(responseBody, type)
-                        
-                        val downloadedMusicRepo = DownloadedMusicRepository(requireContext())
-                        val downloadedFiles = downloadedMusicRepo.loadDownloadedMusic().map { it.fileName }
-
-                        val downloadableFiles = musicFiles.map { fileName ->
-                            val isDownloaded = downloadedFiles.contains(fileName)
-                            DownloadableFile(fileName, isDownloaded, isDownloaded)
-                        }
-
-                        withContext(Dispatchers.Main) {
-                            downloadableMusicAdapter = DownloadableMusicAdapter(downloadableFiles.toMutableList())
-                            recyclerView.adapter = downloadableMusicAdapter
-                        }
-                    }
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching { requestMusicList(accessToken) }
+            }
+            result.onSuccess { files ->
+                if (files.isNotEmpty()) {
+                    downloadableMusicAdapter.updateData(files)
                 } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "无法获取音乐列表", Toast.LENGTH_SHORT).show()
-                    }
+                    Toast.makeText(context, "暂无可下载音乐", Toast.LENGTH_SHORT).show()
                 }
-            } catch (e: IOException) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "网络错误: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
+            }.onFailure { throwable ->
+                Toast.makeText(context, throwable.message ?: "无法获取音乐列表", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun requestMusicList(accessToken: String?): List<DownloadableFile> {
+        val baseUrl = EndpointProvider.baseUrl.trimEnd('/')
+        val requestBuilder = Request.Builder()
+            .url("$baseUrl/api/v1/music")
+        if (!accessToken.isNullOrBlank()) {
+            requestBuilder.addHeader("Authorization", "Bearer $accessToken")
+        }
+        val request = requestBuilder.build()
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw IOException("获取音乐列表失败: ${response.code}")
+            }
+            val body = response.body?.string() ?: throw IOException("服务器返回空数据")
+            val musicResponse = gson.fromJson(body, MusicListResponse::class.java)
+            val downloadedMusicRepo = DownloadedMusicRepository(appContext)
+            val downloadedFiles = downloadedMusicRepo.loadDownloadedMusic()
+                .map { it.fileName }
+                .toSet()
+
+            return musicResponse.tracks.mapNotNull { track ->
+                val fileKey = track.fileKey.orEmpty()
+                if (fileKey.isBlank()) return@mapNotNull null
+                val fileName = fileKey.substringAfterLast('/')
+                val downloadUrl = "$baseUrl/${fileKey.trimStart('/')}"
+                val isDownloaded = downloadedFiles.contains(fileName)
+                DownloadableFile(
+                    id = track.id,
+                    title = track.title.orEmpty(),
+                    artist = track.artist.orEmpty(),
+                    downloadUrl = downloadUrl,
+                    fileName = fileName,
+                    isDownloaded = isDownloaded,
+                    isSelected = isDownloaded
+                )
             }
         }
     }
@@ -113,3 +144,14 @@ class MusicDownloadDialogFragment : DialogFragment() {
         dialog?.window?.setLayout(width, height)
     }
 }
+
+private data class MusicListResponse(
+    @SerializedName("tracks") val tracks: List<MusicTrackDto> = emptyList()
+)
+
+private data class MusicTrackDto(
+    @SerializedName("id") val id: Long = -1,
+    @SerializedName("title") val title: String? = null,
+    @SerializedName("artist") val artist: String? = null,
+    @SerializedName("file_key") val fileKey: String? = null
+)

@@ -9,6 +9,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 data class DownloadableFile(
+    val id: Long,
+    val title: String,
+    val artist: String,
+    val downloadUrl: String,
     val fileName: String,
     var isDownloaded: Boolean,
     var isSelected: Boolean
@@ -21,6 +25,7 @@ class DownloadableMusicAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val checkBox: CheckBox = view.findViewById(R.id.music_checkbox)
         val title: TextView = view.findViewById(R.id.music_title_textview)
+        val artist: TextView = view.findViewById(R.id.music_artist_textview)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -31,25 +36,40 @@ class DownloadableMusicAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val file = musicFiles[position]
-        holder.title.text = file.fileName
+        holder.checkBox.setOnCheckedChangeListener(null)
         holder.checkBox.isChecked = file.isSelected
+        holder.title.text = file.title.ifBlank { file.fileName }
+        holder.artist.text = file.artist.ifBlank { "未知艺术家" }
 
         if (file.isDownloaded) {
             holder.title.setTextColor(Color.GRAY)
+            holder.artist.setTextColor(Color.GRAY)
             holder.checkBox.isEnabled = false
         } else {
             holder.title.setTextColor(Color.BLACK)
+            holder.artist.setTextColor(Color.DKGRAY)
             holder.checkBox.isEnabled = true
         }
 
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
             file.isSelected = isChecked
         }
+        holder.itemView.setOnClickListener {
+            if (!file.isDownloaded && holder.checkBox.isEnabled) {
+                holder.checkBox.isChecked = !holder.checkBox.isChecked
+            }
+        }
     }
 
     override fun getItemCount() = musicFiles.size
 
-    fun getSelectedFiles(): List<String> {
-        return musicFiles.filter { it.isSelected && !it.isDownloaded }.map { it.fileName }
+    fun updateData(newFiles: List<DownloadableFile>) {
+        musicFiles.clear()
+        musicFiles.addAll(newFiles)
+        notifyDataSetChanged()
+    }
+
+    fun getSelectedFiles(): List<DownloadableFile> {
+        return musicFiles.filter { it.isSelected && !it.isDownloaded }
     }
 }

@@ -1,5 +1,9 @@
 package com.example.sonicwavev4
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -15,7 +19,10 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -26,6 +33,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Guideline
 import androidx.core.net.toUri
 import androidx.core.view.forEach
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -36,31 +44,42 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sonicwavev4.databinding.ActivityMainBinding
-
 import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
 import com.example.sonicwavev4.network.AppUsageRequest
-import com.example.sonicwavev4.network.EndpointProvider
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.utils.SessionManager
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
+    private lateinit var sessionManager: SessionManager
     private var musicAreaLayout: ConstraintLayout? = null
     private var musicRecyclerView: RecyclerView? = null
-    private var playButton: ImageButton? = null
+    private var downloadButton: ImageButton? = null
+    private var playPauseButton: ImageButton? = null
+    private var prevButton: ImageButton? = null
+    private var nextButton: ImageButton? = null
+    private var vinylDiscView: ImageView? = null
+    private var tonearmView: ImageView? = null
     private lateinit var musicAdapter: MusicAdapter // 【修改点 1】Adapter类型将在后面定义为ListAdapter
     private var mediaPlayer: MediaPlayer? = null
     private var currentPlayingUri: Uri? = null
+    private var currentTrackIndex: Int = -1
     private var isPlaying: Boolean = false
     private lateinit var musicDownloader: MusicDownloader
     private lateinit var downloadedMusicRepository: DownloadedMusicRepository
+    private var vinylAnimator: ObjectAnimator? = null
+    private var tonearmAnimator: ObjectAnimator? = null
+    private val tonearmRestRotation = 0f   //
+    private val tonearmPlayRotation = 15f   //旋转角度
+    private val tonearmPivotXRatio = 0.5f  //旋转中心横坐标，百分比
+    private val tonearmPivotYRatio = 0.29f  //旋转中心纵坐标，百分比
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -77,7 +96,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val sessionManager = SessionManager(this)
+        sessionManager = SessionManager(this)
 
         setSupportActionBar(binding.toolbar)
 
@@ -90,42 +109,16 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         setupDragListeners()
 
         musicAreaLayout = binding.mainContentConstraintLayout?.findViewById(R.id.fragment_bottom_left)
-        musicRecyclerView = musicAreaLayout?.findViewById(R.id.music_list_recyclerview)
-        playButton = musicAreaLayout?.findViewById(R.id.play_button)
-        setupMusicArea()
-
         musicDownloader = MusicDownloader(this)
         downloadedMusicRepository = DownloadedMusicRepository(this)
-
-        musicAreaLayout?.let { musicArea ->
-            val downloadImageButton = ImageButton(this).apply {
-                id = View.generateViewId()
-                setImageResource(android.R.drawable.stat_sys_download)
-                setBackgroundResource(android.R.color.transparent)
-                layoutParams = ConstraintLayout.LayoutParams(
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT,
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    topToTop = ConstraintLayout.LayoutParams.PARENT_ID
-                    endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-                    setMargins(0, 16.dpToPx(), 16.dpToPx(), 0)
-                }
-            }
-            musicArea.addView(downloadImageButton)
-
-            downloadImageButton.setOnClickListener {
-                val dialog = MusicDownloadDialogFragment()
-                dialog.listener = this
-                dialog.show(supportFragmentManager, "MusicDownloadDialogFragment")
-            }
-        }
+        setupMusicArea()
         checkAndRequestPermissions()
 
         // Record app launch time
         val launchTime = System.currentTimeMillis()
         val userId = sessionManager.fetchUserId()
         if (!sessionManager.isOfflineTestMode()) {
-            CoroutineScope(Dispatchers.IO).launch {
+            lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     val request = AppUsageRequest(launchTime = launchTime, userId = userId)
                     RetrofitClient.api.recordAppUsage(request)
@@ -138,59 +131,89 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     }
 
     // 【修改点 2】修复了下载功能的线程问题，防止UI卡死
-    override fun onDownloadSelected(files: List<String>) {
-        // CoroutineScope现在用于在主线程启动，但在内部切换到IO线程执行耗时操作
-        CoroutineScope(Dispatchers.Main).launch {
+    override fun onDownloadSelected(files: List<DownloadableFile>) {
+        lifecycleScope.launch {
             Toast.makeText(this@MainActivity, "开始下载 ${files.size} 个文件...", Toast.LENGTH_SHORT).show()
+            val accessToken = sessionManager.fetchAccessToken()
 
-            // 使用 withContext 将网络和文件操作切换到后台IO线程
-            withContext(Dispatchers.IO) {
-                val baseUrl = EndpointProvider.baseUrl
-                files.forEach { fileName ->
-                    val musicUrl = "$baseUrl/music/$fileName"
-                    val downloadedFile = musicDownloader.downloadMusic(musicUrl, fileName)
+            val failedDownloads = withContext(Dispatchers.IO) {
+                files.mapNotNull { file ->
+                    val downloadedFile = musicDownloader.downloadMusic(
+                        file.downloadUrl,
+                        file.fileName,
+                        accessToken
+                    )
                     if (downloadedFile != null) {
                         val downloadedItem = DownloadedMusicItem(
                             fileName = downloadedFile.name,
-                            title = downloadedFile.nameWithoutExtension,
-                            artist = "Downloaded",
+                            title = file.title.ifBlank { downloadedFile.nameWithoutExtension },
+                            artist = file.artist.ifBlank { "Downloaded" },
                             internalPath = downloadedFile.absolutePath
                         )
                         downloadedMusicRepository.addDownloadedMusic(downloadedItem)
+                        null
                     } else {
-                        // 在后台线程中显示Toast需要切回主线程
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(this@MainActivity, "下载失败: $fileName", Toast.LENGTH_SHORT).show()
-                        }
+                        file.fileName
                     }
                 }
             }
 
-            Toast.makeText(this@MainActivity, "下载完成", Toast.LENGTH_SHORT).show()
+            if (failedDownloads.isEmpty()) {
+                Toast.makeText(this@MainActivity, "下载完成", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(
+                    this@MainActivity,
+                    "部分音乐下载失败: ${failedDownloads.joinToString()}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
             loadMusic() // 下载完成后，在主线程刷新列表
         }
     }
 
     private fun setupMusicArea() {
         // 【修改点 3】初始化新的ListAdapter
-        musicAdapter = MusicAdapter { uri ->
-            playMusic(uri)
+        musicAdapter = MusicAdapter { item, position ->
+            playMusic(item.uri, position)
         }
+        val area = musicAreaLayout ?: return
+        musicRecyclerView = area.findViewById(R.id.music_list_recyclerview)
+        downloadButton = area.findViewById(R.id.download_music_button)
+        playPauseButton = area.findViewById(R.id.play_pause_button)
+        prevButton = area.findViewById(R.id.prev_button)
+        nextButton = area.findViewById(R.id.next_button)
+        vinylDiscView = area.findViewById(R.id.vinyl_disc_view)
+        tonearmView = area.findViewById(R.id.tonearm_view)
+
+        tonearmView?.apply {
+            rotation = tonearmRestRotation
+            post {
+                pivotX = width * tonearmPivotXRatio
+                pivotY = height * tonearmPivotYRatio
+            }
+        }
+
         musicRecyclerView?.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = musicAdapter
         }
 
-        playButton?.setOnClickListener {
-            togglePlayPause()
+        downloadButton?.setOnClickListener {
+            val dialog = MusicDownloadDialogFragment()
+            dialog.listener = this
+            dialog.show(supportFragmentManager, "MusicDownloadDialogFragment")
         }
+        playPauseButton?.setOnClickListener { togglePlayPause() }
+        prevButton?.setOnClickListener { playPreviousTrack() }
+        nextButton?.setOnClickListener { playNextTrack() }
 
-        musicAreaLayout?.visibility = View.VISIBLE
+        area.visibility = View.VISIBLE
     }
 
     private fun loadMusic() {
         // 使用协程在后台线程加载音乐，在主线程更新UI
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
+            SampleMusicSeeder.seedIfNeeded(applicationContext, downloadedMusicRepository)
             val musicList = mutableListOf<MusicItem>()
             val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
@@ -234,22 +257,28 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                     }
                 }
             }
-            // 【修改点 4】修复了此函数中一个多余的右大括号语法错误
 
-            // 加载已下载的音乐
+            // 加载已下载的音乐并剔除失效文件
             val downloadedMusic = downloadedMusicRepository.loadDownloadedMusic()
+            val validDownloads = mutableListOf<DownloadedMusicItem>()
             downloadedMusic.forEach { downloadedItem ->
-                musicList.add(downloadedItem.toMusicItem())
+                val localItem = downloadedItem.toMusicItem()
+                if (localItem != null) {
+                    musicList.add(localItem)
+                    validDownloads.add(downloadedItem)
+                }
+            }
+            if (validDownloads.size != downloadedMusic.size) {
+                downloadedMusicRepository.saveDownloadedMusic(validDownloads)
             }
 
             // 切回主线程更新UI
             withContext(Dispatchers.Main) {
                 if (musicList.isNotEmpty()) {
-                    // 【修改点 5】使用 submitList 更新列表，而不是 notifyDataSetChanged
                     musicAdapter.submitList(musicList)
                     Toast.makeText(this@MainActivity, "已加载 ${musicList.size} 首音乐", Toast.LENGTH_SHORT).show()
                 } else {
-                    musicAdapter.submitList(emptyList()) // 提交空列表以清空UI
+                    musicAdapter.submitList(emptyList())
                     Toast.makeText(this@MainActivity, "未找到音乐文件", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -257,7 +286,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     }
 
     // 【修改点 6】将Adapter重构为 ListAdapter，并使用 DiffUtil 提高性能
-    inner class MusicAdapter(private val onMusicItemClick: (Uri) -> Unit) :
+    inner class MusicAdapter(private val onMusicItemClick: (MusicItem, Int) -> Unit) :
         ListAdapter<MusicItem, MusicAdapter.MusicViewHolder>(MusicDiffCallback()) {
 
         inner class MusicViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -269,7 +298,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                     val position = adapterPosition
                     if (position != RecyclerView.NO_POSITION) {
                         // 使用 getItem(position) 来安全地获取当前项
-                        onMusicItemClick(getItem(position).uri)
+                        onMusicItemClick(getItem(position), position)
                     }
                 }
             }
@@ -357,14 +386,14 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                     newPercent = relativeX / parentDimension
                     val minWidthPx = 660.dpToPx()
                     val minWidthPercent = minWidthPx / parentDimension
-                    params.guidePercent = newPercent.coerceIn(minWidthPercent, 0.9f)
+                    params.guidePercent = newPercent.coerceIn(minWidthPercent, 0.6f)
                 } else {
                     val parentStartY = location[1]
                     val relativeY = event.rawY - parentStartY
                     newPercent = relativeY / parentDimension
                     val minHeightPx = 315.dpToPx()
                     val minHeightPercent = minHeightPx / parentDimension
-                    params.guidePercent = newPercent.coerceIn(minHeightPercent, 0.9f)
+                    params.guidePercent = newPercent.coerceIn(minHeightPercent, 0.6f)
                 }
                 guideline.layoutParams = params
                 return true
@@ -461,46 +490,51 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         }
     }
 
-    private fun playMusic(uri: Uri) {
-        // ... 播放逻辑保持不变 ...
+    private fun playMusic(uri: Uri, selectedIndex: Int? = null) {
+        val targetIndex = selectedIndex ?: musicAdapter.currentList.indexOfFirst { it.uri == uri }
+        currentTrackIndex = targetIndex
         if (mediaPlayer == null) {
             mediaPlayer = MediaPlayer().apply {
                 setDataSource(this@MainActivity, uri)
                 prepareAsync()
-                setOnPreparedListener {
-                    it.start()
+                setOnPreparedListener { preparedPlayer ->
+                    preparedPlayer.start()
                     this@MainActivity.isPlaying = true
-                    playButton?.setImageResource(android.R.drawable.ic_media_pause)
+                    playPauseButton?.setImageResource(android.R.drawable.ic_media_pause)
+                    startPlaybackAnimation()
                     Toast.makeText(this@MainActivity, "开始播放: ${uri.lastPathSegment}", Toast.LENGTH_SHORT).show()
                 }
-                setOnCompletionListener {
+                setOnCompletionListener { completedPlayer ->
                     this@MainActivity.isPlaying = false
-                    playButton?.setImageResource(android.R.drawable.ic_media_play)
+                    playPauseButton?.setImageResource(android.R.drawable.ic_media_play)
+                    stopPlaybackAnimation()
                     Toast.makeText(this@MainActivity, "播放完成", Toast.LENGTH_SHORT).show()
-                    it.release()
-                    this@MainActivity.mediaPlayer = null
+                    completedPlayer.release()
+                    mediaPlayer = null
                     currentPlayingUri = null
                 }
                 setOnErrorListener { mp, what, extra ->
                     Toast.makeText(this@MainActivity, "播放错误: $what, $extra", Toast.LENGTH_LONG).show()
                     this@MainActivity.isPlaying = false
-                    playButton?.setImageResource(android.R.drawable.ic_media_play)
+                    playPauseButton?.setImageResource(android.R.drawable.ic_media_play)
+                    stopPlaybackAnimation()
                     mp.release()
-                    this@MainActivity.mediaPlayer = null
+                    mediaPlayer = null
                     currentPlayingUri = null
                     true
                 }
             }
+        } else if (currentPlayingUri != uri) {
+            mediaPlayer?.release()
+            mediaPlayer = null
+            stopPlaybackAnimation()
+            isPlaying = false
+            currentPlayingUri = null
+            playMusic(uri, selectedIndex)
+            return
         } else {
-            if (currentPlayingUri != uri) {
-                mediaPlayer?.release()
-                mediaPlayer = null
-                isPlaying = false
-                currentPlayingUri = null
-                playMusic(uri)
-            } else {
-                togglePlayPause()
-            }
+            togglePlayPause()
+            return
         }
         currentPlayingUri = uri
     }
@@ -510,17 +544,106 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             if (it.isPlaying) {
                 it.pause()
                 isPlaying = false
-                playButton?.setImageResource(android.R.drawable.ic_media_play)
+                playPauseButton?.setImageResource(android.R.drawable.ic_media_play)
+                stopPlaybackAnimation()
                 Toast.makeText(this, "暂停", Toast.LENGTH_SHORT).show()
             } else {
                 it.start()
                 isPlaying = true
-                playButton?.setImageResource(android.R.drawable.ic_media_pause)
+                playPauseButton?.setImageResource(android.R.drawable.ic_media_pause)
+                startPlaybackAnimation()
                 Toast.makeText(this, "继续播放", Toast.LENGTH_SHORT).show()
             }
         } ?: run {
-            val firstSongUri = musicAdapter.currentList.firstOrNull()?.uri
-            firstSongUri?.let { playMusic(it) } ?: Toast.makeText(this, "没有可播放的音乐", Toast.LENGTH_SHORT).show()
+            val firstSong = musicAdapter.currentList.firstOrNull()
+            firstSong?.let { playMusic(it.uri, 0) } ?: Toast.makeText(this, "没有可播放的音乐", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun playNextTrack() {
+        val list = musicAdapter.currentList
+        if (list.isEmpty()) {
+            Toast.makeText(this, "没有可播放的音乐", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val nextIndex = if (currentTrackIndex == -1) 0 else (currentTrackIndex + 1) % list.size
+        val nextItem = list[nextIndex]
+        playMusic(nextItem.uri, nextIndex)
+    }
+
+    private fun playPreviousTrack() {
+        val list = musicAdapter.currentList
+        if (list.isEmpty()) {
+            Toast.makeText(this, "没有可播放的音乐", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val prevIndex = if (currentTrackIndex <= 0) list.lastIndex else currentTrackIndex - 1
+        val prevItem = list[prevIndex]
+        playMusic(prevItem.uri, prevIndex)
+    }
+
+    private fun startPlaybackAnimation() {
+        if (tonearmView == null) {
+            spinVinyl()
+        } else {
+            animateTonearm(true) { spinVinyl() }
+        }
+    }
+
+    private fun stopPlaybackAnimation() {
+        pauseVinyl()
+        animateTonearm(false, null)
+    }
+
+    private fun spinVinyl() {
+        val disc = vinylDiscView ?: return
+        val animator = vinylAnimator ?: ObjectAnimator.ofFloat(disc, View.ROTATION, 0f, 360f).apply {
+            duration = 12000L    //唱臂旋转速度，这里是时间
+            interpolator = LinearInterpolator()
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.RESTART
+        }.also { vinylAnimator = it }
+        if (!animator.isStarted) {
+            animator.start()
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            animator.resume()
+        }
+    }
+
+    private fun pauseVinyl() {
+        vinylAnimator?.let { animator ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                animator.pause()
+            } else {
+                animator.cancel()
+                vinylAnimator = null
+            }
+        }
+    }
+
+    private fun animateTonearm(engage: Boolean, onEnd: (() -> Unit)? = null) {
+        val tonearm = tonearmView ?: run {
+            onEnd?.invoke()
+            return
+        }
+        tonearmAnimator?.cancel()
+        val targetRotation = if (engage) tonearmPlayRotation else tonearmRestRotation
+        var wasCancelled = false
+        tonearmAnimator = ObjectAnimator.ofFloat(tonearm, View.ROTATION, tonearm.rotation, targetRotation).apply {
+            duration = if (engage) 420L else 360L
+            interpolator = DecelerateInterpolator()
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationCancel(animation: Animator) {
+                    wasCancelled = true
+                }
+
+                override fun onAnimationEnd(animation: Animator) {
+                    if (!wasCancelled) {
+                        onEnd?.invoke()
+                    }
+                }
+            })
+            start()
         }
     }
 
@@ -528,6 +651,10 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         super.onDestroy()
         mediaPlayer?.release()
         mediaPlayer = null
+        vinylAnimator?.cancel()
+        vinylAnimator = null
+        tonearmAnimator?.cancel()
+        tonearmAnimator = null
     }
 
     override fun onSupportNavigateUp(): Boolean {
