@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.45" />
+            app:layout_constraintGuide_percent="0.55" />
 
         <!-- === 左侧栏布局 === -->
         <androidx.constraintlayout.widget.Guideline
@@ -177,8 +177,8 @@
 
                 <ImageView
                     android:id="@+id/vinyl_disc_view"
-                    android:layout_width="220dp"
-                    android:layout_height="220dp"
+                    android:layout_width="143dp"
+                    android:layout_height="143dp"
                     android:layout_marginBottom="24dp"
                     android:adjustViewBounds="true"
                     android:contentDescription="@string/cd_vinyl_disc"
@@ -188,7 +188,35 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="1.0" />
+                    app:layout_constraintVertical_bias="0.821" />
+
+                <LinearLayout
+                    android:id="@+id/playback_progress_container"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="0dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    app:layout_constraintBottom_toTopOf="@id/music_player_controls"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <SeekBar
+                        android:id="@+id/playback_seekbar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:progress="0" />
+
+                    <TextView
+                        android:id="@+id/playback_time_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/remaining_time_format_placeholder"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="12sp" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/music_player_controls"
@@ -228,15 +256,17 @@
 
                 <ImageView
                     android:id="@+id/tonearm_view"
-                    android:layout_width="99dp"
-                    android:layout_height="257dp"
-                    android:layout_marginStart="160dp"
+                    android:layout_width="25dp"
+                    android:layout_height="116.54dp"
+                    android:layout_marginStart="124dp"
+                    android:layout_marginBottom="24dp"
                     android:adjustViewBounds="true"
                     android:contentDescription="@string/cd_tonearm"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_tonearm"
                     app:layout_constraintBottom_toBottomOf="@+id/vinyl_disc_view"
-                    app:layout_constraintStart_toStartOf="@+id/vinyl_disc_view" />
+                    app:layout_constraintStart_toStartOf="@+id/vinyl_disc_view"
+                    tools:ignore="MissingConstraints" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
