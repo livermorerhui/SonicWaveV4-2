@@ -15,6 +15,7 @@ import com.example.sonicwavev4.ui.persetmode.modes.Step
 import com.example.sonicwavev4.ui.persetmode.modes.UpperLimbAndHead10m
 import com.example.sonicwavev4.ui.persetmode.modes.WholeBody10m
 import com.example.sonicwavev4.utils.GlobalLogoutManager
+import com.example.sonicwavev4.utils.TestToneSettings
 import kotlin.coroutines.coroutineContext
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Job
@@ -43,8 +44,6 @@ data class PresetModeUiState(
     val isRunning: Boolean = false,
     val modeButtonsEnabled: Boolean = true,
     val isStartEnabled: Boolean = false,
-    val playSineTone: Boolean = false,
-    val showSineToneToggle: Boolean = false,
     val currentStepIndex: Int? = null,
     val currentStep: Step? = null,
     val frequencyHz: Int? = null,
@@ -127,6 +126,13 @@ class PersetmodeViewModel(
                 }
             }
         }
+
+        viewModelScope.launch {
+            TestToneSettings.sineToneEnabled.collect { desired ->
+                val allowed = isTestAccount
+                setPlaySineTone(if (allowed) desired else false)
+            }
+        }
     }
 
     fun selectMode(index: Int) {
@@ -178,15 +184,9 @@ class PersetmodeViewModel(
     fun updateAccountAccess(testAccount: Boolean) {
         if (isTestAccount == testAccount) return
         isTestAccount = testAccount
-        val currentTone = shouldPlayTone
-        shouldPlayTone = testAccount && currentTone
-        _uiState.update {
-            it.copy(
-                showSineToneToggle = testAccount,
-                playSineTone = shouldPlayTone
-            )
-        }
-        if (!testAccount && currentTone) {
+        if (testAccount) {
+            setPlaySineTone(TestToneSettings.sineToneEnabled.value)
+        } else {
             setPlaySineTone(false)
         }
         recomputeStartButtonEnabled()
@@ -196,8 +196,8 @@ class PersetmodeViewModel(
         val allowed = isTestAccount
         val desired = if (allowed) enabled else false
         if (shouldPlayTone == desired) return
+        val previous = shouldPlayTone
         shouldPlayTone = desired
-        _uiState.update { it.copy(playSineTone = shouldPlayTone) }
         if (_uiState.value.isRunning) {
             viewModelScope.launch {
                 try {
@@ -225,8 +225,7 @@ class PersetmodeViewModel(
                 } catch (e: Exception) {
                     Log.e("PersetmodeViewModel", "Failed to toggle sine tone", e)
                     _events.emit(UiEvent.ShowError(e))
-                    shouldPlayTone = !desired
-                    _uiState.update { it.copy(playSineTone = shouldPlayTone) }
+                    shouldPlayTone = previous
                 }
             }
         }
@@ -429,11 +428,13 @@ class PersetmodeViewModel(
 
     private suspend fun runPresetSequence(steps: List<Step>, useHardware: Boolean) {
         var remaining = steps.sumOf { it.durationSec }
-        for ((index, step) in steps.withIndex()) {
-            if (!coroutineContext.isActive) return
-            if (index > 0) {
-                applyStep(step, useHardware)
-            }
+        var index = 0
+        while (index < steps.size && coroutineContext.isActive) {
+            val step = steps[index]
+            Log.d(
+                "PresetRun",
+                "stepState index=$index freq=${step.frequencyHz} intensity=${step.intensity01V} duration=${step.durationSec} remaining=$remaining hardwareReady=$lastHardwareReady runningWithoutHardware=$runningWithoutHardware"
+            )
             _uiState.update {
                 it.copy(
                     currentStepIndex = index,
@@ -452,6 +453,16 @@ class PersetmodeViewModel(
                     if (!state.isRunning) state else state.copy(remainingSeconds = remaining)
                 }
             }
+            val nextIndex = index + 1
+            if (nextIndex < steps.size && coroutineContext.isActive) {
+                val nextStep = steps[nextIndex]
+                Log.d(
+                    "PresetRun",
+                    "applyStep index=$nextIndex freq=${nextStep.frequencyHz} intensity=${nextStep.intensity01V} scaled=${scaleIntensity(nextStep.intensity01V)} useHardware=$useHardware shouldPlayTone=$shouldPlayTone"
+                )
+                applyStep(nextStep, useHardware)
+            }
+            index++
         }
         finalizeRun(StopReason.COUNTDOWN_COMPLETE, detail = null)
     }

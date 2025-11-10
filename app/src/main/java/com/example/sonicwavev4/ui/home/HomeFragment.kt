@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -100,18 +99,6 @@ class HomeFragment : Fragment() {
                 val minutesPart = seconds / 60
                 val secondsPart = seconds % 60
                 binding.tvTimeValue.text = String.format(Locale.ROOT, "%02d:%02d", minutesPart, secondsPart)
-            }
-        }
-        viewModel.playSineTone.observe(viewLifecycleOwner) { enabled ->
-            if (binding.switchSineTone.isChecked != enabled) {
-                binding.switchSineTone.isChecked = enabled
-            }
-        }
-        viewModel.isTestAccount.observe(viewLifecycleOwner) { isTestAccount ->
-            binding.switchSineTone.isVisible = isTestAccount
-            if (!isTestAccount && binding.switchSineTone.isChecked) {
-                binding.switchSineTone.isChecked = false
-                viewModel.setPlaySineTone(false)
             }
         }
         viewModel.startButtonEnabled.observe(viewLifecycleOwner) { isEnabled ->
@@ -265,13 +252,6 @@ class HomeFragment : Fragment() {
         binding.btnKeyClear.setOnLongClickListener { viewModel.clearCurrentParameter(); viewModel.playTapSound(); true }
 
         binding.btnKeyEnter.setOnClickListener { viewModel.commitAndCycleInputType(); viewModel.playTapSound() }
-
-        binding.switchSineTone.setOnCheckedChangeListener { buttonView, isChecked ->
-            viewModel.setPlaySineTone(isChecked)
-            if (buttonView.isPressed) {
-                viewModel.playTapSound()
-            }
-        }
 
     }
 

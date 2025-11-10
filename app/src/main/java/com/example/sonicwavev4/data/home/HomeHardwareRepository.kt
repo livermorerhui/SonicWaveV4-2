@@ -93,6 +93,11 @@ class HomeHardwareRepository(
     private var audioFocusRequest: AudioFocusRequest? = null
     private var audioTrack: AudioTrack? = null
     private var toneJob: Job? = null
+    @Volatile
+    private var softwareToneFrequency = 0
+    @Volatile
+    private var softwareToneIntensity = 0
+    private var hasAudioFocus = false
 
     private lateinit var soundPool: SoundPool
     private var tapSoundId: Int = 0
@@ -140,12 +145,14 @@ class HomeHardwareRepository(
         val clamped = freq.coerceAtLeast(0)
         desiredState = desiredState.copy(frequency = clamped)
         applyFrequencyInternal(clamped, force = true)
+        logOutputState("applyFrequency($clamped)")
     }
 
     suspend fun applyIntensity(intensity: Int) = mutex.withLock {
         val clamped = intensity.coerceIn(0, 255)
         desiredState = desiredState.copy(intensity = clamped)
         applyIntensityInternal(clamped, force = true)
+        logOutputState("applyIntensity($clamped)")
     }
 
     suspend fun startOutput(
@@ -167,6 +174,7 @@ class HomeHardwareRepository(
             applyFrequencyInternal(desiredState.frequency, force = false)
             applyIntensityInternal(desiredState.intensity, force = false)
             val success = setOutputModeInternal(true)
+            logOutputState(if (success) "startOutput-success" else "startOutput-failure")
             if (!success) {
                 desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
             }
@@ -176,6 +184,7 @@ class HomeHardwareRepository(
     suspend fun stopOutput() = mutex.withLock {
         desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
         setOutputModeInternal(false)
+        logOutputState("stopOutput")
     }
 
     suspend fun playStandaloneTone(frequency: Int, intensity: Int): Boolean = mutex.withLock {
@@ -192,12 +201,14 @@ class HomeHardwareRepository(
             applyFrequencyInternal(clampedFrequency, force = false)
             applyIntensityInternal(clampedIntensity, force = false)
             val success = setOutputModeInternal(true)
+            logOutputState(if (success) "playStandaloneTone-success" else "playStandaloneTone-failure")
             if (!success) {
                 desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
             }
             success
         } else {
             startTonePlayback(clampedFrequency, clampedIntensity)
+            logOutputState("playStandaloneTone-software")
             true
         }
     }
@@ -209,6 +220,7 @@ class HomeHardwareRepository(
         } else {
             stopTonePlayback()
         }
+        logOutputState("stopStandaloneTone")
     }
 
     fun playTapSound() {
@@ -357,17 +369,19 @@ class HomeHardwareRepository(
     }
 
     private fun startTonePlayback(frequency: Int, intensity: Int) {
-        stopTonePlayback()
-        val currentVolume = if (intensity > 100) 1f else intensity / 100f
-        toneJob = scope.launch(Dispatchers.Default) {
-            ensureAudioFocus()
-            val sampleRate = 44100
-            val totalSeconds = 60 // tone runs until stopOutput is invoked
-            val minBufferSize = AudioTrack.getMinBufferSize(
-                sampleRate,
-                AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_16BIT
-            )
+        softwareToneFrequency = frequency.coerceAtLeast(0)
+        softwareToneIntensity = intensity.coerceIn(0, 255)
+        if (toneJob?.isActive == true && audioTrack != null) {
+            return
+        }
+        ensureAudioFocus()
+        val sampleRate = 44100
+        val minBufferSize = AudioTrack.getMinBufferSize(
+            sampleRate,
+            AudioFormat.CHANNEL_OUT_MONO,
+            AudioFormat.ENCODING_PCM_16BIT
+        ).coerceAtLeast(2048)
+        if (audioTrack == null) {
             audioTrack = AudioTrack.Builder()
                 .setAudioAttributes(
                     AudioAttributes.Builder()
@@ -386,39 +400,56 @@ class HomeHardwareRepository(
                 .setTransferMode(AudioTrack.MODE_STREAM)
                 .build()
             audioTrack?.play()
-
-            val samplesPerCycle = if (frequency <= 0) 1.0 else sampleRate.toDouble() / frequency
-            val waveBuffer = ShortArray(samplesPerCycle.toInt().coerceAtLeast(1))
-            for (i in waveBuffer.indices) {
-                waveBuffer[i] =
-                    (sin(2 * Math.PI * i / samplesPerCycle) * Short.MAX_VALUE * currentVolume).toInt().toShort()
-            }
-
+        }
+        if (toneJob?.isActive == true) return
+        toneJob = scope.launch(Dispatchers.Default) {
+            val buffer = ShortArray(minBufferSize)
+            var phase = 0.0
+            val twoPi = 2 * Math.PI
             _state.update { it.copy(isTonePlaying = true) }
-            var isPlaying = true
-            while (isActive && isPlaying) {
-                val result = audioTrack?.write(waveBuffer, 0, waveBuffer.size) ?: -1
-                if (result <= 0) {
-                    isPlaying = false
+            try {
+                while (isActive) {
+                    val freq = softwareToneFrequency
+                    val intensityLocal = softwareToneIntensity
+                    val phaseIncrement = if (freq <= 0) 0.0 else twoPi * freq / sampleRate
+                    val volume = if (intensityLocal > 100) 1f else intensityLocal / 100f
+                    if (phaseIncrement == 0.0 || volume == 0f) {
+                        buffer.fill(0)
+                    } else {
+                        for (i in buffer.indices) {
+                            val sample = (sin(phase) * Short.MAX_VALUE * volume)
+                            buffer[i] = sample.toInt().toShort()
+                            phase += phaseIncrement
+                            if (phase >= twoPi) {
+                                phase -= twoPi
+                            }
+                        }
+                    }
+                    val result = audioTrack?.write(buffer, 0, buffer.size) ?: -1
+                    if (result <= 0) break
                 }
+            } finally {
+                _state.update { it.copy(isTonePlaying = false) }
             }
-            _state.update { it.copy(isTonePlaying = false) }
         }
     }
 
-    private fun stopTonePlayback() {
+    private fun stopTonePlayback(releaseAudioFocus: Boolean = true) {
         toneJob?.cancel()
         toneJob = null
         audioTrack?.stop()
         audioTrack?.release()
         audioTrack = null
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
-        } else {
-            @Suppress("DEPRECATION")
-            audioManager?.abandonAudioFocus(null)
+        if (releaseAudioFocus && hasAudioFocus) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                audioFocusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
+            } else {
+                @Suppress("DEPRECATION")
+                audioManager?.abandonAudioFocus(null)
+            }
+            audioFocusRequest = null
+            hasAudioFocus = false
         }
-        audioFocusRequest = null
         _state.update { it.copy(isTonePlaying = false) }
     }
 
@@ -525,6 +556,14 @@ class HomeHardwareRepository(
         }
     }
 
+    private fun logOutputState(action: String) {
+        Log.d(
+            "HomeHardwareRepo",
+            "[$action] desired={enabled=${desiredState.isOutputEnabled}, playTone=${desiredState.playTone}, freq=${desiredState.frequency}, intensity=${desiredState.intensity}} " +
+                "hardwareReady=${state.value.isHardwareReady} tonePlaying=${state.value.isTonePlaying} lastMode=$lastMode"
+        )
+    }
+
     private fun initializeAudioResources() {
         audioManager = application.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
         if (!enableTapSound) {
@@ -554,34 +593,35 @@ class HomeHardwareRepository(
     }
 
     private fun ensureAudioFocus() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build()
-                )
-                .setOnAudioFocusChangeListener { change ->
-                    if (change == AudioManager.AUDIOFOCUS_LOSS) {
-                        scope.launch { stopOutput() }
+        if (hasAudioFocus) return
+        val granted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (audioFocusRequest == null) {
+                audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                    .setOnAudioFocusChangeListener { change ->
+                        if (change == AudioManager.AUDIOFOCUS_LOSS) {
+                            scope.launch { stopOutput() }
+                        }
                     }
-                }
-                .build()
-            val requestResult = audioManager?.requestAudioFocus(audioFocusRequest!!)
-            if (requestResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                Log.w("HomeHardwareRepo", "Audio focus request failed, continuing playback.")
+                    .build()
             }
+            audioManager?.requestAudioFocus(audioFocusRequest!!)
         } else {
             @Suppress("DEPRECATION")
-            if (audioManager?.requestAudioFocus(
-                    null,
-                    AudioManager.STREAM_MUSIC,
-                    AudioManager.AUDIOFOCUS_GAIN
-                ) != AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-            ) {
-                Log.w("HomeHardwareRepo", "Legacy audio focus request failed, continuing playback.")
-            }
+            audioManager?.requestAudioFocus(
+                null,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
+        }
+        hasAudioFocus = granted == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        if (!hasAudioFocus) {
+            Log.w("HomeHardwareRepo", "Audio focus request failed, continuing playback.")
         }
     }
 

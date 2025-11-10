@@ -12,8 +12,9 @@ import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.network.OperationEventRequest
 import com.example.sonicwavev4.network.Customer
-import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.ui.common.UiEvent
+import com.example.sonicwavev4.utils.GlobalLogoutManager
+import com.example.sonicwavev4.utils.TestToneSettings
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -112,6 +113,12 @@ class HomeViewModel(
                 forceStop(StopReason.LOGOUT)
             }
         }
+        viewModelScope.launch {
+            TestToneSettings.sineToneEnabled.collect { desired ->
+                val allowed = _isTestAccount.value == true
+                setPlaySineTone(desired && allowed)
+            }
+        }
         _isTestAccount.value = false
         recomputeStartButtonEnabled()
     }
@@ -156,9 +163,12 @@ class HomeViewModel(
             return
         }
         _isTestAccount.value = isTestAccount
-        if (!isTestAccount && _playSineTone.value == true) {
-            _playSineTone.value = false
+        val desired = if (isTestAccount) {
+            TestToneSettings.sineToneEnabled.value
+        } else {
+            false
         }
+        setPlaySineTone(desired)
         recomputeStartButtonEnabled()
     }
 

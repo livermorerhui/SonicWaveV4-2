@@ -233,16 +233,6 @@
                 tools:text="09:42"/>
         </LinearLayout>
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_sine_tone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_sine_toggle"
-            android:padding="12dp"
-            android:text="@string/label_sine_tone_switch"
-            android:visibility="gone"
-            tools:visibility="visible"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

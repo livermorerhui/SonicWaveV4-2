@@ -464,14 +464,24 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                     newPercent = relativeX / parentDimension
                     val minWidthPx = 660.dpToPx()
                     val minWidthPercent = minWidthPx / parentDimension
-                    params.guidePercent = newPercent.coerceIn(minWidthPercent, 0.5f)
+                    val maxPercent = 0.51f
+                    params.guidePercent = if (minWidthPercent >= maxPercent) {
+                        minWidthPercent.coerceIn(0f, 1f) // 屏幕太窄，直接固定在下限
+                    } else {
+                        newPercent.coerceIn(minWidthPercent, maxPercent)
+                    }
                 } else {
                     val parentStartY = location[1]
                     val relativeY = event.rawY - parentStartY
                     newPercent = relativeY / parentDimension
                     val minHeightPx = 315.dpToPx()
                     val minHeightPercent = minHeightPx / parentDimension
-                    params.guidePercent = newPercent.coerceIn(minHeightPercent, 0.55f)     //
+                    val maxPercent = 0.56f
+                    params.guidePercent = if (minHeightPercent >= maxPercent) {
+                        minHeightPercent.coerceIn(0f, 1f)
+                    } else {
+                        newPercent.coerceIn(minHeightPercent, maxPercent)
+                    }
                 }
                 guideline.layoutParams = params
                 return true
@@ -654,7 +664,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             val targetIndex = pendingSelectionIndex.takeIf { it != RecyclerView.NO_POSITION }
                 ?: currentTrackIndex.takeIf { it != RecyclerView.NO_POSITION }
             val targetItem = targetIndex?.let { musicAdapter.currentList.getOrNull(it) }
-            if (targetItem != null && targetIndex != null) {
+            if (targetItem != null) {
                 playMusic(targetItem.uri, targetIndex)
             } else {
                 Toast.makeText(this, "请选择音乐", Toast.LENGTH_SHORT).show()

@@ -88,9 +88,6 @@ class PersetmodeFragment : Fragment() {
             val customer = userViewModel.selectedCustomer.value
             viewModel.toggleStartStop(customer)
         }
-        binding.switchSineTone.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setPlaySineTone(isChecked)
-        }
     }
 
     private fun observeViewModel() {
@@ -138,14 +135,6 @@ class PersetmodeFragment : Fragment() {
         binding.imgHighlightUpperHead.isVisible = state.selectedModeIndex == 1
         binding.imgHighlightChestAbdomen.isVisible = state.selectedModeIndex == 2
         binding.imgHighlightLowerLimb.isVisible = state.selectedModeIndex == 3
-
-        binding.switchSineTone.isVisible = state.showSineToneToggle
-        if (binding.switchSineTone.isVisible && binding.switchSineTone.isChecked != state.playSineTone) {
-            binding.switchSineTone.isChecked = state.playSineTone
-        }
-        if (!state.showSineToneToggle && binding.switchSineTone.isChecked) {
-            binding.switchSineTone.isChecked = false
-        }
 
         binding.tvFrequencyValue.text = state.frequencyHz?.toString() ?: "--"
         binding.tvIntensityValue.text = state.intensity01V?.toString() ?: "--"

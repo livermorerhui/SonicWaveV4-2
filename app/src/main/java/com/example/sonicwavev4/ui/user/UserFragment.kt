@@ -20,6 +20,7 @@ import com.example.sonicwavev4.utils.HeartbeatManager
 import com.example.sonicwavev4.utils.LogoutReason
 import com.example.sonicwavev4.utils.OfflineTestModeManager
 import com.example.sonicwavev4.utils.SessionManager
+import com.example.sonicwavev4.utils.TestToneSettings
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -29,6 +30,7 @@ class UserFragment : Fragment() {
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
     private val userViewModel: UserViewModel by activityViewModels()
+    private var suppressToneSwitchChange = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,6 +47,8 @@ class UserFragment : Fragment() {
         setupLogoutButton()
         setupAddCustomerButton()
         observeOfflineMode()
+        setupToneSwitch()
+        observeAccountType()
     }
 
     private fun setupUsernameDisplay() {
@@ -70,6 +74,41 @@ class UserFragment : Fragment() {
                     childFragmentManager.beginTransaction()
                         .replace(R.id.customer_list_container, CustomerListFragment())
                         .commit()
+                }
+            }
+        }
+    }
+
+    private fun observeAccountType() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            userViewModel.accountType.collectLatest { accountType ->
+                val isTestAccount = accountType?.equals("test", ignoreCase = true) == true
+                binding.switchTestSineTone.isVisible = isTestAccount
+                binding.switchTestSineTone.isEnabled = isTestAccount
+                if (!isTestAccount) {
+                    suppressToneSwitchChange = true
+                    binding.switchTestSineTone.isChecked = false
+                    suppressToneSwitchChange = false
+                    if (TestToneSettings.sineToneEnabled.value) {
+                        TestToneSettings.setSineToneEnabled(false)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setupToneSwitch() {
+        binding.switchTestSineTone.setOnCheckedChangeListener { _, isChecked ->
+            if (suppressToneSwitchChange) return@setOnCheckedChangeListener
+            TestToneSettings.setSineToneEnabled(isChecked)
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            TestToneSettings.sineToneEnabled.collectLatest { enabled ->
+                val shouldCheck = enabled && binding.switchTestSineTone.isEnabled
+                if (binding.switchTestSineTone.isChecked != shouldCheck) {
+                    suppressToneSwitchChange = true
+                    binding.switchTestSineTone.isChecked = shouldCheck
+                    suppressToneSwitchChange = false
                 }
             }
         }
