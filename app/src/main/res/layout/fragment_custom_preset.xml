@@ -56,6 +56,17 @@
             android:textColor="@android:color/darker_gray"
             android:textSize="12sp" />
 
+        <TextView
+            android:id="@+id/tv_empty_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="16dp"
+            android:layout_marginTop="100dp"
+            android:text="暂无自设模式，点击“新增”开始配置"
+            android:textColor="@android:color/darker_gray"
+            android:visibility="gone" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_custom_presets"
             android:layout_width="match_parent"
@@ -65,15 +76,6 @@
             android:clipToPadding="false"
             android:paddingBottom="8dp" />
 
-        <TextView
-            android:id="@+id/tv_empty_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="16dp"
-            android:text="暂无自设模式，点击“新增”开始配置"
-            android:textColor="@android:color/darker_gray"
-            android:visibility="gone" />
     </LinearLayout>
 
     <!-- 右侧：运行面板 -->

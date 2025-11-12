@@ -225,7 +225,7 @@ class CustomPresetFragment : Fragment() {
 
         val selected = state.customPresets.firstOrNull { it.isSelected }
         binding.tvSelectedPresetName.text = selected?.name ?: "未选择自设模式"
-        binding.tvSelectedSummary.text = selected?.summary ?: "请选择左侧的自设模式后再开始"
+        binding.tvSelectedSummary.text = selected?.summary ?: "请选择自设模式后再开始"
 
         binding.btnStartStop.text =
             if (state.isRunning) getString(R.string.button_stop) else getString(R.string.button_start)
