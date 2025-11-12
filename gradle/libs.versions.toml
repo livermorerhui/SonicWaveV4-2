@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "8.13.0"  # Adjust to match your Gradle version
+androidGradlePlugin = "8.13.1"  # Adjust to match your Gradle version
 constraintlayout = "2.2.0"
 kotlin = "2.0.20"              # Kotlin version compatible with your project
 androidxCoreKtx = "1.15.0"

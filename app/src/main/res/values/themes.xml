@@ -2,8 +2,8 @@
     <!-- Base application theme. -->
     <style name="Theme.SonicWaveD" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimary">#01E4BA</item>
+        <item name="colorPrimaryVariant">#96E4BA</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -16,5 +16,12 @@
         <!-- 当状态栏背景颜色是浅色时，将此项设置为 true，使状态栏图标变为深色 -->
         <item name="android:windowLightStatusBar">true</item>
 
+    </style>
+
+    <style name="Theme.SonicWaveD.Splash" parent="Theme.SonicWaveD">
+        <item name="android:windowBackground">@drawable/splash_screen_background</item>
+        <item name="windowSplashScreenBackground">@drawable/splash_screen_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_screen_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.SonicWaveD</item>
     </style>
 </resources>

@@ -45,4 +45,12 @@ class DownloadedMusicRepository(private val context: Context) {
             saveDownloadedMusic(currentList)
         }
     }
+
+    fun removeDownloadedMusicByPath(path: String) {
+        val currentList = loadDownloadedMusic()
+        val newList = currentList.filterNot { it.internalPath == path }
+        if (newList.size != currentList.size) {
+            saveDownloadedMusic(newList)
+        }
+    }
 }

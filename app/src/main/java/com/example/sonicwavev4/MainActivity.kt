@@ -6,17 +6,20 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
@@ -24,17 +27,16 @@ import android.view.animation.LinearInterpolator
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
-import android.widget.SeekBar
-import android.os.Handler
-import android.os.Looper
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.Guideline
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.core.widget.ImageViewCompat
 import androidx.core.view.forEach
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -47,15 +49,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sonicwavev4.databinding.ActivityMainBinding
-import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
 import com.example.sonicwavev4.network.AppUsageRequest
 import com.example.sonicwavev4.network.RetrofitClient
+import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
+import java.io.IOException
 import java.util.Locale
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadListener {
     private lateinit var binding: ActivityMainBinding
@@ -107,6 +110,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -117,11 +121,17 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         navController = navHostFragment.navController
-        appBarConfiguration = AppBarConfiguration(setOf(R.id.navigation_home, R.id.navigation_persetmode))
+        appBarConfiguration = AppBarConfiguration(setOf(R.id.navigation_home, R.id.navigation_persetmode, R.id.navigation_custom_preset))
         setupActionBarWithNavController(navController, appBarConfiguration)
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.navigation_home,
+                R.id.navigation_persetmode,
+                R.id.navigation_custom_preset -> updateNavRailSelection(destination.id)
+            }
+        }
 
         setupCustomNavigationRail()
-        setupDragListeners()
 
         musicAreaLayout = binding.mainContentConstraintLayout?.findViewById(R.id.fragment_bottom_left)
         musicDownloader = MusicDownloader(this)
@@ -261,6 +271,13 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private fun onMusicItemSelected(position: Int) {
         pendingSelectionIndex = position
         musicAdapter.setSelectedPosition(position)
+        val item = musicAdapter.currentList.getOrNull(position) ?: return
+        val player = mediaPlayer
+        val isDifferentTrack = currentTrackIndex != position
+
+        if (player != null && isPlaying && isDifferentTrack) {
+            playMusic(item.uri, position)
+        }
     }
 
     private fun ensureSelectionValid(totalSize: Int) {
@@ -358,17 +375,16 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
             init {
                 view.setOnClickListener {
-                    val position = adapterPosition
+                    val position = bindingAdapterPosition
                     if (position != RecyclerView.NO_POSITION) {
                         onMusicItemSelected(position)
                     }
                 }
             }
 
-            fun bind(item: MusicItem) {
+            fun bind(item: MusicItem, isSelected: Boolean) {
                 titleTextView.text = item.title
                 artistTextView.text = item.artist
-                val isSelected = adapterPosition == selectedPosition
                 itemView.setBackgroundResource(
                     if (isSelected) R.drawable.bg_music_item_selected else android.R.color.transparent
                 )
@@ -382,7 +398,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         }
 
         override fun onBindViewHolder(holder: MusicViewHolder, position: Int) {
-            holder.bind(getItem(position))
+            holder.bind(getItem(position), position == selectedPosition)
         }
 
         fun setSelectedPosition(position: Int) {
@@ -444,74 +460,8 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         ).toInt()
     }
 
-    private fun handleDrag(event: MotionEvent, parentView: View, guideline: Guideline, isHorizontal: Boolean): Boolean {
-        val parentDimension = if (isHorizontal) parentView.width.toFloat() else parentView.height.toFloat()
-        if (parentDimension == 0f) return true
-
-        val params = guideline.layoutParams as ConstraintLayout.LayoutParams
-        val location = IntArray(2)
-        parentView.getLocationOnScreen(location)
-
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                return true
-            }
-            MotionEvent.ACTION_MOVE -> {
-                val newPercent: Float
-                if (isHorizontal) {
-                    val parentStartX = location[0]
-                    val relativeX = event.rawX - parentStartX
-                    newPercent = relativeX / parentDimension
-                    val minWidthPx = 660.dpToPx()
-                    val minWidthPercent = minWidthPx / parentDimension
-                    val maxPercent = 0.51f
-                    params.guidePercent = if (minWidthPercent >= maxPercent) {
-                        minWidthPercent.coerceIn(0f, 1f) // 屏幕太窄，直接固定在下限
-                    } else {
-                        newPercent.coerceIn(minWidthPercent, maxPercent)
-                    }
-                } else {
-                    val parentStartY = location[1]
-                    val relativeY = event.rawY - parentStartY
-                    newPercent = relativeY / parentDimension
-                    val minHeightPx = 315.dpToPx()
-                    val minHeightPercent = minHeightPx / parentDimension
-                    val maxPercent = 0.56f
-                    params.guidePercent = if (minHeightPercent >= maxPercent) {
-                        minHeightPercent.coerceIn(0f, 1f)
-                    } else {
-                        newPercent.coerceIn(minHeightPercent, maxPercent)
-                    }
-                }
-                guideline.layoutParams = params
-                return true
-            }
-        }
-        return false
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupDragListeners() {
-        binding.mainContentConstraintLayout?.let { mainContentLayout ->
-            val verticalGuideline: Guideline? = mainContentLayout.findViewById(R.id.vertical_divider_guideline)
-            val horizontalGuideline: Guideline? = mainContentLayout.findViewById(R.id.horizontal_divider_guideline)
-            val verticalDragHandle: View? = mainContentLayout.findViewById(R.id.vertical_drag_handle)
-            val horizontalDragHandle: View? = mainContentLayout.findViewById(R.id.horizontal_drag_handle)
-
-            if (verticalGuideline != null && verticalDragHandle != null) {
-                verticalDragHandle.setOnTouchListener { _, event ->
-                    handleDrag(event, mainContentLayout, verticalGuideline, isHorizontal = true)
-                }
-            }
-            if (horizontalGuideline != null && horizontalDragHandle != null) {
-                horizontalDragHandle.setOnTouchListener { _, event ->
-                    handleDrag(event, mainContentLayout, horizontalGuideline, isHorizontal = false)
-                }
-            }
-        }
-    }
-
     private fun setupCustomNavigationRail() {
+        navButtonViews.clear()
         val topSectionContainer: LinearLayout? = binding.mainContentConstraintLayout?.findViewById(R.id.nav_rail_top_section)
         val bottomSectionContainer: LinearLayout? = binding.mainContentConstraintLayout?.findViewById(R.id.nav_rail_bottom_section)
 
@@ -536,6 +486,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                 }
             }
         }
+        updateNavRailSelection(currentNavItemId)
     }
 
     private fun createNavRailButton(item: MenuItem, parent: ViewGroup): View? {
@@ -545,25 +496,57 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         val icon: ImageButton? = buttonView.findViewById(R.id.nav_item_icon)
         val title: TextView? = buttonView.findViewById(R.id.nav_item_title)
 
-        return if (icon != null && title != null) {
-            icon.setImageDrawable(item.icon)
-            title.text = item.title
-            buttonView.setOnClickListener { handleNavigation(item) }
-            buttonView
+        if (icon == null || title == null) return null
+
+        icon.setImageDrawable(item.icon)
+        title.text = item.title
+
+        val isMusicItem = item.itemId == R.id.navigation_music
+        val root = buttonView.findViewById<View>(R.id.nav_item_root)
+        if (isMusicItem) {
+            root.isClickable = false
+            root.isFocusable = false
+            root.background = null
+            val accentColor = ContextCompat.getColor(this, R.color.nav_music)
+            icon.imageTintList = ColorStateList.valueOf(accentColor)
+            title.setTextColor(accentColor)
         } else {
-            null
+            root.isClickable = true
+            root.isFocusable = true
+            navButtonViews[item.itemId] = icon to title
+            val isSelected = item.itemId == currentNavItemId
+            applyNavButtonColors(icon, title, isSelected)
+            root.setOnClickListener {
+                handleNavigation(item)
+                updateNavRailSelection(item.itemId)
+            }
         }
+        return buttonView
     }
 
     private fun handleNavigation(item: MenuItem) {
         when (item.itemId) {
-            R.id.navigation_home, R.id.navigation_persetmode -> {
+            R.id.navigation_home, R.id.navigation_persetmode, R.id.navigation_custom_preset -> {
                 navController.navigate(item.itemId)
             }
-            R.id.navigation_music -> {
-                Toast.makeText(this, "音乐按钮被点击", Toast.LENGTH_SHORT).show()
-            }
+            R.id.navigation_music -> Unit
         }
+    }
+
+    private fun updateNavRailSelection(activeItemId: Int) {
+        currentNavItemId = activeItemId
+        navButtonViews.forEach { (id, pair) ->
+            val (icon, title) = pair
+            val isSelected = id == activeItemId
+            applyNavButtonColors(icon, title, isSelected)
+        }
+    }
+
+    private fun applyNavButtonColors(icon: ImageButton, title: TextView, isSelected: Boolean) {
+        val colorRes = if (isSelected) R.color.nav_item_active else R.color.nav_item_inactive
+        val color = ContextCompat.getColor(this, colorRes)
+        ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(color))
+        title.setTextColor(color)
     }
 
     
@@ -593,9 +576,10 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         stopPlaybackAnimation()
         resetPlaybackUi()
 
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(this@MainActivity, uri)
-            setOnPreparedListener { preparedPlayer ->
+        val player = MediaPlayer()
+        try {
+            player.setDataSource(this@MainActivity, uri)
+            player.setOnPreparedListener { preparedPlayer ->
                 playbackSeekBar?.apply {
                     isEnabled = true
                     max = preparedPlayer.duration
@@ -608,7 +592,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                 startPlaybackAnimation()
                 Toast.makeText(this@MainActivity, "开始播放: ${uri.lastPathSegment}", Toast.LENGTH_SHORT).show()
             }
-            setOnCompletionListener { completedPlayer ->
+            player.setOnCompletionListener { completedPlayer ->
                 this@MainActivity.isPlaying = false
                 playPauseButton?.setImageResource(android.R.drawable.ic_media_play)
                 stopPlaybackAnimation()
@@ -618,7 +602,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                 mediaPlayer = null
                 currentPlayingUri = null
             }
-            setOnErrorListener { mp, what, extra ->
+            player.setOnErrorListener { mp, what, extra ->
                 Toast.makeText(this@MainActivity, "播放错误: $what, $extra", Toast.LENGTH_LONG).show()
                 this@MainActivity.isPlaying = false
                 playPauseButton?.setImageResource(android.R.drawable.ic_media_play)
@@ -629,9 +613,13 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                 currentPlayingUri = null
                 true
             }
-            prepareAsync()
+            player.prepareAsync()
+            mediaPlayer = player
+            currentPlayingUri = uri
+        } catch (e: Exception) {
+            player.release()
+            handlePlaybackSourceError(targetIndex, uri, e)
         }
-        currentPlayingUri = uri
     }
 
     private fun togglePlayPause() {
@@ -670,6 +658,28 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                 Toast.makeText(this, "请选择音乐", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun handlePlaybackSourceError(targetIndex: Int, uri: Uri, error: Exception) {
+        Log.e("MainActivity", "Failed to play uri=$uri", error)
+        Toast.makeText(this, "无法播放，文件可能已被删除", Toast.LENGTH_LONG).show()
+        if (uri.scheme.equals("file", ignoreCase = true)) {
+            uri.path?.let { downloadedMusicRepository.removeDownloadedMusicByPath(it) }
+        }
+        removeTrackFromList(targetIndex)
+        currentPlayingUri = null
+        currentTrackIndex = RecyclerView.NO_POSITION
+        pendingSelectionIndex = RecyclerView.NO_POSITION
+        loadMusic()
+    }
+
+    private fun removeTrackFromList(targetIndex: Int) {
+        val currentList = musicAdapter.currentList
+        if (targetIndex !in currentList.indices) return
+        val updatedList = currentList.toMutableList().apply { removeAt(targetIndex) }
+        musicAdapter.setSelectedPosition(RecyclerView.NO_POSITION)
+        musicAdapter.submitList(updatedList)
+        ensureSelectionValid(updatedList.size)
     }
 
     private fun playNextTrack() {
@@ -726,20 +736,12 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         }.also { vinylAnimator = it }
         if (!animator.isStarted) {
             animator.start()
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        } else
             animator.resume()
-        }
     }
 
     private fun pauseVinyl() {
-        vinylAnimator?.let { animator ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                animator.pause()
-            } else {
-                animator.cancel()
-                vinylAnimator = null
-            }
-        }
+        vinylAnimator?.pause()
     }
 
     private fun animateTonearm(engage: Boolean, onEnd: (() -> Unit)? = null) {
@@ -832,3 +834,5 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 }
+    private val navButtonViews = mutableMapOf<Int, Pair<ImageButton, TextView>>()
+    private var currentNavItemId: Int = R.id.navigation_home

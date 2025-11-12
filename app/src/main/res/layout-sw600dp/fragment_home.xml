@@ -45,7 +45,7 @@
     <TextView
         android:id="@+id/tv_frequency_value"
         style="@style/ParameterDisplay"
-        android:text="0 Hz"
+        android:text="0 赫兹"
         android:minHeight="48dp"
         app:layout_constraintTop_toTopOf="@id/btn_frequency_down"
         app:layout_constraintBottom_toBottomOf="@id/btn_frequency_down"
@@ -200,7 +200,7 @@
         android:minHeight="48dp"
         android:src="@drawable/ic_return_key_white"
         android:contentDescription="输入"
-        app:tint="?attr/colorOnSurface"
+
         android:scaleType="fitCenter" />
 
     <!-- ===================================================== -->
@@ -210,14 +210,15 @@
         android:id="@+id/btn_start_stop"
         android:layout_width="0dp"
         android:layout_height="70dp"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/rounded_button"
-        android:text="Start"
-        android:textColor="#FFFFFF"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_preset_mode_button"
         android:minHeight="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="开始"
+        android:textColor="@color/black"
+        android:textSize="22dp"
         app:layout_constraintEnd_toStartOf="@+id/btn_clear"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_time_value"
         app:layout_constraintWidth_min="120dp" />
 
     <Button
@@ -225,13 +226,16 @@
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:layout_marginStart="8dp"
-        android:background="@drawable/rounded_button"
-        android:text="Clear"
-        android:textColor="#FFFFFF"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_preset_mode_button"
         android:minHeight="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="清空"
+        android:textColor="@color/black"
+        android:textSize="22dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline_vertical"
         app:layout_constraintStart_toEndOf="@+id/btn_start_stop"
+        app:layout_constraintTop_toBottomOf="@+id/tv_time_value"
         app:layout_constraintWidth_min="120dp" />
 
     <!-- ===================================================== -->

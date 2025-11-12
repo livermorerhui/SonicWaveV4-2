@@ -10,7 +10,7 @@
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="#96E4BA"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -32,6 +32,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_return"
             android:layout_gravity="end"
+            android:layout_marginEnd="20dp"
             android:contentDescription="返回" />
 
     </androidx.appcompat.widget.Toolbar>

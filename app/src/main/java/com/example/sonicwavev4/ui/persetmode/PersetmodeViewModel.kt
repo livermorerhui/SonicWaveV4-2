@@ -4,6 +4,9 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sonicwavev4.data.custompreset.CustomPresetRepository
+import com.example.sonicwavev4.data.custompreset.model.CustomPreset
+import com.example.sonicwavev4.data.custompreset.model.CustomPresetStep
 import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.network.Customer
@@ -31,6 +34,25 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+enum class PresetCategory {
+    BUILT_IN,
+    CUSTOM
+}
+
+private fun CustomPreset.toUiModel(selectedId: String?): CustomPresetUiModel {
+    val orderedSteps = steps.sortedBy { it.order }
+    val totalDuration = orderedSteps.sumOf { it.durationSec }
+    val summary = "共${orderedSteps.size}步 · ${totalDuration}秒"
+    return CustomPresetUiModel(
+        id = id,
+        name = name,
+        summary = summary,
+        stepCount = orderedSteps.size,
+        totalDurationSec = totalDuration,
+        isSelected = selectedId == id
+    )
+}
+
 data class PresetModeSummary(
     val id: String,
     val displayName: String,
@@ -38,7 +60,17 @@ data class PresetModeSummary(
     val stepCount: Int
 )
 
+data class CustomPresetUiModel(
+    val id: String,
+    val name: String,
+    val summary: String,
+    val stepCount: Int,
+    val totalDurationSec: Int,
+    val isSelected: Boolean
+)
+
 data class PresetModeUiState(
+    val category: PresetCategory = PresetCategory.BUILT_IN,
     val modeSummaries: List<PresetModeSummary> = emptyList(),
     val selectedModeIndex: Int = 0,
     val isRunning: Boolean = false,
@@ -49,13 +81,16 @@ data class PresetModeUiState(
     val frequencyHz: Int? = null,
     val intensity01V: Int? = null,
     val remainingSeconds: Int = 0,
-    val totalDurationSeconds: Int = 0
+    val totalDurationSeconds: Int = 0,
+    val customPresets: List<CustomPresetUiModel> = emptyList(),
+    val selectedCustomPresetId: String? = null
 )
 
 class PersetmodeViewModel(
     application: Application,
     private val hardwareRepository: HomeHardwareRepository,
-    private val sessionRepository: HomeSessionRepository
+    private val sessionRepository: HomeSessionRepository,
+    private val customPresetRepository: CustomPresetRepository
 ) : AndroidViewModel(application) {
 
     private val presetModes: List<PresetMode> = listOf(
@@ -64,6 +99,9 @@ class PersetmodeViewModel(
         AbdomenChest10m,
         LowerLimb10m
     )
+
+    private var customPresetsCache: List<CustomPreset> = emptyList()
+    private var pendingCustomSelectionId: String? = null
 
     private val intensityScalePct = MutableStateFlow(100)
 
@@ -133,6 +171,38 @@ class PersetmodeViewModel(
                 setPlaySineTone(if (allowed) desired else false)
             }
         }
+
+        viewModelScope.launch {
+            customPresetRepository.customPresets.collect { presets ->
+                customPresetsCache = presets
+                val currentSelectedId = _uiState.value.selectedCustomPresetId
+                val hasCurrent = currentSelectedId != null && presets.any { it.id == currentSelectedId }
+                val normalizedSelectedId = if (hasCurrent) currentSelectedId else null
+                _uiState.update { state ->
+                    val updated = state.copy(
+                        customPresets = presets.map { it.toUiModel(normalizedSelectedId) },
+                        selectedCustomPresetId = normalizedSelectedId
+                    )
+                    if (state.category == PresetCategory.CUSTOM && normalizedSelectedId == null) {
+                        updated.copy(
+                            frequencyHz = null,
+                            intensity01V = null,
+                            remainingSeconds = 0,
+                            totalDurationSeconds = 0
+                        )
+                    } else {
+                        updated
+                    }
+                }
+                val pendingSelection = pendingCustomSelectionId
+                if (pendingSelection != null && presets.any { it.id == pendingSelection }) {
+                    pendingCustomSelectionId = null
+                    selectCustomPreset(pendingSelection)
+                } else {
+                    recomputeStartButtonEnabled()
+                }
+            }
+        }
     }
 
     fun selectMode(index: Int) {
@@ -143,12 +213,93 @@ class PersetmodeViewModel(
         val first = steps.firstOrNull()
         _uiState.update {
             it.copy(
+                category = PresetCategory.BUILT_IN,
                 selectedModeIndex = clamped,
                 frequencyHz = first?.frequencyHz,
                 intensity01V = first?.intensity01V,
                 remainingSeconds = mode.totalDurationSec,
                 totalDurationSeconds = mode.totalDurationSec
             )
+        }
+        recomputeStartButtonEnabled()
+    }
+
+    fun enterCustomMode() {
+        if (_uiState.value.isRunning) return
+        _uiState.update { it.copy(category = PresetCategory.CUSTOM) }
+        recomputeStartButtonEnabled()
+    }
+
+    fun selectCustomPreset(presetId: String) {
+        if (_uiState.value.isRunning) return
+        val preset = customPresetsCache.firstOrNull { it.id == presetId }
+        if (preset == null) {
+            pendingCustomSelectionId = presetId
+            return
+        }
+        pendingCustomSelectionId = null
+        applyCustomPresetSelection(preset)
+    }
+
+    fun focusOnCustomPreset(presetId: String) {
+        pendingCustomSelectionId = presetId
+        selectCustomPreset(presetId)
+    }
+
+    fun clearCustomSelection() {
+        if (_uiState.value.selectedCustomPresetId == null && _uiState.value.category == PresetCategory.CUSTOM) {
+            return
+        }
+        _uiState.update {
+            it.copy(
+                category = PresetCategory.CUSTOM,
+                selectedCustomPresetId = null,
+                customPresets = it.customPresets.map { model -> model.copy(isSelected = false) },
+                frequencyHz = null,
+                intensity01V = null,
+                remainingSeconds = 0,
+                totalDurationSeconds = 0
+            )
+        }
+        recomputeStartButtonEnabled()
+    }
+
+    private fun applyCustomPresetSelection(preset: CustomPreset) {
+        val orderedSteps = preset.steps.sortedBy { it.order }
+        val first = orderedSteps.firstOrNull()
+        val totalDuration = orderedSteps.sumOf { it.durationSec }
+        _uiState.update {
+            it.copy(
+                category = PresetCategory.CUSTOM,
+                selectedCustomPresetId = preset.id,
+                customPresets = customPresetsCache.map { presetItem -> presetItem.toUiModel(preset.id) },
+                frequencyHz = first?.frequencyHz,
+                intensity01V = first?.intensity01V,
+                remainingSeconds = totalDuration,
+                totalDurationSeconds = totalDuration
+            )
+        }
+        recomputeStartButtonEnabled()
+    }
+
+    fun deleteCustomPreset(presetId: String) {
+        viewModelScope.launch {
+            customPresetRepository.delete(presetId)
+        }
+        if (_uiState.value.selectedCustomPresetId == presetId) {
+            _uiState.update {
+                it.copy(
+                    selectedCustomPresetId = null,
+                    customPresets = it.customPresets.map { preset -> preset.copy(isSelected = false) }
+                )
+            }
+            recomputeStartButtonEnabled()
+        }
+    }
+
+    fun reorderCustomPresets(newOrderIds: List<String>) {
+        viewModelScope.launch {
+            customPresetRepository.reorderPresets(newOrderIds)
         }
     }
 
@@ -249,14 +400,42 @@ class PersetmodeViewModel(
             }
             return
         }
-        val steps = scaledSteps()
-        if (steps.isEmpty()) {
-            viewModelScope.launch {
-                _events.emit(UiEvent.ShowToast("当前预设没有有效步骤"))
+        val category = _uiState.value.category
+        val steps: List<Step>
+        val presetId: String
+        val presetName: String
+        if (category == PresetCategory.BUILT_IN) {
+            val mode = currentMode()
+            val modeSteps = scaledSteps(mode)
+            if (modeSteps.isEmpty()) {
+                viewModelScope.launch {
+                    _events.emit(UiEvent.ShowToast("当前预设没有有效步骤"))
+                }
+                return
             }
-            return
+            steps = modeSteps
+            presetId = mode.id
+            presetName = mode.displayName
+        } else {
+            val preset = selectedCustomPreset()
+            if (preset == null) {
+                viewModelScope.launch {
+                    _events.emit(UiEvent.ShowToast("请先选择自设模式"))
+                }
+                return
+            }
+            val customSteps = preset.toSteps()
+            if (customSteps.isEmpty()) {
+                viewModelScope.launch {
+                    _events.emit(UiEvent.ShowToast("自设模式没有有效步骤"))
+                }
+                return
+            }
+            steps = customSteps
+            presetId = preset.id
+            presetName = preset.name
         }
-        startPreset(selectedCustomer, steps, useHardware = hardwareReady)
+        startPreset(selectedCustomer, presetId = presetId, presetName = presetName, steps = steps, useHardware = hardwareReady)
     }
 
     private fun buildInitialUiState(): PresetModeUiState {
@@ -289,6 +468,15 @@ class PersetmodeViewModel(
         }
     }
 
+    private fun selectedCustomPreset(): CustomPreset? {
+        val selectedId = _uiState.value.selectedCustomPresetId ?: return null
+        return customPresetsCache.firstOrNull { it.id == selectedId }
+    }
+
+    private fun CustomPreset.toSteps(): List<Step> =
+        steps.sortedBy { it.order }
+            .map { Step(intensity01V = it.intensity01V, frequencyHz = it.frequencyHz, durationSec = it.durationSec) }
+
     fun stopIfRunning() {
         if (_uiState.value.isRunning || currentRunId != null) {
             forceStop(StopReason.MANUAL)
@@ -316,19 +504,29 @@ class PersetmodeViewModel(
     }
 
     private fun recomputeStartButtonEnabled() {
-        val running = _uiState.value.isRunning
+        val state = _uiState.value
+        val running = state.isRunning
+        val hasSelection = when (state.category) {
+            PresetCategory.BUILT_IN -> true
+            PresetCategory.CUSTOM -> state.selectedCustomPresetId != null
+        }
         val enabled = if (running) {
             true
         } else {
-            isSessionActive && (lastHardwareReady || isTestAccount)
+            isSessionActive && hasSelection && (lastHardwareReady || isTestAccount)
         }
         _uiState.update { it.copy(isStartEnabled = enabled) }
     }
 
-    private fun startPreset(selectedCustomer: Customer?, steps: List<Step>, useHardware: Boolean) {
+    private fun startPreset(
+        selectedCustomer: Customer?,
+        presetId: String,
+        presetName: String,
+        steps: List<Step>,
+        useHardware: Boolean
+    ) {
         val first = steps.first()
         val totalDuration = steps.sumOf { it.durationSec }
-        val mode = currentMode()
         val scalePct = intensityScalePct.value
         viewModelScope.launch {
             try {
@@ -344,8 +542,8 @@ class PersetmodeViewModel(
             val runId = try {
                 sessionRepository.startPresetModeRun(
                     selectedCustomer = selectedCustomer,
-                    presetModeId = mode.id,
-                    presetModeName = mode.displayName,
+                    presetModeId = presetId,
+                    presetModeName = presetName,
                     intensityScalePct = scalePct,
                     totalDurationSec = totalDuration
                 )
@@ -508,18 +706,38 @@ class PersetmodeViewModel(
                 }
             }
         }
-        val mode = currentMode()
-        val first = scaledSteps(mode).firstOrNull()
+        val isCustomCategory = _uiState.value.category == PresetCategory.CUSTOM
+        val nextFreq: Int?
+        val nextIntensity: Int?
+        val nextRemaining: Int
+        val nextTotal: Int
+        if (isCustomCategory) {
+            val preset = selectedCustomPreset()
+            val steps = preset?.toSteps()
+            val first = steps?.firstOrNull()
+            val total = steps?.sumOf { it.durationSec } ?: 0
+            nextFreq = first?.frequencyHz
+            nextIntensity = first?.intensity01V
+            nextRemaining = total
+            nextTotal = total
+        } else {
+            val mode = currentMode()
+            val first = scaledSteps(mode).firstOrNull()
+            nextFreq = first?.frequencyHz
+            nextIntensity = first?.intensity01V
+            nextRemaining = mode.totalDurationSec
+            nextTotal = mode.totalDurationSec
+        }
         _uiState.update {
             it.copy(
                 isRunning = false,
                 modeButtonsEnabled = true,
                 currentStepIndex = null,
                 currentStep = null,
-                frequencyHz = first?.frequencyHz,
-                intensity01V = first?.intensity01V,
-                remainingSeconds = mode.totalDurationSec,
-                totalDurationSeconds = mode.totalDurationSec
+                frequencyHz = nextFreq,
+                intensity01V = nextIntensity,
+                remainingSeconds = nextRemaining,
+                totalDurationSeconds = nextTotal
             )
         }
         recomputeStartButtonEnabled()

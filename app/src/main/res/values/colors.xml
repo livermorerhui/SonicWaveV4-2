@@ -9,9 +9,12 @@
     <color name="white">#FFFFFFFF</color>
     <color name="sine_toggle_background">#FFF9C4</color>
     <color name="sine_toggle_border">#FFE082</color>
-    <color name="preset_mode_button_selected">#FF6200EE</color>
+    <color name="nav_music">#B98C00</color>
+    <color name="preset_mode_button_selected">#FF0C8A4F</color>
     <color name="preset_mode_button_default">#FFFFFFFF</color>
     <color name="preset_mode_button_border">#FFDDDDDD</color>
     <color name="preset_mode_button_disabled">#FFE0E0E0</color>
     <color name="preset_mode_button_text_default">#FF333333</color>
+    <color name="nav_item_active">#008950</color>
+    <color name="nav_item_inactive">#747474</color>
 </resources>

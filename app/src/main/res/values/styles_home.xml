@@ -7,7 +7,7 @@
         <item name="layout_columnWeight">1</item>
         <item name="android:background">@drawable/rounded_button</item>
         <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">30sp</item>
         <item name="android:layout_margin">2dp</item> <!-- 增加一点间距 -->
     </style>
 
@@ -18,9 +18,10 @@
         <item name="android:padding">10dp</item>
         <item name="android:scaleType">centerInside</item>
         <item name="android:adjustViewBounds">true</item>
-        <item name="android:tint">@android:color/white</item>
+        <item name="android:tint">@color/black</item>
     </style>
 
+    <!-- 自选模式的加减按钮 -->
     <style name="ParameterButton.Plus" parent="ParameterButton">
         <item name="android:src">@drawable/ic_param_plus</item>
     </style>
@@ -29,8 +30,10 @@
         <item name="android:src">@drawable/ic_param_minus</item>
     </style>
 
+
+    <!-- 自选模式的编辑框 -->
     <style name="ParameterDisplay">
-        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_width">120dp</item>
         <item name="android:layout_height">50dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_marginStart">8dp</item>
@@ -41,11 +44,13 @@
         <item name="android:textColor">#000000</item>
     </style>
 
+
+
     <style name="ParameterLabel">
         <item name="android:layout_width">60dp</item>
         <item name="android:layout_height">50dp</item>
         <item name="android:background">@drawable/rounded_button</item>
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColor">@color/black</item>
         <item name="android:layout_marginBottom">0dp</item>
 
         <item name="android:gravity">center</item>

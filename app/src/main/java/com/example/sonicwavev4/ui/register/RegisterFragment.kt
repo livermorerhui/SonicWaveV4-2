@@ -6,11 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.databinding.FragmentRegisterBinding
+import com.example.sonicwavev4.ui.login.LoginFragment
 import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.ui.user.UserFragment
 
@@ -35,6 +36,9 @@ class RegisterFragment : Fragment() {
         setupRegisterButton()
         observeViewModels()
         setupLoginLink()
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            navigateBackToLogin()
+        }
     }
 
     private fun setupRegisterButton() {
@@ -91,15 +95,20 @@ class RegisterFragment : Fragment() {
 
     private fun setupLoginLink() {
         binding.loginLinkTextView.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            navigateBackToLogin()
         }
     }
 
     private fun navigateToUserFragment() {
         Toast.makeText(requireContext(), "登录成功！", Toast.LENGTH_SHORT).show()
-        parentFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_right_main, UserFragment())
+            .commit()
+    }
+
+    private fun navigateBackToLogin() {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_right_main, LoginFragment())
             .commit()
     }
 

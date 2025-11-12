@@ -17,7 +17,7 @@ class CustomerAdapter(
 
     private var selectedPosition = RecyclerView.NO_POSITION
     private var lastClickTime: Long = 0
-    private val DOUBLE_CLICK_TIME_DELTA: Long = 300 // milliseconds
+    private val doubleClickTimeDeltaMs: Long = 300 // milliseconds
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomerViewHolder {
         val binding = ItemCustomerBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -33,17 +33,24 @@ class CustomerAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         init {
-            binding.editButton.setOnClickListener { onEditClick(getItem(adapterPosition)) }
+            binding.editButton.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onEditClick(getItem(position))
+                }
+            }
             itemView.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position == RecyclerView.NO_POSITION) return@setOnClickListener
                 val clickTime = System.currentTimeMillis()
-                if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA) {
+                if (clickTime - lastClickTime < doubleClickTimeDeltaMs) {
                     // Double click detected
-                    onItemDoubleClick(getItem(adapterPosition))
+                    onItemDoubleClick(getItem(position))
                     lastClickTime = 0 // Reset to prevent triple clicks
                 } else {
                     // Single click logic (highlighting)
                     val oldSelectedPosition = selectedPosition
-                    selectedPosition = adapterPosition
+                    selectedPosition = position
 
                     // Notify old selected item to un-highlight
                     if (oldSelectedPosition != RecyclerView.NO_POSITION) {
@@ -59,7 +66,7 @@ class CustomerAdapter(
         }
 
         fun bind(customer: Customer, isSelected: Boolean) {
-            binding.customerNameTextView.text = "${customer.name}"
+            binding.customerNameTextView.text = customer.name
 
 
             // Set background based on selection state

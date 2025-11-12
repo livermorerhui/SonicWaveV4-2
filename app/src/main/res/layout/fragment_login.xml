@@ -10,7 +10,7 @@
         android:id="@+id/dialogTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="登录到 SonicWaveV4"
+        android:text="登录到 SonicWave"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
@@ -20,7 +20,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/usernameTextInputLayout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
+        android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -39,7 +39,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/passwordTextInputLayout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
+        android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         app:endIconMode="password_toggle"
@@ -58,10 +58,13 @@
 
     <Button
         android:id="@+id/loginButton"
-        android:layout_width="0dp"
+        android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:background="@drawable/bg_preset_mode_button"
         android:text="登录"
+        android:textColor="@color/black"
+        android:backgroundTint="#01E4BA"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/passwordTextInputLayout" />
@@ -72,7 +75,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="忘记密码?"
-        android:textColor="?attr/colorPrimary"
+        android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/loginButton" />
@@ -83,7 +86,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="还没有账号？注册"
-        android:textColor="?attr/colorPrimary"
+        android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/forgotPasswordTextView" />

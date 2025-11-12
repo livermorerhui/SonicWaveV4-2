@@ -6,13 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.sonicwavev4.R
+import com.example.sonicwavev4.data.custompreset.CustomPresetRepositoryImpl
 import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentPersetmodeBinding
@@ -30,14 +32,20 @@ class PersetmodeFragment : Fragment() {
 
     private val userViewModel: UserViewModel by activityViewModels()
 
-    private val viewModel: PersetmodeViewModel by viewModels {
+    private val viewModel: PersetmodeViewModel by activityViewModels {
         val application = requireActivity().application
         val hardwareRepository = HomeHardwareRepository.getInstance(application)
         val sessionRepository = HomeSessionRepository(
             SessionManager(application.applicationContext),
             RetrofitClient.api
         )
-        PersetmodeViewModelFactory(application, hardwareRepository, sessionRepository)
+        val customPresetRepository = CustomPresetRepositoryImpl.getInstance(application)
+        PersetmodeViewModelFactory(
+            application,
+            hardwareRepository,
+            sessionRepository,
+            customPresetRepository
+        )
     }
 
     private val modeButtons: List<Button> by lazy {
@@ -63,6 +71,7 @@ class PersetmodeFragment : Fragment() {
         setupListeners()
         observeViewModel()
         observeUserSession()
+        viewModel.selectMode(0)
     }
 
     override fun onResume() {
@@ -122,13 +131,28 @@ class PersetmodeFragment : Fragment() {
     }
 
     private fun renderState(state: PresetModeUiState) {
-        binding.btnStartStop.text = if (state.isRunning) getString(R.string.button_stop) else getString(R.string.button_start)
+        binding.btnStartStop.text =
+            if (state.isRunning) getString(R.string.button_stop) else getString(R.string.button_start)
         binding.btnStartStop.isEnabled = state.isStartEnabled
+
+        val selectedTextColor = ContextCompat.getColor(requireContext(), android.R.color.white)
+        val defaultTextColor = ContextCompat.getColor(requireContext(), R.color.preset_mode_button_text_default)
+        val disabledTextColor = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
 
         modeButtons.forEachIndexed { index, button ->
             val selected = index == state.selectedModeIndex
-            button.isSelected = selected
-            button.isEnabled = if (selected) true else state.modeButtonsEnabled
+            button.background = ContextCompat.getDrawable(
+                requireContext(),
+                if (selected) R.drawable.bg_preset_mode_button_selected else R.drawable.bg_preset_mode_button_default
+            )
+            ViewCompat.setBackgroundTintList(button, null)
+            button.isEnabled = state.modeButtonsEnabled
+            val targetTextColor = when {
+                !state.modeButtonsEnabled -> disabledTextColor
+                selected -> selectedTextColor
+                else -> defaultTextColor
+            }
+            button.setTextColor(targetTextColor)
         }
 
         binding.imgHighlightWhole.isVisible = state.selectedModeIndex == 0

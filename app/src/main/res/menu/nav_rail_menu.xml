@@ -12,6 +12,11 @@
             android:id="@+id/navigation_persetmode"
             android:icon="@drawable/ic_dashboard_black_24dp"
             android:title="预定设置" />
+
+        <item
+            android:id="@+id/navigation_custom_preset"
+            android:icon="@drawable/ic_edit"
+            android:title="自设模式" />
     </group>
 
     <group android:id="@+id/group_other">

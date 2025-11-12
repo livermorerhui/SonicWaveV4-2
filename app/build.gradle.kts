@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
+    id("kotlin-kapt")
 }
 
 // Function to get local IP address on macOS
@@ -184,4 +185,12 @@ dependencies {
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     implementation(files("libs/CH341PARV1.1.jar"))
+
+    // Room 持久化：用于保存用户自设模式
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

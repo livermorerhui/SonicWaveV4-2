@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.22"/>
+        app:layout_constraintGuide_percent="0.2203125" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guide_right"
@@ -40,7 +40,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/bg_preset_mode_button"
+            android:background="@drawable/bg_preset_mode_button_default"
+            style="@style/Widget.SonicWave.PresetModeButton"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:text="全身模式"
@@ -52,7 +53,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/bg_preset_mode_button"
+            android:background="@drawable/bg_preset_mode_button_default"
+            style="@style/Widget.SonicWave.PresetModeButton"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:text="头部上肢"
@@ -64,7 +66,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/bg_preset_mode_button"
+            android:background="@drawable/bg_preset_mode_button_default"
+            style="@style/Widget.SonicWave.PresetModeButton"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:text="胸部腹部"
@@ -75,12 +78,14 @@
             android:id="@+id/btn_lower_limb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_preset_mode_button"
+            android:background="@drawable/bg_preset_mode_button_default"
+            style="@style/Widget.SonicWave.PresetModeButton"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:text="下肢模式"
             android:textAllCaps="false"
             android:textColor="@color/color_preset_mode_button_text"/>
+
     </LinearLayout>
 
     <!-- 中间：人形轮廓 + 高亮层 + 开始/停止按钮 -->
@@ -155,7 +160,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="@string/button_start"/>
+            android:text="@string/button_start"
+            android:textColor="@color/black"
+            android:background="@drawable/rounded_button"/>
     </LinearLayout>
 
     <!-- 右侧：状态窗口（频率/强度/剩余时间） -->

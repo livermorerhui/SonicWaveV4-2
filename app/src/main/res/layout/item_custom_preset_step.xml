@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dp"
+    android:background="@drawable/bg_preset_mode_step"
+    android:layout_marginBottom="8dp">
+
+    <TextView
+        android:id="@+id/tv_step_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="步骤 1："
+        android:textColor="@color/black"
+        android:textSize="16dp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tv_step_detail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="频率 0Hz · 强度 0 · 时长 0秒"
+        android:textColor="#464545"
+        android:textSize="16dp"/>
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_move_up"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="上移"
+            android:src="@drawable/outline_arrow_circle_up_24"/>
+
+        <ImageButton
+            android:id="@+id/btn_move_down"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="下移"
+            android:src="@drawable/outline_arrow_circle_down_24"/>
+
+        <ImageButton
+            android:id="@+id/btn_edit"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="编辑"
+            android:src="@drawable/ic_edit"/>
+
+        <ImageButton
+            android:id="@+id/btn_delete"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="删除"
+            android:src="@android:drawable/ic_menu_delete"/>
+    </LinearLayout>
+</LinearLayout>

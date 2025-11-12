@@ -17,6 +17,10 @@
         android:label="预定设置"
         app:layout="@layout/fragment_persetmode" />
 
-
+    <fragment
+        android:id="@+id/navigation_custom_preset"
+        android:name="com.example.sonicwavev4.ui.custompreset.CustomPresetFragment"
+        android:label="自设模式"
+        app:layout="@layout/fragment_custom_preset" />
 
 </navigation>
