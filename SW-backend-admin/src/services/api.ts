@@ -2,6 +2,7 @@ import type { ErrorEnvelope } from '@/models/ErrorEnvelope';
 import type { UserDTO, UserDetail } from '@/models/UserDTO';
 import type { CustomerDTO, CustomerDetail } from '@/models/CustomerDTO';
 import type { PaginatedResponse } from '@/models/PaginatedResponse';
+import type { FeatureFlag, FeatureFlagSnapshot } from '@/models/FeatureFlag';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
@@ -212,3 +213,29 @@ export const patchCustomer = (
     token,
     body: JSON.stringify(payload)
   });
+
+export const fetchFeatureFlags = (token: string) =>
+  request<FeatureFlagSnapshot>('/api/admin/feature-flags', {
+    method: 'GET',
+    token
+  });
+
+export const patchOfflineModeFlag = (enabled: boolean, token: string, notifyOnline = false) =>
+  request<{ message: string; featureFlag: FeatureFlag; notified: boolean }>(
+    '/api/admin/feature-flags/offline-mode',
+    {
+      method: 'PATCH',
+      token,
+      body: JSON.stringify({ enabled, notifyOnline })
+    }
+  );
+
+export const forceExitOfflineMode = (countdownSec: number, token: string) =>
+  request<{ message: string; countdownSec: number }>(
+    '/api/admin/feature-flags/offline-mode/force-exit',
+    {
+      method: 'POST',
+      token,
+      body: JSON.stringify({ countdownSec })
+    }
+  );

@@ -27,6 +27,9 @@ interface ApiService {
     @POST("api/v1/app/usage")
     suspend fun recordAppUsage(@Body request: AppUsageRequest): Response<Unit>
 
+    @GET("api/v1/app/feature-flags")
+    suspend fun fetchFeatureFlags(): Response<FeatureFlagsResponse>
+
     @POST("api/v1/operations/start")
     suspend fun startOperation(@Body request: StartOperationRequest): StartOperationResponse
 

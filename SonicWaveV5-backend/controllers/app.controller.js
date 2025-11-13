@@ -1,5 +1,6 @@
 const logger = require('../logger');
 const { dbPool } = require('../config/db');
+const featureFlagsService = require('../services/featureFlags.service');
 
 const recordAppUsage = async (req, res) => {
   try {
@@ -19,6 +20,20 @@ const recordAppUsage = async (req, res) => {
   }
 };
 
+const getFeatureFlags = async (req, res) => {
+  try {
+    const snapshot = await featureFlagsService.getFeatureFlagSnapshot();
+    res.json({
+      offlineModeEnabled: snapshot.offlineMode.enabled,
+      updatedAt: snapshot.offlineMode.updatedAt
+    });
+  } catch (error) {
+    logger.error('Error fetching feature flags snapshot:', { error: error.message });
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
 module.exports = {
-  recordAppUsage
+  recordAppUsage,
+  getFeatureFlags
 };

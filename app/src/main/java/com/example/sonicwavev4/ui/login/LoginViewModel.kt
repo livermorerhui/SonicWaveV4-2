@@ -102,6 +102,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         return email.equals(OFFLINE_USERNAME, ignoreCase = true) && password == OFFLINE_PASSWORD
     }
 
+    fun enterOfflineMode() {
+        viewModelScope.launch {
+            handleOfflineLogin()
+        }
+    }
+
     private suspend fun handleOfflineLogin() {
         sessionManager.setOfflineTestMode(true)
         OfflineTestModeManager.setOfflineTestMode(true)

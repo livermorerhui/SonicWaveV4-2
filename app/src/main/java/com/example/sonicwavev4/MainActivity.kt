@@ -31,6 +31,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -38,7 +39,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.widget.ImageViewCompat
 import androidx.core.view.forEach
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -52,6 +55,8 @@ import com.example.sonicwavev4.databinding.ActivityMainBinding
 import com.example.sonicwavev4.network.AppUsageRequest
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
+import com.example.sonicwavev4.utils.GlobalLogoutManager
+import com.example.sonicwavev4.utils.OfflineForceExitManager
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -98,6 +103,9 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         }
     }
     private var isUserSeeking = false
+    private var forceExitDialog: AlertDialog? = null
+    private val navButtonViews = mutableMapOf<Int, Pair<ImageButton, TextView>>()
+    private var currentNavItemId: Int = R.id.navigation_home
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -153,6 +161,9 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                 }
             }
         }
+
+        observeForceExitCountdown()
+        observeGlobalLogout()
     }
 
     // 【修改点 2】修复了下载功能的线程问题，防止UI卡死
@@ -194,6 +205,59 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             }
             loadMusic() // 下载完成后，在主线程刷新列表
         }
+    }
+
+    private fun observeForceExitCountdown() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                OfflineForceExitManager.countdownSeconds.collect { seconds ->
+                    if (seconds == null) {
+                        dismissForceExitDialog()
+                    } else {
+                        showForceExitDialog(seconds)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showForceExitDialog(seconds: Int) {
+        val message = getString(R.string.force_exit_dialog_message, seconds)
+        if (forceExitDialog == null) {
+            forceExitDialog = AlertDialog.Builder(this)
+                .setTitle(R.string.force_exit_dialog_title)
+                .setMessage(message)
+                .setCancelable(false)
+                .create()
+        } else {
+            forceExitDialog?.setMessage(message)
+        }
+        forceExitDialog?.show()
+    }
+
+    private fun dismissForceExitDialog() {
+        forceExitDialog?.dismiss()
+        forceExitDialog = null
+    }
+
+    private fun observeGlobalLogout() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                GlobalLogoutManager.logoutEvent.collect {
+                    showLoginFragment()
+                }
+            }
+        }
+    }
+
+    private fun showLoginFragment() {
+        val container = findViewById<View?>(R.id.fragment_right_main) ?: return
+        val fragmentManager = supportFragmentManager
+        val current = fragmentManager.findFragmentById(container.id)
+        if (current is com.example.sonicwavev4.ui.login.LoginFragment) return
+        fragmentManager.beginTransaction()
+            .replace(container.id, com.example.sonicwavev4.ui.login.LoginFragment())
+            .commitAllowingStateLoss()
     }
 
     private fun setupMusicArea() {
@@ -820,6 +884,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
     override fun onDestroy() {
         super.onDestroy()
+        dismissForceExitDialog()
         mediaPlayer?.release()
         mediaPlayer = null
         vinylAnimator?.cancel()
@@ -834,5 +899,3 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 }
-    private val navButtonViews = mutableMapOf<Int, Pair<ImageButton, TextView>>()
-    private var currentNavItemId: Int = R.id.navigation_home

@@ -292,4 +292,28 @@ const customerUpdateValidators = [
 
 router.patch('/customers/:id', customerUpdateValidators, validate, adminController.updateCustomer);
 
+router.get('/feature-flags', adminController.getFeatureFlags);
+
+router.patch(
+  '/feature-flags/offline-mode',
+  [
+    body('enabled').isBoolean().withMessage('enabled 需为布尔值'),
+    body('notifyOnline').optional().isBoolean().withMessage('notifyOnline 需为布尔值').toBoolean()
+  ],
+  validate,
+  adminController.updateOfflineModeFlag
+);
+
+router.post(
+  '/feature-flags/offline-mode/force-exit',
+  [
+    body('countdownSec')
+      .isInt({ min: 5, max: 120 })
+      .withMessage('countdownSec 需为 5~120 之间的整数')
+      .toInt()
+  ],
+  validate,
+  adminController.forceExitOfflineMode
+);
+
 module.exports = router;

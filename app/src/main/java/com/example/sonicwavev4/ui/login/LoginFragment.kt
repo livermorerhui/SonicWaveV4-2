@@ -6,14 +6,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.databinding.FragmentLoginBinding
 import com.example.sonicwavev4.ui.register.RegisterFragment
 import com.example.sonicwavev4.ui.user.UserFragment
 import com.example.sonicwavev4.ui.user.UserViewModel
+import com.example.sonicwavev4.utils.OfflineCapabilityManager
+import com.example.sonicwavev4.utils.OfflineModeRemoteSync
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
@@ -34,6 +42,14 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupClickListeners()
         observeViewModel()
+        observeOfflineCapability()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewLifecycleOwner.lifecycleScope.launch {
+            OfflineModeRemoteSync.sync(requireContext(), force = false)
+        }
     }
 
     private fun setupClickListeners() {
@@ -51,6 +67,10 @@ class LoginFragment : Fragment() {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_right_main, RegisterFragment())
                 .commit()
+        }
+        binding.offlineModeButton.setOnClickListener {
+            binding.offlineModeButton.isEnabled = false
+            loginViewModel.enterOfflineMode()
         }
     }
 
@@ -74,6 +94,17 @@ class LoginFragment : Fragment() {
         }
     }
 
+    private fun observeOfflineCapability() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                OfflineCapabilityManager.isOfflineAllowed.collectLatest { allowed ->
+                    binding.offlineModeButton.isVisible = allowed
+                    binding.offlineModeButton.isEnabled = allowed
+                }
+            }
+        }
+    }
+
     private fun navigateToUserFragment() {
         Toast.makeText(requireContext(), "登录成功！", Toast.LENGTH_SHORT).show()
         parentFragmentManager.beginTransaction()
@@ -85,6 +116,7 @@ class LoginFragment : Fragment() {
         Log.e("LoginFragment", "登录失败", error)
         Toast.makeText(requireContext(), error.message ?: "登录失败，请稍后再试", Toast.LENGTH_LONG).show()
         binding.loginButton.isEnabled = true
+        binding.offlineModeButton.isEnabled = binding.offlineModeButton.isVisible
     }
 
     override fun onDestroyView() {

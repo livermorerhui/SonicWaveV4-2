@@ -106,3 +106,24 @@
 {"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/operations/stop/474'. Error: jwt malformed","timestamp":"2025-10-24T07:27:04.434Z"}
 {"error":"Table 'sonicwave_db.preset_mode_runs' doesn't exist","level":"error","message":"Error starting preset mode run:","timestamp":"2025-10-27T10:45:19.383Z"}
 {"error":"Table 'sonicwave_db.preset_mode_runs' doesn't exist","level":"error","message":"Error starting preset mode run:","timestamp":"2025-10-27T10:45:23.670Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T09:20:08.161Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T09:33:19.043Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T09:59:22.815Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:06:26.350Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:20:43.605Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:21:43.686Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:23:12.809Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:28:27.213Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:28:45.299Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:36:25.723Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:36:58.441Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:42:13.808Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:42:59.854Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:49:51.570Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:50:05.443Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T11:05:05.244Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T11:05:30.035Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T11:17:31.418Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T15:37:41.920Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T15:38:18.560Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T15:55:39.701Z"}

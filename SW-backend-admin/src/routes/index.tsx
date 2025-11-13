@@ -6,6 +6,7 @@ import { CustomersPage } from '@/views/CustomersPage';
 import { NotAuthorized } from '@/views/NotAuthorized';
 import { AdminLayout } from '@/views/AdminLayout';
 import { LoadingScreen } from '@/views/LoadingScreen';
+import { FeatureFlagsPage } from '@/views/FeatureFlagsPage';
 
 const ProtectedRoute = () => {
   const { user, isBootstrapping } = useAuth();
@@ -34,6 +35,7 @@ export const AppRoutes = () => (
           <Route index element={<Navigate to="/users" replace />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/customers" element={<CustomersPage />} />
+          <Route path="/feature-flags" element={<FeatureFlagsPage />} />
         </Route>
       </Route>
       <Route path="/not-authorized" element={<NotAuthorized />} />

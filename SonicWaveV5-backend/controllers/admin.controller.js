@@ -274,6 +274,59 @@ const updateCustomer = async (req, res) => {
   }
 };
 
+const getFeatureFlags = async (req, res) => {
+  try {
+    const snapshot = await adminService.getFeatureFlagsSnapshot();
+    res.json(snapshot);
+  } catch (error) {
+    logger.error('[AdminController] Failed to fetch feature flags', { error: error.message });
+    res.status(500).json(buildError('INTERNAL_ERROR', '获取功能开关状态失败'));
+  }
+};
+
+const updateOfflineModeFlag = async (req, res) => {
+  try {
+    const { enabled } = req.body;
+    const notifyOnline = req.body.notifyOnline === true;
+    const updated = await adminService.updateOfflineModeFlag({
+      actorId: toActorId(req),
+      enabled,
+      notifyOnline,
+      ip: toIp(req),
+      userAgent: toUserAgent(req)
+    });
+    res.json(
+      buildSuccess('离线模式开关已更新', {
+        featureFlag: updated,
+        notified: notifyOnline
+      })
+    );
+  } catch (error) {
+    logger.error('[AdminController] Failed to update offline flag', { error: error.message });
+    res.status(500).json(buildError('INTERNAL_ERROR', '更新离线模式开关失败'));
+  }
+};
+
+const forceExitOfflineMode = async (req, res) => {
+  try {
+    const countdownSec = Number.parseInt(req.body.countdownSec, 10);
+    const result = await adminService.forceExitOfflineMode({
+      actorId: toActorId(req),
+      countdownSec,
+      ip: toIp(req),
+      userAgent: toUserAgent(req)
+    });
+    res.json(
+      buildSuccess('已发送离线模式强制退出指令', {
+        countdownSec: result.countdownSec
+      })
+    );
+  } catch (error) {
+    logger.error('[AdminController] Failed to broadcast force exit', { error: error.message });
+    res.status(500).json(buildError('INTERNAL_ERROR', '强制关闭离线模式失败'));
+  }
+};
+
 const setAdminService = nextService => {
   adminService = nextService;
 };
@@ -288,5 +341,8 @@ module.exports = {
   deleteUser,
   getCustomerDetail,
   updateCustomer,
+  getFeatureFlags,
+  updateOfflineModeFlag,
+  forceExitOfflineMode,
   setAdminService
 };

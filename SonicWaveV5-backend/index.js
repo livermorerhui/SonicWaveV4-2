@@ -15,6 +15,7 @@ const { checkDbConnection } = require('./config/db');
 const { startManagerIntervals } = require('./onlineStatusManager');
 const config = require('./config/config'); // 引入新的配置
 const swaggerSpec = require('./docs/swagger');
+const offlineControlChannel = require('./realtime/offlineControlChannel');
 
 // 引入路由模块
 const userRouter = require('./routes/users.routes.js');
@@ -66,11 +67,18 @@ const wss = new WebSocketServer({ server });
 
 // 用于存储 userId 和 WebSocket 连接的映射
 const wsClients = new Map();
+offlineControlChannel.registerUserSocketMap(wsClients);
 
 wss.on('connection', (ws, req) => {
-  // 从连接 URL 中获取 token
-  const token = url.parse(req.url, true).query.token;
+  const parsed = url.parse(req.url, true);
+  const { token, channel } = parsed.query || {};
 
+  if (channel === 'control') {
+    offlineControlChannel.registerControlClient(ws);
+    return;
+  }
+
+  // 从连接 URL 中获取 token
   if (!token) {
     logger.warn('WebSocket connection attempt without token. Closing.');
     ws.close();

@@ -16,6 +16,7 @@ import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.AddCustomerDialogFragment
 import com.example.sonicwavev4.ui.customer.CustomerListFragment
 import com.example.sonicwavev4.ui.login.LoginFragment
+import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.utils.HeartbeatManager
 import com.example.sonicwavev4.utils.LogoutReason
 import com.example.sonicwavev4.utils.OfflineTestModeManager
@@ -49,6 +50,7 @@ class UserFragment : Fragment() {
         observeOfflineMode()
         setupToneSwitch()
         observeAccountType()
+        observeGlobalLogout()
     }
 
     private fun setupUsernameDisplay() {
@@ -114,6 +116,16 @@ class UserFragment : Fragment() {
         }
     }
 
+    private fun observeGlobalLogout() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            GlobalLogoutManager.logoutEvent.collect {
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_right_main, LoginFragment())
+                    .commitAllowingStateLoss()
+            }
+        }
+    }
+
     private fun removeCustomerListFragmentIfNeeded() {
         childFragmentManager.findFragmentById(R.id.customer_list_container)?.let {
             childFragmentManager.beginTransaction().remove(it).commit()
@@ -162,7 +174,7 @@ class UserFragment : Fragment() {
         // 导航回登录页
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_right_main, LoginFragment())
-            .commit()
+            .commitAllowingStateLoss()
     }
 
     override fun onDestroyView() {

@@ -19293,3 +19293,754 @@
 {"launchTime":1762920824497,"level":"info","message":"App usage recorded:","timestamp":"2025-11-12T04:13:44.675Z","userId":"1"}
 {"launchTime":1762921159090,"level":"info","message":"App usage recorded:","timestamp":"2025-11-12T04:19:19.205Z","userId":"1"}
 {"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/music'.","timestamp":"2025-11-12T04:25:00.630Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T08:29:52.601Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T08:29:52.618Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T08:29:52.620Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T08:29:52.620Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T08:40:39.960Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T08:40:40.016Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T08:40:40.053Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T08:40:45.240Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T08:40:45.250Z"}
+{"launchTime":1763023309498,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T08:41:46.917Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T08:44:26.942Z"}
+{"launchTime":1763023496591,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T08:44:53.997Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T08:45:39.228Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T08:45:44.001Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:19:21.888Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/v1/users/me'.","timestamp":"2025-11-13T09:19:26.677Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/v1/users/me'.","timestamp":"2025-11-13T09:19:26.679Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T09:19:28.321Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:19:28.340Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:19:28.349Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T09:19:30.122Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T09:19:30.127Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:19:31.429Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T09:20:08.145Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T09:20:08.161Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:20:56.846Z"}
+{"launchTime":1763026353652,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T09:32:30.925Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:32:56.019Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T09:33:19.025Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T09:33:19.043Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:33:30.695Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/login-event'.","timestamp":"2025-11-13T09:34:01.613Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 125","timestamp":"2025-11-13T09:34:01.624Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T09:34:01.733Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T09:34:01.733Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 125","timestamp":"2025-11-13T09:34:01.734Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/customers'.","timestamp":"2025-11-13T09:34:02.000Z"}
+{"intensityScalePct":100,"level":"info","message":"Received request for startPresetModeRun:","presetModeId":"whole_body_10m","presetModeName":"全身 · 10分钟/周期","timestamp":"2025-11-13T09:34:11.203Z","totalDurationSec":593,"userId":"1","userName":"123","user_email":"123"}
+{"customer_id":1,"customer_name":"111","intensityScalePct":100,"level":"info","message":"Received request for startPresetModeRun:","presetModeId":"whole_body_10m","presetModeName":"全身 · 10分钟/周期","timestamp":"2025-11-13T09:34:16.679Z","totalDurationSec":593,"userId":"1","userName":"123","user_email":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T09:34:16.829Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T09:34:16.829Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 125","timestamp":"2025-11-13T09:34:16.830Z"}
+{"customer_id":1,"customer_name":"111","intensityScalePct":100,"level":"info","message":"Received request for startPresetModeRun:","presetModeId":"whole_body_10m","presetModeName":"全身 · 10分钟/周期","timestamp":"2025-11-13T09:34:18.556Z","totalDurationSec":593,"userId":"1","userName":"123","user_email":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/operations/start'.","timestamp":"2025-11-13T09:34:28.925Z"}
+{"customer_id":1,"customer_name":"111","frequency":200,"intensity":100,"level":"info","message":"Received request body for startOperation:","operationTime":10,"timestamp":"2025-11-13T09:34:28.926Z","userId":"1","userName":"123","user_email":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T09:34:31.972Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T09:34:31.972Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 125","timestamp":"2025-11-13T09:34:31.972Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/operations/stop/503'.","timestamp":"2025-11-13T09:34:32.213Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/operations/start'.","timestamp":"2025-11-13T09:34:37.839Z"}
+{"customer_id":1,"customer_name":"111","frequency":200,"intensity":100,"level":"info","message":"Received request body for startOperation:","operationTime":10,"timestamp":"2025-11-13T09:34:37.839Z","userId":"1","userName":"123","user_email":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/operations/stop/504'.","timestamp":"2025-11-13T09:34:38.936Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T09:34:47.098Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T09:34:47.098Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 125","timestamp":"2025-11-13T09:34:47.099Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/logout-event'.","timestamp":"2025-11-13T09:34:47.133Z"}
+{"level":"info","message":"[Logout Attempt] Received request for userId: '1', sessionId: '125'","timestamp":"2025-11-13T09:34:47.134Z"}
+{"level":"info","message":"[Logout Check] Performing security SELECT for sessionId: 125 and userId: 1","timestamp":"2025-11-13T09:34:47.134Z"}
+{"level":"info","message":"[Logout Check Result] Found 1 matching active session(s).","timestamp":"2025-11-13T09:34:47.145Z"}
+{"level":"info","message":"[Logout Success] Security check passed. Proceeding to update session 125.","timestamp":"2025-11-13T09:34:47.145Z"}
+{"level":"info","message":"[Logout DB Update] Database update complete. Affected rows: 1.","timestamp":"2025-11-13T09:34:47.148Z"}
+{"level":"info","message":"为 1 个活跃会话批量更新了心跳时间。","timestamp":"2025-11-13T09:34:52.432Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:35:19.437Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T09:35:22.446Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:35:22.511Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:35:22.522Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T09:35:23.874Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T09:35:23.881Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:35:25.197Z"}
+{"level":"info","message":"发现 1 个超时会话，正在数据库中标为非活跃。","timestamp":"2025-11-13T09:35:52.579Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:37:32.061Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T09:44:45.143Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T09:44:45.159Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T09:44:45.160Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T09:44:45.161Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T09:45:02.415Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T09:45:02.428Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T09:45:02.429Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T09:45:02.429Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T09:45:21.786Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T09:45:21.796Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T09:45:21.797Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T09:45:21.797Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T09:45:46.025Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T09:45:46.036Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T09:45:46.036Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T09:45:46.037Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T09:46:07.465Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T09:46:07.477Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T09:46:07.478Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T09:46:07.478Z"}
+{"launchTime":1763027663772,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T09:54:21.110Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T09:55:26.779Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T09:55:26.792Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T09:55:26.793Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T09:55:26.793Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T09:55:56.988Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:55:57.034Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:55:57.058Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T09:55:58.889Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T09:55:58.899Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:56:07.761Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:56:07.779Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T09:56:08.863Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T09:56:08.867Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:56:13.321Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:56:13.329Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:56:14.450Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T09:56:14.456Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T09:56:34.484Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T09:56:34.488Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T09:58:02.507Z"}
+{"launchTime":1763027886203,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T09:58:03.519Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:58:16.510Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T09:58:16.524Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:58:19.484Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T09:58:19.494Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T09:58:21.545Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T09:58:21.547Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T09:58:58.910Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T09:58:58.911Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T09:59:12.427Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T09:59:12.427Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T09:59:22.793Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T09:59:22.815Z"}
+{"intensityScalePct":100,"level":"info","message":"Received request for startPresetModeRun:","presetModeId":"whole_body_10m","presetModeName":"全身 · 10分钟/周期","timestamp":"2025-11-13T09:59:41.280Z","totalDurationSec":593,"userId":"guest"}
+{"intensityScalePct":100,"level":"info","message":"Received request for startPresetModeRun:","presetModeId":"whole_body_10m","presetModeName":"全身 · 10分钟/周期","timestamp":"2025-11-13T09:59:41.640Z","totalDurationSec":593,"userId":"guest"}
+{"intensityScalePct":100,"level":"info","message":"Received request for startPresetModeRun:","presetModeId":"whole_body_10m","presetModeName":"全身 · 10分钟/周期","timestamp":"2025-11-13T09:59:42.278Z","totalDurationSec":593,"userId":"guest"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T09:59:57.862Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T09:59:57.870Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:05:44.349Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:05:44.362Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:05:47.145Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:05:47.146Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:06:16.048Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:06:16.049Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:06:26.334Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:06:26.350Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T10:07:49.335Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T10:07:53.454Z"}
+{"launchTime":1763028477464,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T10:07:54.509Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:08:09.968Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:08:09.982Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:09:40.561Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:09:40.575Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:10:16.852Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:10:16.853Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T10:17:20.076Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T10:17:20.093Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T10:17:20.094Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T10:17:20.094Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T10:17:29.715Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags'.","timestamp":"2025-11-13T10:17:35.032Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags'.","timestamp":"2025-11-13T10:17:35.035Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags'.","timestamp":"2025-11-13T10:17:41.551Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags'.","timestamp":"2025-11-13T10:17:41.555Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/v1/users/me'.","timestamp":"2025-11-13T10:18:25.689Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/v1/users/me'.","timestamp":"2025-11-13T10:18:25.692Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T10:18:27.340Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T10:18:27.366Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T10:18:27.403Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T10:18:28.688Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T10:18:28.696Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T10:20:09.704Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T10:20:13.861Z"}
+{"launchTime":1763029217948,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T10:20:14.974Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:20:22.345Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:20:22.360Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:20:27.337Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:20:27.344Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:20:33.258Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:20:33.259Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:20:43.264Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T10:20:43.264Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:20:43.587Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:20:43.605Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:21:11.793Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:21:11.805Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:21:33.339Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:21:33.341Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:21:43.350Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T10:21:43.350Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:21:43.656Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:21:43.686Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:22:39.888Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:22:39.905Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:23:02.436Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:23:02.438Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:23:12.445Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T10:23:12.445Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:23:12.792Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:23:12.809Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:25:54.132Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:25:54.149Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T10:27:13.217Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T10:27:15.883Z"}
+{"launchTime":1763029639945,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T10:27:16.956Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:27:25.036Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:27:25.045Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:27:26.415Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:27:26.423Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:27:30.260Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:27:30.266Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:27:36.009Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:27:36.016Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:27:40.422Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:27:40.422Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:27:50.430Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T10:27:50.431Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:27:54.337Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:27:54.345Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:28:27.195Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:28:27.213Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:28:36.118Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:28:36.127Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:28:39.610Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:28:39.617Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:28:45.282Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:28:45.299Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:28:51.967Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:28:51.974Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:29:03.645Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:29:03.671Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:29:03.730Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:29:03.735Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:29:05.106Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:29:05.114Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T10:35:53.004Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T10:35:55.675Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:36:11.527Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T10:36:16.501Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T10:36:16.517Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T10:36:16.529Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T10:36:17.977Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T10:36:17.982Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:36:19.738Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:36:19.744Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:36:25.704Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:36:25.723Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:36:31.723Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:36:31.727Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:36:40.072Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:36:40.073Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:36:50.081Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T10:36:50.081Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:36:58.418Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:36:58.441Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T10:41:38.567Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T10:41:43.295Z"}
+{"launchTime":1763030507418,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T10:41:44.498Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:41:53.167Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:41:53.180Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:42:09.536Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:42:09.542Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:42:13.792Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:42:13.808Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:42:17.556Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:42:17.562Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:42:40.954Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:42:40.955Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:42:50.963Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T10:42:50.964Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:42:59.832Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:42:59.854Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T10:49:08.911Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T10:49:13.050Z"}
+{"launchTime":1763030957203,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T10:49:14.162Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:49:21.367Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:49:21.376Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:49:33.445Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:49:33.446Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:49:43.451Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T10:49:43.452Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:49:51.553Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:49:51.570Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:49:55.679Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:49:55.684Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:50:02.028Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:50:02.033Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T10:50:05.426Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T10:50:05.443Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/v1/users/me'.","timestamp":"2025-11-13T10:57:26.782Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/v1/users/me'.","timestamp":"2025-11-13T10:57:26.787Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T10:57:28.532Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T10:57:28.548Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T10:57:28.560Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T10:57:30.147Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T10:57:30.152Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T10:57:33.272Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:57:33.281Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T10:57:36.752Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T10:57:36.753Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T10:57:46.761Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T10:57:46.762Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T11:04:16.289Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T11:04:19.161Z"}
+{"launchTime":1763031863400,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:04:20.256Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:04:37.498Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:04:37.516Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T11:04:41.280Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T11:04:41.281Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:04:51.286Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T11:04:51.286Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T11:05:05.219Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T11:05:05.244Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:05:20.542Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:05:20.556Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:05:24.520Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:05:24.535Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T11:05:30.016Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T11:05:30.035Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:05:34.179Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:05:34.184Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:09:39.174Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:09:39.204Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:09:42.559Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:09:42.566Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T11:12:20.797Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T11:12:23.795Z"}
+{"launchTime":1763032348048,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:12:24.975Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:12:36.453Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T11:13:16.217Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T11:13:22.389Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:13:22.420Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:13:22.439Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:13:23.355Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:13:23.362Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T11:13:24.615Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T11:13:24.616Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:13:34.628Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T11:13:34.628Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:17:26.180Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:17:26.197Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T11:17:31.392Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T11:17:31.418Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:22:29.602Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:22:29.703Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:22:30.572Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:22:30.577Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T11:28:11.742Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T11:28:14.522Z"}
+{"launchTime":1763033298824,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:15.599Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T11:28:29.877Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T11:28:32.652Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:28:32.668Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:28:32.688Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:28:33.594Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:28:33.599Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T11:28:34.483Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T11:28:34.485Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:28:44.499Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T11:28:44.500Z"}
+{"launchTime":1763033329069,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:45.824Z"}
+{"launchTime":1763033329486,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:46.329Z"}
+{"launchTime":1763033329804,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:46.836Z"}
+{"launchTime":1763033330121,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:46.890Z"}
+{"launchTime":1763033330445,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:47.218Z"}
+{"launchTime":1763033330756,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:47.512Z"}
+{"launchTime":1763033331082,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:47.836Z"}
+{"launchTime":1763033331432,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:48.262Z"}
+{"launchTime":1763033331746,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:48.521Z"}
+{"launchTime":1763033332034,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:48.803Z"}
+{"launchTime":1763033332315,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:49.100Z"}
+{"launchTime":1763033332620,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:49.451Z"}
+{"launchTime":1763033332904,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:49.663Z"}
+{"launchTime":1763033333178,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:49.934Z"}
+{"launchTime":1763033333502,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:50.276Z"}
+{"launchTime":1763033333789,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:50.564Z"}
+{"launchTime":1763033334084,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:50.836Z"}
+{"launchTime":1763033334361,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:51.111Z"}
+{"launchTime":1763033334624,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:51.399Z"}
+{"launchTime":1763033334893,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:51.651Z"}
+{"launchTime":1763033335139,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:51.897Z"}
+{"launchTime":1763033335422,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:52.179Z"}
+{"launchTime":1763033335768,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:52.519Z"}
+{"launchTime":1763033336028,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:52.780Z"}
+{"launchTime":1763033336272,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:53.019Z"}
+{"launchTime":1763033336523,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:53.277Z"}
+{"launchTime":1763033336767,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:53.532Z"}
+{"launchTime":1763033337013,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:53.767Z"}
+{"launchTime":1763033337302,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:54.057Z"}
+{"launchTime":1763033337587,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:54.337Z"}
+{"launchTime":1763033337830,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:54.577Z"}
+{"launchTime":1763033338072,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:54.821Z"}
+{"launchTime":1763033338315,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:55.100Z"}
+{"launchTime":1763033338568,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:55.403Z"}
+{"launchTime":1763033338819,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:55.583Z"}
+{"launchTime":1763033339071,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:55.826Z"}
+{"launchTime":1763033339349,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:56.157Z"}
+{"launchTime":1763033339665,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:56.415Z"}
+{"launchTime":1763033339907,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:56.653Z"}
+{"launchTime":1763033340160,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:56.911Z"}
+{"launchTime":1763033340411,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:57.249Z"}
+{"launchTime":1763033340659,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:57.427Z"}
+{"launchTime":1763033340921,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:57.676Z"}
+{"launchTime":1763033341156,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:57.908Z"}
+{"launchTime":1763033341433,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:58.210Z"}
+{"launchTime":1763033341725,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:58.473Z"}
+{"launchTime":1763033341970,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:58.719Z"}
+{"launchTime":1763033342227,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:58.976Z"}
+{"launchTime":1763033342465,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:59.240Z"}
+{"launchTime":1763033342705,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:59.468Z"}
+{"launchTime":1763033342952,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:59.710Z"}
+{"launchTime":1763033343181,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:28:59.939Z"}
+{"launchTime":1763033343446,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:00.226Z"}
+{"launchTime":1763033343712,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:00.476Z"}
+{"launchTime":1763033343936,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:00.705Z"}
+{"launchTime":1763033344158,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:00.909Z"}
+{"launchTime":1763033344374,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:01.125Z"}
+{"launchTime":1763033344635,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:01.384Z"}
+{"launchTime":1763033344858,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:01.607Z"}
+{"launchTime":1763033345085,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:01.832Z"}
+{"launchTime":1763033345311,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:02.059Z"}
+{"launchTime":1763033345600,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:02.347Z"}
+{"launchTime":1763033345839,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:02.586Z"}
+{"launchTime":1763033346068,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:02.830Z"}
+{"launchTime":1763033346280,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:03.035Z"}
+{"launchTime":1763033346505,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:03.262Z"}
+{"launchTime":1763033346720,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:03.466Z"}
+{"launchTime":1763033346995,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:03.744Z"}
+{"launchTime":1763033347219,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:03.977Z"}
+{"launchTime":1763033347493,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:04.253Z"}
+{"launchTime":1763033347746,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:04.492Z"}
+{"launchTime":1763033347986,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:04.743Z"}
+{"launchTime":1763033348207,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:04.950Z"}
+{"launchTime":1763033348426,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:05.170Z"}
+{"launchTime":1763033348643,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:05.414Z"}
+{"launchTime":1763033348872,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:05.617Z"}
+{"launchTime":1763033349085,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:05.830Z"}
+{"launchTime":1763033349315,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:06.057Z"}
+{"launchTime":1763033349584,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:06.328Z"}
+{"launchTime":1763033349852,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:06.604Z"}
+{"launchTime":1763033350050,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:06.803Z"}
+{"launchTime":1763033350270,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:07.020Z"}
+{"launchTime":1763033350466,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:07.219Z"}
+{"launchTime":1763033350691,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:07.436Z"}
+{"launchTime":1763033350948,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:07.692Z"}
+{"launchTime":1763033351174,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:07.926Z"}
+{"launchTime":1763033351395,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:08.254Z"}
+{"launchTime":1763033351717,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:08.491Z"}
+{"launchTime":1763033351936,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:08.684Z"}
+{"launchTime":1763033352147,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:08.893Z"}
+{"launchTime":1763033352403,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:09.226Z"}
+{"launchTime":1763033352617,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:09.366Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T11:29:22.108Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T11:29:22.123Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T11:29:22.125Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T11:29:22.125Z"}
+{"launchTime":1763033365414,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:22.370Z"}
+{"launchTime":1763033365610,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:22.471Z"}
+{"launchTime":1763033365851,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:22.623Z"}
+{"launchTime":1763033366080,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:22.830Z"}
+{"launchTime":1763033366284,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:23.029Z"}
+{"launchTime":1763033366492,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:23.284Z"}
+{"launchTime":1763033366728,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:23.474Z"}
+{"launchTime":1763033366953,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:23.718Z"}
+{"launchTime":1763033367205,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:23.950Z"}
+{"launchTime":1763033367409,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:24.284Z"}
+{"launchTime":1763033367615,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:24.382Z"}
+{"launchTime":1763033367847,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:24.610Z"}
+{"launchTime":1763033368107,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:24.850Z"}
+{"launchTime":1763033368310,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:25.056Z"}
+{"launchTime":1763033368513,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:25.276Z"}
+{"launchTime":1763033368713,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:25.477Z"}
+{"launchTime":1763033368920,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:25.663Z"}
+{"launchTime":1763033369108,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:25.852Z"}
+{"launchTime":1763033369314,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:26.059Z"}
+{"launchTime":1763033369513,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:26.261Z"}
+{"launchTime":1763033369716,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:26.466Z"}
+{"launchTime":1763033369982,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:26.732Z"}
+{"launchTime":1763033370218,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T11:29:26.961Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T11:38:59.636Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T11:38:59.656Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T11:38:59.658Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T11:38:59.658Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T11:39:03.326Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:39:03.357Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:39:03.399Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:39:05.014Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:39:05.028Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T11:39:06.381Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:39:06.477Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:39:06.499Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:39:12.257Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:39:12.261Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:39:27.957Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:39:27.966Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:39:31.446Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:39:31.458Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:39:35.304Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:39:35.311Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:39:58.952Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:39:58.960Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:39:59.861Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:39:59.868Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:44:16.033Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:44:16.047Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:44:24.984Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:44:25.046Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T11:45:53.113Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T11:45:55.963Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:46:04.434Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:46:04.487Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:46:05.375Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:46:05.381Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:46:13.138Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:46:13.148Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:46:13.830Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:46:13.836Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:46:20.238Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:46:20.244Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:46:25.255Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:46:25.262Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T11:46:48.540Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T11:49:24.477Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/login-event'.","timestamp":"2025-11-13T11:56:01.480Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 126","timestamp":"2025-11-13T11:56:01.486Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T11:56:01.626Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T11:56:01.627Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 126","timestamp":"2025-11-13T11:56:01.627Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/customers'.","timestamp":"2025-11-13T11:56:01.888Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T11:56:16.744Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T11:56:16.745Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 126","timestamp":"2025-11-13T11:56:16.745Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T11:56:31.871Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T11:56:31.872Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 126","timestamp":"2025-11-13T11:56:31.872Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T11:56:46.993Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T11:56:46.993Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 126","timestamp":"2025-11-13T11:56:46.993Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T11:57:02.191Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T11:57:02.191Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 126","timestamp":"2025-11-13T11:57:02.191Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T11:57:17.484Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T11:57:17.484Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 126","timestamp":"2025-11-13T11:57:17.484Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T11:57:32.652Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T11:57:32.652Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 126","timestamp":"2025-11-13T11:57:32.652Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T11:57:47.800Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T11:57:47.800Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 126","timestamp":"2025-11-13T11:57:47.800Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T11:58:02.922Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T11:58:02.923Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 126","timestamp":"2025-11-13T11:58:02.923Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T11:58:18.053Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T11:58:18.053Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 126","timestamp":"2025-11-13T11:58:18.053Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:58:51.668Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T11:58:55.176Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:58:55.199Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T11:58:55.219Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:58:58.583Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T11:58:58.588Z"}
+{"level":"info","message":"为 1 个活跃会话批量更新了心跳时间。","timestamp":"2025-11-13T11:58:59.610Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T11:58:59.938Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T11:58:59.944Z"}
+{"level":"info","message":"发现 1 个超时会话，正在数据库中标为非活跃。","timestamp":"2025-11-13T11:59:14.638Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T12:02:39.167Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T12:02:46.855Z"}
+{"launchTime":1763035371376,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T12:02:47.977Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T12:03:11.688Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T12:03:11.704Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T12:04:14.980Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T12:04:19.738Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T12:04:47.505Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T12:04:47.516Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T12:04:48.400Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T12:04:48.407Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T12:04:53.275Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T12:04:53.281Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T12:05:12.246Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T12:11:22.058Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T12:11:22.071Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T12:17:14.235Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T12:17:19.476Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T12:17:19.479Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T12:17:21.076Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T12:17:21.093Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T12:17:21.101Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T12:17:22.343Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T12:17:22.347Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T12:17:32.751Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T12:17:32.758Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T12:17:36.042Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T12:17:36.048Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-13T14:53:20.943Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-13T14:53:20.958Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-13T14:53:20.960Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-13T14:53:20.960Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T14:53:27.807Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T15:02:06.990Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T15:02:11.489Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T15:03:17.932Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T15:03:17.973Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T15:03:17.989Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T15:03:19.352Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T15:03:19.357Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:03:26.125Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:03:26.139Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:03:27.233Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:03:27.238Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/login-event'.","timestamp":"2025-11-13T15:03:47.024Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 127","timestamp":"2025-11-13T15:03:47.027Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T15:03:47.201Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T15:03:47.202Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 127","timestamp":"2025-11-13T15:03:47.202Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/customers'.","timestamp":"2025-11-13T15:03:47.537Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/logout-event'.","timestamp":"2025-11-13T15:03:49.664Z"}
+{"level":"info","message":"[Logout Attempt] Received request for userId: '1', sessionId: '127'","timestamp":"2025-11-13T15:03:49.664Z"}
+{"level":"info","message":"[Logout Check] Performing security SELECT for sessionId: 127 and userId: 1","timestamp":"2025-11-13T15:03:49.664Z"}
+{"level":"info","message":"[Logout Check Result] Found 1 matching active session(s).","timestamp":"2025-11-13T15:03:49.668Z"}
+{"level":"info","message":"[Logout Success] Security check passed. Proceeding to update session 127.","timestamp":"2025-11-13T15:03:49.668Z"}
+{"level":"info","message":"[Logout DB Update] Database update complete. Affected rows: 1.","timestamp":"2025-11-13T15:03:49.672Z"}
+{"level":"info","message":"发现 1 个超时会话，正在数据库中标为非活跃。","timestamp":"2025-11-13T15:04:36.042Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:11:13.192Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:11:13.205Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:11:16.650Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:11:16.656Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:11:31.095Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:11:31.104Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:11:31.932Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:11:31.938Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:11:56.677Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:11:56.685Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:11:57.470Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:11:57.475Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:12:40.630Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:12:40.638Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:12:41.650Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:12:41.657Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T15:21:31.689Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T15:21:35.893Z"}
+{"launchTime":1763047298826,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T15:21:36.845Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:21:55.281Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T15:21:58.810Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T15:21:58.823Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T15:21:58.829Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T15:22:01.951Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T15:22:01.956Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:22:03.065Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:22:03.071Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:22:04.672Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:22:04.681Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T15:36:33.718Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T15:36:38.004Z"}
+{"launchTime":1763048201000,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T15:36:39.035Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:36:50.681Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:36:50.701Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:36:52.141Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:36:52.148Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:37:07.169Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:37:14.803Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:37:20.898Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T15:37:24.468Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T15:37:24.490Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T15:37:24.518Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T15:37:25.826Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T15:37:25.831Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:37:26.984Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:37:26.988Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T15:37:41.901Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T15:37:41.920Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:37:46.436Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:37:46.442Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T15:37:52.713Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T15:37:52.716Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:37:57.726Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T15:37:57.726Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T15:38:18.534Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T15:38:18.560Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/login-event'.","timestamp":"2025-11-13T15:38:28.481Z"}
+{"level":"info","message":"[Login Event] User 1 logged in. Session ID: 128","timestamp":"2025-11-13T15:38:28.484Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T15:38:28.587Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T15:38:28.588Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 128","timestamp":"2025-11-13T15:38:28.588Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/customers'.","timestamp":"2025-11-13T15:38:28.772Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/operations/start'.","timestamp":"2025-11-13T15:38:32.373Z"}
+{"frequency":200,"intensity":100,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-11-13T15:38:32.374Z","userId":"1","userName":"123","user_email":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/operations/stop/505'.","timestamp":"2025-11-13T15:38:33.112Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/operations/start'.","timestamp":"2025-11-13T15:38:35.978Z"}
+{"customer_id":1,"customer_name":"111","frequency":200,"intensity":100,"level":"info","message":"Received request body for startOperation:","operationTime":1,"timestamp":"2025-11-13T15:38:35.978Z","userId":"1","userName":"123","user_email":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/operations/stop/506'.","timestamp":"2025-11-13T15:38:36.798Z"}
+{"customer_id":1,"customer_name":"111","intensityScalePct":100,"level":"info","message":"Received request for startPresetModeRun:","presetModeId":"whole_body_10m","presetModeName":"全身 · 10分钟/周期","timestamp":"2025-11-13T15:38:39.464Z","totalDurationSec":593,"userId":"1","userName":"123","user_email":"123"}
+{"customer_id":1,"customer_name":"111","intensityScalePct":100,"level":"info","message":"Received request for startPresetModeRun:","presetModeId":"whole_body_10m","presetModeName":"全身 · 10分钟/周期","timestamp":"2025-11-13T15:38:42.532Z","totalDurationSec":593,"userId":"1","userName":"123","user_email":"123"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T15:38:43.669Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T15:38:43.669Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 128","timestamp":"2025-11-13T15:38:43.670Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T15:38:58.731Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T15:38:58.731Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 128","timestamp":"2025-11-13T15:38:58.731Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T15:39:13.819Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T15:39:13.819Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 128","timestamp":"2025-11-13T15:39:13.819Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-13T15:39:28.911Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: undefined","timestamp":"2025-11-13T15:39:28.911Z"}
+{"level":"info","message":"[Heartbeat] Received from user: undefined, session: 128","timestamp":"2025-11-13T15:39:28.911Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/logout-event'.","timestamp":"2025-11-13T15:39:35.199Z"}
+{"level":"info","message":"[Logout Attempt] Received request for userId: '1', sessionId: '128'","timestamp":"2025-11-13T15:39:35.199Z"}
+{"level":"info","message":"[Logout Check] Performing security SELECT for sessionId: 128 and userId: 1","timestamp":"2025-11-13T15:39:35.199Z"}
+{"level":"info","message":"[Logout Check Result] Found 1 matching active session(s).","timestamp":"2025-11-13T15:39:35.200Z"}
+{"level":"info","message":"[Logout Success] Security check passed. Proceeding to update session 128.","timestamp":"2025-11-13T15:39:35.200Z"}
+{"level":"info","message":"[Logout DB Update] Database update complete. Affected rows: 1.","timestamp":"2025-11-13T15:39:35.205Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:39:44.212Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:39:44.219Z"}
+{"level":"info","message":"发现 1 个超时会话，正在数据库中标为非活跃。","timestamp":"2025-11-13T15:40:36.204Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T15:49:56.350Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T15:50:02.376Z"}
+{"launchTime":1763049005248,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T15:50:03.419Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-13T15:54:20.444Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-13T15:54:24.588Z"}
+{"launchTime":1763049267388,"level":"info","message":"App usage recorded:","timestamp":"2025-11-13T15:54:25.579Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:55:20.776Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-13T15:55:23.781Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T15:55:23.795Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-13T15:55:23.804Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T15:55:25.561Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T15:55:25.567Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:55:26.475Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:55:26.482Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:55:27.683Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:55:27.690Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:55:34.592Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:55:34.598Z"}
+{"level":"warn","message":"[Auth Middleware] Token missing. Request to '/api/v1/customers' denied.","timestamp":"2025-11-13T15:55:39.680Z"}
+{"level":"error","message":"[Auth Middleware] Token verification failed for request to '/api/v1/customers'. Error: jwt malformed","timestamp":"2025-11-13T15:55:39.701Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:55:42.360Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:55:42.365Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T15:55:46.574Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T15:55:46.575Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:55:51.581Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T15:55:51.581Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T15:56:02.208Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:56:02.215Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T15:56:06.690Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T15:56:06.691Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T15:56:11.697Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T15:56:11.697Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T16:00:54.105Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T16:00:54.118Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T16:00:56.212Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T16:00:56.219Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T16:00:57.562Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T16:00:57.570Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-13T16:01:02.288Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-13T16:01:02.289Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T16:01:07.299Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-13T16:01:07.299Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-13T16:02:06.733Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-13T16:02:13.412Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-13T16:02:13.418Z"}

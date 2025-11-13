@@ -16,6 +16,8 @@ const {
 } = require('../repositories/admin.repository');
 const { hasColumn } = require('../utils/schema');
 const auditService = require('./audit.service');
+const featureFlagsService = require('./featureFlags.service');
+const offlineControlChannel = require('../realtime/offlineControlChannel');
 
 const ServiceError = (code, message) => {
   const err = new Error(message);
@@ -199,6 +201,66 @@ async function updateCustomer({ actorId, customerId, payload, ip, userAgent }) {
   return updated;
 }
 
+async function getFeatureFlagsSnapshot() {
+  return featureFlagsService.getFeatureFlagSnapshot();
+}
+
+async function updateOfflineModeFlag({ actorId, enabled, notifyOnline = false, ip, userAgent }) {
+  const updated = await featureFlagsService.setOfflineModeFlag({ enabled, actorId });
+  if (notifyOnline) {
+    offlineControlChannel.broadcastOfflineModeUpdate({
+      enabled,
+      updatedBy: actorId
+    });
+  }
+  await auditService.logAction({
+    actorId,
+    action: 'FEATURE_FLAG_UPDATED',
+    targetType: 'feature_flag',
+    targetId: featureFlagsService.FEATURE_KEYS.OFFLINE_MODE,
+    metadata: {
+      enabled,
+      notifyOnline
+    },
+    ip,
+    userAgent
+  });
+  return updated;
+}
+
+async function forceExitOfflineMode({ actorId, countdownSec, ip, userAgent }) {
+  offlineControlChannel.broadcastForceExit({
+    countdownSec,
+    updatedBy: actorId
+  });
+  setTimeout(async () => {
+    try {
+      await featureFlagsService.setOfflineModeFlag({ enabled: false, actorId });
+      offlineControlChannel.broadcastOfflineModeUpdate({
+        enabled: false,
+        updatedBy: actorId
+      });
+      logger.info('[AdminService] Force exit countdown elapsed, offline mode disabled.');
+    } catch (error) {
+      logger.error('[AdminService] Failed to disable offline mode after force exit countdown', {
+        error: error.message
+      });
+    }
+  }, Math.max(1, countdownSec) * 1000);
+  await auditService.logAction({
+    actorId,
+    action: 'OFFLINE_FORCE_EXIT_TRIGGERED',
+    targetType: 'feature_flag',
+    targetId: featureFlagsService.FEATURE_KEYS.OFFLINE_MODE,
+    metadata: {
+      countdownSec
+    },
+    ip,
+    userAgent
+  });
+  return { countdownSec };
+}
+
 async function ensureSeedAdmin() {
   const email = process.env.ADMIN_SEED_EMAIL;
   const password = process.env.ADMIN_SEED_PASSWORD;
@@ -253,5 +315,8 @@ module.exports = {
   deleteUser,
   getCustomerDetail,
   updateCustomer,
-  ensureSeedAdmin
+  ensureSeedAdmin,
+  getFeatureFlagsSnapshot,
+  updateOfflineModeFlag,
+  forceExitOfflineMode
 };
