@@ -97,14 +97,14 @@ export const DevicesPage = () => {
       },
       {
         key: 'offlineAllowed',
-        header: '离线权限',
+        header: '离线模式权限',
         render: item => (
           <Tag tone={item.offlineAllowed ? 'success' : 'danger'} label={item.offlineAllowed ? '允许' : '禁止'} />
         )
       },
       {
         key: 'actions',
-        header: '操作',
+        header: '离线模式',
         render: item => (
           <div className="devices-actions">
             <button
@@ -112,7 +112,7 @@ export const DevicesPage = () => {
               onClick={() => toggleOfflinePermission(item)}
               disabled={isLoading || actionDeviceId === item.deviceId}
             >
-              {item.offlineAllowed ? '禁止离线' : '允许离线'}
+              {item.offlineAllowed ? '禁止' : '允许'}
             </button>
             <button
               type="button"

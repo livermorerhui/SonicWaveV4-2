@@ -66,6 +66,16 @@ export const useDevicesVM = () => {
   }, [load]);
 
   useEffect(() => {
+    if (!token) {
+      return;
+    }
+    const timer = setInterval(() => {
+      load();
+    }, 60_000);
+    return () => clearInterval(timer);
+  }, [token, load]);
+
+  useEffect(() => {
     if (!infoMessage) return;
     const timer = setTimeout(() => setInfoMessage(null), 4000);
     return () => clearTimeout(timer);
