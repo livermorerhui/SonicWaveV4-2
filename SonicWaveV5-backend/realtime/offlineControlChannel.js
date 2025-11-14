@@ -67,7 +67,7 @@ function broadcastForceExit({ countdownSec, updatedBy, targetDeviceIds = null })
   };
   const message = {
     type: 'offline_mode',
-    action: 'force_exit',
+    action: 'force_exit_offline_mode',
     payload
   };
   const total = broadcast(message);

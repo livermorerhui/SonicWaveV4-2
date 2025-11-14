@@ -40,7 +40,7 @@ object OfflineControlMessageHandler {
             when (json.optString("action")) {
                 "enable" -> handleEnable(true)
                 "disable" -> handleEnable(false)
-                "force_exit" -> {
+                "force_exit_offline_mode" -> {
                     val countdown = payload?.optInt("countdownSec", 0) ?: 0
                     handleForceExit(countdown)
                 }
@@ -65,14 +65,14 @@ object OfflineControlMessageHandler {
 
     private fun handleForceExit(countdownSec: Int) {
         val manager = sessionManager ?: return
+        if (!OfflineTestModeManager.isOfflineMode()) {
+            Log.i(TAG, "Received force-exit command, but device is not in offline mode. Ignoring.")
+            return
+        }
         val logoutBlock: suspend () -> Unit = {
             manager.setOfflineModeAllowed(false)
             OfflineCapabilityManager.setOfflineAllowed(false)
             manager.initiateLogout(LogoutReason.HardLogout)
-        }
-        if (!OfflineTestModeManager.isOfflineMode()) {
-            scope.launch { logoutBlock() }
-            return
         }
         if (countdownSec <= 0) {
             scope.launch {
