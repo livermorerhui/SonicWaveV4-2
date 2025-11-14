@@ -34,6 +34,11 @@ class MainApplication : Application() {
         DeviceIdentityProvider.initialize(this)
         DeviceHeartbeatManager.start(this)
         val sessionManager = SessionManager(this)
+        sessionManager.fetchAccessToken()?.let { token ->
+            if (!token.isNullOrBlank()) {
+                RetrofitClient.updateToken(token)
+            }
+        }
         val isOffline = sessionManager.isOfflineTestMode()
         OfflineCapabilityManager.initialize(sessionManager.isOfflineModeAllowed())
         OfflineTestModeManager.initialize(isOffline)

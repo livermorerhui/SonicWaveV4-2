@@ -62,13 +62,12 @@ export const DevicesPage = () => {
       },
       {
         key: 'lastUserId',
-        header: '最近用户',
+        header: '登录用户',
         render: item =>
           item.lastUserId ? (
             <div className="devices-user">
               <span>{item.lastUserName || '未命名'}</span>
               <span className="devices-user-email">{item.lastUserEmail || '无邮箱'}</span>
-              <span className="devices-user-id">ID: {item.lastUserId}</span>
             </div>
           ) : (
             '—'

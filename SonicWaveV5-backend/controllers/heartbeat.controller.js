@@ -6,10 +6,8 @@ const resolveClientIp = req =>
   req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.connection?.remoteAddress || req.ip || null;
 
 const handleHeartbeat = (req, res) => {
-  // [新增日志] 确认心跳接口被调用
-  logger.info(`[Heartbeat Controller] Received request for userId: ${req.user.userId}`);
-
-  const userId = req.user.userId;
+  const userId = req.user?.id || req.user?.userId || null;
+  logger.info(`[Heartbeat Controller] Received request for userId: ${userId}`);
   const { sessionId, deviceId } = req.body;
 
   if (!sessionId) {
