@@ -87,7 +87,7 @@ class SessionManager(context: Context) {
         prefs.edit().putBoolean(OFFLINE_MODE_ALLOWED, allowed).apply()
     }
 
-    fun isOfflineModeAllowed(): Boolean = prefs.getBoolean(OFFLINE_MODE_ALLOWED, false)
+    fun isOfflineModeAllowed(): Boolean = prefs.getBoolean(OFFLINE_MODE_ALLOWED, true)
 
     fun fetchAccessToken(): String? = prefs.getString(ACCESS_TOKEN, null)
     fun fetchRefreshToken(): String? = prefs.getString(REFRESH_TOKEN, null)

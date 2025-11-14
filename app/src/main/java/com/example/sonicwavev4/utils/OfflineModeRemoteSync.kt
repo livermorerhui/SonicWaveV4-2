@@ -12,6 +12,7 @@ object OfflineModeRemoteSync {
     @Volatile private var lastSyncAtMs: Long = 0L
 
     suspend fun sync(context: Context, force: Boolean = false) {
+        DeviceIdentityProvider.initialize(context.applicationContext)
         val sessionManager = SessionManager(context.applicationContext)
         sync(sessionManager, force)
     }
@@ -22,11 +23,17 @@ object OfflineModeRemoteSync {
             return
         }
         lastSyncAtMs = now
+        val deviceId = runCatching { DeviceIdentityProvider.getDeviceId() }.getOrNull()
         try {
-            val response = RetrofitClient.api.fetchFeatureFlags()
+            val response = RetrofitClient.api.fetchFeatureFlags(deviceId)
             if (response.isSuccessful) {
-                val remoteAllowed = response.body()?.offlineModeEnabled ?: false
-                applyRemoteState(sessionManager, remoteAllowed)
+                val body = response.body()
+                val remoteAllowed = body?.offlineModeEnabled ?: false
+                applyRemoteState(
+                    sessionManager = sessionManager,
+                    remoteAllowed = remoteAllowed,
+                    deviceAllowed = body?.deviceOfflineAllowed
+                )
             } else {
                 Log.w(TAG, "fetchFeatureFlags failed: code=${response.code()}")
             }
@@ -35,13 +42,14 @@ object OfflineModeRemoteSync {
         }
     }
 
-    private fun applyRemoteState(sessionManager: SessionManager, remoteAllowed: Boolean) {
+    private fun applyRemoteState(sessionManager: SessionManager, remoteAllowed: Boolean, deviceAllowed: Boolean?) {
+        val targetAllowed = deviceAllowed ?: remoteAllowed
         val localAllowed = sessionManager.isOfflineModeAllowed()
-        if (localAllowed != remoteAllowed) {
-            sessionManager.setOfflineModeAllowed(remoteAllowed)
+        if (localAllowed != targetAllowed) {
+            sessionManager.setOfflineModeAllowed(targetAllowed)
         }
         OfflineCapabilityManager.setOfflineAllowed(sessionManager.isOfflineModeAllowed())
-        if (!remoteAllowed && sessionManager.isOfflineTestMode()) {
+        if (!targetAllowed && sessionManager.isOfflineTestMode()) {
             sessionManager.initiateLogout(LogoutReason.HardLogout)
         }
     }

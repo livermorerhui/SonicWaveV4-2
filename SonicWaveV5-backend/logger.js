@@ -4,7 +4,7 @@ const { splat, combine, timestamp, printf, colorize, json, errors } = winston.fo
 
 // --- 日志记录器配置 ---
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || 'debug',
   
   // 文件日志的格式：保持为JSON，便于机器解析
   format: combine(

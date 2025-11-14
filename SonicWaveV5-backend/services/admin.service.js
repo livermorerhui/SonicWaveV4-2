@@ -18,6 +18,7 @@ const { hasColumn } = require('../utils/schema');
 const auditService = require('./audit.service');
 const featureFlagsService = require('./featureFlags.service');
 const offlineControlChannel = require('../realtime/offlineControlChannel');
+const deviceService = require('./device.service');
 
 const ServiceError = (code, message) => {
   const err = new Error(message);
@@ -305,6 +306,54 @@ async function ensureSeedAdmin() {
   logger.info(`[AdminService] Seeded admin user with email ${email}.`);
 }
 
+function handleDeviceServiceError(error) {
+  if (error.code === 'DEVICE_NOT_FOUND') {
+    throw ServiceError('DEVICE_NOT_FOUND', '目标设备不存在');
+  }
+  throw error;
+}
+
+async function listRegisteredDevices(params) {
+  return deviceService.listDevices(params);
+}
+
+async function getDeviceRegistryEntry(deviceId) {
+  const device = await deviceService.findDevice(deviceId);
+  if (!device) {
+    throw ServiceError('DEVICE_NOT_FOUND', '目标设备不存在');
+  }
+  return device;
+}
+
+async function updateDeviceOfflinePermission({ actorId, deviceId, offlineAllowed, notifyOnline = false, ip, userAgent }) {
+  try {
+    return await deviceService.setOfflinePermission({
+      actorId,
+      deviceId,
+      offlineAllowed,
+      notifyOnline,
+      ip,
+      userAgent
+    });
+  } catch (error) {
+    return handleDeviceServiceError(error);
+  }
+}
+
+async function forceExitDeviceOffline({ actorId, deviceId, countdownSec, ip, userAgent }) {
+  try {
+    return await deviceService.forceExitOffline({
+      actorId,
+      deviceId,
+      countdownSec,
+      ip,
+      userAgent
+    });
+  } catch (error) {
+    return handleDeviceServiceError(error);
+  }
+}
+
 module.exports = {
   getAllUsers,
   getAllCustomers,
@@ -318,5 +367,9 @@ module.exports = {
   ensureSeedAdmin,
   getFeatureFlagsSnapshot,
   updateOfflineModeFlag,
-  forceExitOfflineMode
+  forceExitOfflineMode,
+  listRegisteredDevices,
+  getDeviceRegistryEntry,
+  updateDeviceOfflinePermission,
+  forceExitDeviceOffline
 };

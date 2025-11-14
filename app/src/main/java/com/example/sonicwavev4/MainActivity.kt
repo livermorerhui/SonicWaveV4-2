@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
-import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.content.res.Resources
@@ -37,8 +36,9 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.core.widget.ImageViewCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.forEach
+import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -55,15 +55,14 @@ import com.example.sonicwavev4.databinding.ActivityMainBinding
 import com.example.sonicwavev4.network.AppUsageRequest
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
+import com.example.sonicwavev4.utils.DeviceIdentityProvider
 import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.utils.OfflineForceExitManager
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import java.util.Locale
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadListener {
     private lateinit var binding: ActivityMainBinding
@@ -153,7 +152,16 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         if (!sessionManager.isOfflineTestMode()) {
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    val request = AppUsageRequest(launchTime = launchTime, userId = userId)
+                    val deviceProfile = DeviceIdentityProvider.buildProfile()
+                    val request = AppUsageRequest(
+                        launchTime = launchTime,
+                        userId = userId,
+                        deviceId = deviceProfile.deviceId,
+                        ipAddress = deviceProfile.localIpAddress,
+                        deviceModel = deviceProfile.deviceModel,
+                        osVersion = deviceProfile.osVersion,
+                        appVersion = deviceProfile.appVersion
+                    )
                     RetrofitClient.api.recordAppUsage(request)
                 } catch (e: Exception) {
                     // Log error or handle it appropriately

@@ -2,12 +2,11 @@ package com.example.sonicwavev4.utils
 
 import android.content.Context
 import android.util.Log
-import com.example.sonicwavev4.utils.LogoutReason
-import com.example.sonicwavev4.utils.OfflineCapabilityManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 import org.json.JSONObject
 
 object OfflineControlMessageHandler {
@@ -24,6 +23,7 @@ object OfflineControlMessageHandler {
         val applicationContext = context.applicationContext
         appContext = applicationContext
         sessionManager = SessionManager(applicationContext)
+        DeviceIdentityProvider.initialize(applicationContext)
     }
 
     fun handleRawMessage(raw: String) {
@@ -33,11 +33,14 @@ object OfflineControlMessageHandler {
             if (json.optString("type") != "offline_mode") {
                 return
             }
+            val payload = json.optJSONObject("payload")
+            if (!shouldHandleForCurrentDevice(payload)) {
+                return
+            }
             when (json.optString("action")) {
                 "enable" -> handleEnable(true)
                 "disable" -> handleEnable(false)
                 "force_exit" -> {
-                    val payload = json.optJSONObject("payload")
                     val countdown = payload?.optInt("countdownSec", 0) ?: 0
                     handleForceExit(countdown)
                 }
@@ -79,6 +82,19 @@ object OfflineControlMessageHandler {
         }
         OfflineForceExitManager.startCountdown(countdownSec) {
             logoutBlock()
+        }
+    }
+
+    private fun shouldHandleForCurrentDevice(payload: JSONObject?): Boolean {
+        val targets = payload?.optJSONArray("targetDeviceIds") ?: return true
+        if (targets.length() == 0) return true
+        val currentDeviceId = runCatching { DeviceIdentityProvider.getDeviceId() }.getOrNull() ?: return false
+        return targets.toSequence().any { currentDeviceId == it }
+    }
+
+    private fun JSONArray.toSequence(): Sequence<String> = sequence {
+        for (i in 0 until length()) {
+            yield(optString(i))
         }
     }
 }

@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.example.sonicwavev4.utils.DeviceIdentityProvider
 import com.example.sonicwavev4.utils.OfflineControlMessageHandler
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -59,7 +60,12 @@ object OfflineControlWebSocket : WebSocketListener() {
             val scheme = if (uri.scheme.equals("https", true)) "wss" else "ws"
             val host = uri.host ?: Uri.parse(httpBase).host ?: return null
             val portPart = if (uri.port == -1) "" else ":${uri.port}"
-            "$scheme://$host$portPart/ws?channel=control"
+            val queryItems = mutableListOf("channel=control")
+            val deviceId = runCatching { DeviceIdentityProvider.getDeviceId() }.getOrNull()
+            if (!deviceId.isNullOrBlank()) {
+                queryItems += "deviceId=${Uri.encode(deviceId)}"
+            }
+            "$scheme://$host$portPart/ws?${queryItems.joinToString("&")}"
         } catch (e: Exception) {
             Log.e(TAG, "Invalid base URL for control WS", e)
             null

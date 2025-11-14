@@ -28,6 +28,7 @@ const heartbeatRouter = require('./routes/heartbeat.routes.js');
 const authEventRouter = require('./routes/auth.routes.js');
 const tokenRouter = require('./routes/token.routes.js');
 const adminRouter = require('./routes/admin.routes.js');
+const deviceRouter = require('./routes/device.routes.js');
 const { ensureSeedAdmin } = require('./services/admin.service');
 const customerRouter = require('./routes/customer.routes.js');
 const presetModesRouter = require('./routes/presetModes.routes.js');
@@ -122,6 +123,7 @@ app.use('/api/v1/auth', authEventRouter);
 app.use('/api/v1/token', tokenRouter); // 新增
 app.use('/api/v1/customers', customerRouter);
 app.use('/api/v1/preset-modes', presetModesRouter);
+app.use('/api/v1/device', deviceRouter);
 app.use('/api/admin', adminRouter);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

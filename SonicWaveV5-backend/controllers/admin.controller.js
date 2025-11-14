@@ -274,6 +274,98 @@ const updateCustomer = async (req, res) => {
   }
 };
 
+const getDevices = async (req, res) => {
+  try {
+    const {
+      page,
+      pageSize,
+      keyword,
+      offlineAllowed,
+      onlyOnline,
+      onlineWindowSeconds
+    } = req.query;
+    const result = await adminService.listRegisteredDevices({
+      page,
+      pageSize,
+      keyword,
+      offlineAllowed,
+      onlyOnline,
+      onlineWindowSeconds
+    });
+    res.json(result);
+  } catch (error) {
+    logger.error('[AdminController] Failed to fetch devices', { error: error.message });
+    res.status(500).json(buildError('INTERNAL_ERROR', '获取设备列表失败'));
+  }
+};
+
+const getDeviceDetail = async (req, res) => {
+  try {
+    const { deviceId } = req.params;
+    const detail = await adminService.getDeviceRegistryEntry(deviceId);
+    res.json(detail);
+  } catch (error) {
+    if (error.code === 'DEVICE_NOT_FOUND') {
+      return res.status(404).json(buildError('DEVICE_NOT_FOUND', '未找到目标设备'));
+    }
+    logger.error('[AdminController] Failed to fetch device detail', { error: error.message });
+    res.status(500).json(buildError('INTERNAL_ERROR', '获取设备详情失败'));
+  }
+};
+
+const updateDeviceOfflinePermission = async (req, res) => {
+  try {
+    const { deviceId } = req.params;
+    const { offlineAllowed } = req.body;
+    const notifyOnline = req.body.notifyOnline === true;
+    const updated = await adminService.updateDeviceOfflinePermission({
+      actorId: toActorId(req),
+      deviceId,
+      offlineAllowed,
+      notifyOnline,
+      ip: toIp(req),
+      userAgent: toUserAgent(req)
+    });
+    res.json(
+      buildSuccess('设备离线权限已更新', {
+        device: updated
+      })
+    );
+  } catch (error) {
+    if (error.code === 'DEVICE_NOT_FOUND') {
+      return res.status(404).json(buildError('DEVICE_NOT_FOUND', '未找到目标设备'));
+    }
+    logger.error('[AdminController] Failed to update device offline flag', { error: error.message });
+    res.status(500).json(buildError('INTERNAL_ERROR', '更新设备离线权限失败'));
+  }
+};
+
+const forceExitDeviceOffline = async (req, res) => {
+  try {
+    const { deviceId } = req.params;
+    const countdownSec = Number.parseInt(req.body.countdownSec, 10);
+    const result = await adminService.forceExitDeviceOffline({
+      actorId: toActorId(req),
+      deviceId,
+      countdownSec,
+      ip: toIp(req),
+      userAgent: toUserAgent(req)
+    });
+    res.json(
+      buildSuccess('已下发强制退出指令', {
+        deviceId,
+        countdownSec: result.countdownSec
+      })
+    );
+  } catch (error) {
+    if (error.code === 'DEVICE_NOT_FOUND') {
+      return res.status(404).json(buildError('DEVICE_NOT_FOUND', '未找到目标设备'));
+    }
+    logger.error('[AdminController] Failed to force exit device', { error: error.message });
+    res.status(500).json(buildError('INTERNAL_ERROR', '触发设备强制退出失败'));
+  }
+};
+
 const getFeatureFlags = async (req, res) => {
   try {
     const snapshot = await adminService.getFeatureFlagsSnapshot();
@@ -344,5 +436,9 @@ module.exports = {
   getFeatureFlags,
   updateOfflineModeFlag,
   forceExitOfflineMode,
-  setAdminService
+  setAdminService,
+  getDevices,
+  getDeviceDetail,
+  updateDeviceOfflinePermission,
+  forceExitDeviceOffline
 };

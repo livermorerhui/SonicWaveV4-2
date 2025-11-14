@@ -38,6 +38,21 @@ const customersFilterValidators = [
     .withMessage('sortOrder 仅支持 asc/desc')
 ];
 
+const deviceFilterValidators = [
+  query('offlineAllowed')
+    .optional()
+    .isBoolean()
+    .withMessage('offlineAllowed 需为布尔值')
+    .toBoolean(),
+  query('onlyOnline').optional().isBoolean().withMessage('onlyOnline 需为布尔值').toBoolean(),
+  query('onlineWindowSeconds')
+    .optional()
+    .isInt({ min: 10, max: 3600 })
+    .withMessage('onlineWindowSeconds 范围需在 10~3600')
+    .toInt(),
+  query('keyword').optional().trim().isLength({ max: 191 }).withMessage('keyword 最长 191 个字符')
+];
+
 router.use(authenticateToken);
 router.use(adminAuth);
 
@@ -314,6 +329,44 @@ router.post(
   ],
   validate,
   adminController.forceExitOfflineMode
+);
+
+router.get(
+  '/devices',
+  [...paginationValidators, ...deviceFilterValidators],
+  validate,
+  adminController.getDevices
+);
+
+router.get(
+  '/devices/:deviceId',
+  [param('deviceId').isString().isLength({ min: 1, max: 191 }).withMessage('deviceId 长度需在 1~191 之间')],
+  validate,
+  adminController.getDeviceDetail
+);
+
+router.patch(
+  '/devices/:deviceId/offline',
+  [
+    param('deviceId').isString().isLength({ min: 1, max: 191 }).withMessage('deviceId 长度需在 1~191 之间'),
+    body('offlineAllowed').isBoolean().withMessage('offlineAllowed 需为布尔值'),
+    body('notifyOnline').optional().isBoolean().withMessage('notifyOnline 需为布尔值').toBoolean()
+  ],
+  validate,
+  adminController.updateDeviceOfflinePermission
+);
+
+router.post(
+  '/devices/:deviceId/force-exit',
+  [
+    param('deviceId').isString().isLength({ min: 1, max: 191 }).withMessage('deviceId 长度需在 1~191 之间'),
+    body('countdownSec')
+      .isInt({ min: 5, max: 120 })
+      .withMessage('countdownSec 需为 5~120 之间的整数')
+      .toInt()
+  ],
+  validate,
+  adminController.forceExitDeviceOffline
 );
 
 module.exports = router;

@@ -41,11 +41,12 @@ function broadcast(message) {
   return delivered;
 }
 
-function broadcastOfflineModeUpdate({ enabled, updatedBy }) {
+function broadcastOfflineModeUpdate({ enabled, updatedBy, targetDeviceIds = null }) {
   const payload = {
     enabled,
     updatedBy: updatedBy ?? null,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    targetDeviceIds: Array.isArray(targetDeviceIds) && targetDeviceIds.length > 0 ? targetDeviceIds : null
   };
   const message = {
     type: 'offline_mode',
@@ -57,11 +58,12 @@ function broadcastOfflineModeUpdate({ enabled, updatedBy }) {
   return total;
 }
 
-function broadcastForceExit({ countdownSec, updatedBy }) {
+function broadcastForceExit({ countdownSec, updatedBy, targetDeviceIds = null }) {
   const payload = {
     countdownSec,
     updatedBy: updatedBy ?? null,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    targetDeviceIds: Array.isArray(targetDeviceIds) && targetDeviceIds.length > 0 ? targetDeviceIds : null
   };
   const message = {
     type: 'offline_mode',

@@ -1,0 +1,114 @@
+.devices-root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.devices-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.devices-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.devices-toolbar label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: #444;
+  gap: 4px;
+}
+
+.devices-toolbar select {
+  min-width: 120px;
+}
+
+.devices-checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.devices-refresh {
+  margin-left: auto;
+}
+
+.devices-info {
+  padding: 8px 12px;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+  border-radius: 6px;
+}
+
+.devices-error {
+  padding: 8px 12px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 6px;
+}
+
+.devices-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.devices-code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: 0.9rem;
+}
+
+.devices-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.devices-last-seen {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.devices-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.devices-actions button {
+  padding: 6px 8px;
+}
+
+.devices-force {
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+}
+
+.devices-user {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.devices-user-email {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.devices-user-id {
+  font-size: 0.8rem;
+  color: #666;
+}

@@ -3,6 +3,7 @@ import type { UserDTO, UserDetail } from '@/models/UserDTO';
 import type { CustomerDTO, CustomerDetail } from '@/models/CustomerDTO';
 import type { PaginatedResponse } from '@/models/PaginatedResponse';
 import type { FeatureFlag, FeatureFlagSnapshot } from '@/models/FeatureFlag';
+import type { DeviceDTO } from '@/models/Device';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
@@ -141,6 +142,15 @@ interface CustomerQuery {
   sortOrder?: 'asc' | 'desc';
 }
 
+interface DeviceQuery {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  offlineAllowed?: boolean;
+  onlyOnline?: boolean;
+  onlineWindowSeconds?: number;
+}
+
 export const fetchUsers = (query: UserQuery, token: string) =>
   request<PaginatedResponse<UserDTO>>(`/api/admin/users${buildQueryString(query)}`, {
     method: 'GET',
@@ -233,6 +243,33 @@ export const patchOfflineModeFlag = (enabled: boolean, token: string, notifyOnli
 export const forceExitOfflineMode = (countdownSec: number, token: string) =>
   request<{ message: string; countdownSec: number }>(
     '/api/admin/feature-flags/offline-mode/force-exit',
+    {
+      method: 'POST',
+      token,
+      body: JSON.stringify({ countdownSec })
+    }
+  );
+
+export const fetchDevices = (query: DeviceQuery, token: string) =>
+  request<PaginatedResponse<DeviceDTO>>(`/api/admin/devices${buildQueryString(query)}`, {
+    method: 'GET',
+    token
+  });
+
+export const patchDeviceOfflinePermission = (
+  deviceId: string,
+  payload: { offlineAllowed: boolean; notifyOnline?: boolean },
+  token: string
+) =>
+  request<{ message: string; device: DeviceDTO }>(`/api/admin/devices/${deviceId}/offline`, {
+    method: 'PATCH',
+    token,
+    body: JSON.stringify(payload)
+  });
+
+export const forceExitDeviceOffline = (deviceId: string, countdownSec: number, token: string) =>
+  request<{ message: string; deviceId: string; countdownSec: number }>(
+    `/api/admin/devices/${deviceId}/force-exit`,
     {
       method: 'POST',
       token,

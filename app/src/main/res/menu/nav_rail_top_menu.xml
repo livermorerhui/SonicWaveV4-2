@@ -7,7 +7,7 @@
     <item
         android:id="@+id/navigation_persetmode"
         android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="预设模式" />
+        android:title="专家模式" />
     <item
         android:id="@+id/navigation_custom_preset"
         android:icon="@drawable/ic_custom_perset"

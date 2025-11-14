@@ -26,6 +26,7 @@ object HeartbeatManager {
         Log.d("DEBUG_FLOW", "HeartbeatManager: Starting new heartbeat job...")
         val appContext = context.applicationContext
         val sessionManager = SessionManager(appContext)
+        val deviceId = runCatching { DeviceIdentityProvider.getDeviceId() }.getOrNull()
 
         heartbeatJob = scope.launch {
             Log.d("DEBUG_FLOW", "HeartbeatManager: Coroutine launched. Entering while(isActive) loop.")
@@ -36,7 +37,7 @@ object HeartbeatManager {
                     val sessionId = sessionManager.fetchSessionId()
                     Log.d("DEBUG_FLOW", "HeartbeatManager: Fetched sessionId: $sessionId")
                     if (sessionId != -1L) {
-                        val request = HeartbeatRequest(sessionId)
+                        val request = HeartbeatRequest(sessionId, deviceId)
                         Log.d("DEBUG_FLOW", "HeartbeatManager: Preparing to send heartbeat for session $sessionId.")
                         val response = RetrofitClient.api.sendHeartbeat(request)
                         Log.d("DEBUG_FLOW", "HeartbeatManager: sendHeartbeat call finished.")

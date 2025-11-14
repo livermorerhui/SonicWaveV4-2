@@ -27,6 +27,9 @@ export const AdminLayout = () => {
           <NavLink className="nav-link" to="/customers">
             客户管理
           </NavLink>
+          <NavLink className="nav-link" to="/devices">
+            设备控制
+          </NavLink>
           <NavLink className="nav-link" to="/feature-flags">
             功能开关
           </NavLink>

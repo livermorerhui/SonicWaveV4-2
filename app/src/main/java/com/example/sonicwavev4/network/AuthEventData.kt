@@ -25,5 +25,14 @@ data class LogoutEventRequest(
  * 发送心跳的请求体。
  */
 data class HeartbeatRequest(
-    val sessionId: Long
+    val sessionId: Long,
+    val deviceId: String? = null
+)
+
+data class DeviceHeartbeatRequest(
+    val deviceId: String,
+    val ipAddress: String? = null,
+    val deviceModel: String? = null,
+    val osVersion: String? = null,
+    val appVersion: String? = null
 )

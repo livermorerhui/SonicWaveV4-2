@@ -9,6 +9,9 @@ import cn.wch.ch341lib.CH341Manager
 import com.example.sonicwavev4.logging.LogUploadWorker
 import com.example.sonicwavev4.network.OfflineControlWebSocket
 import com.example.sonicwavev4.network.RetrofitClient
+import com.example.sonicwavev4.utils.DeviceHeartbeatManager
+import com.example.sonicwavev4.utils.DeviceIdentityProvider
+import com.example.sonicwavev4.utils.HeartbeatManager
 import com.example.sonicwavev4.utils.OfflineCapabilityManager
 import com.example.sonicwavev4.utils.OfflineModeRemoteSync
 import com.example.sonicwavev4.utils.OfflineTestModeManager
@@ -28,10 +31,16 @@ class MainApplication : Application() {
         super.onCreate()
         CH341Manager.getInstance().init(this)
         RetrofitClient.initialize(this)
+        DeviceIdentityProvider.initialize(this)
+        DeviceHeartbeatManager.start(this)
         val sessionManager = SessionManager(this)
         val isOffline = sessionManager.isOfflineTestMode()
         OfflineCapabilityManager.initialize(sessionManager.isOfflineModeAllowed())
         OfflineTestModeManager.initialize(isOffline)
+        val hasSession = sessionManager.hasActiveSession() && sessionManager.fetchSessionId() != -1L
+        if (!isOffline && hasSession) {
+            HeartbeatManager.start(this)
+        }
         if (isOffline) {
             WorkManager.getInstance(this).cancelUniqueWork("logUploadWork")
         } else {

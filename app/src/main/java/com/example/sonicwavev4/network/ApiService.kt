@@ -2,11 +2,12 @@ package com.example.sonicwavev4.network
 
 import okhttp3.RequestBody
 import retrofit2.Response
-import retrofit2.http.GET
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -28,7 +29,7 @@ interface ApiService {
     suspend fun recordAppUsage(@Body request: AppUsageRequest): Response<Unit>
 
     @GET("api/v1/app/feature-flags")
-    suspend fun fetchFeatureFlags(): Response<FeatureFlagsResponse>
+    suspend fun fetchFeatureFlags(@Query("deviceId") deviceId: String?): Response<FeatureFlagsResponse>
 
     @POST("api/v1/operations/start")
     suspend fun startOperation(@Body request: StartOperationRequest): StartOperationResponse
@@ -72,4 +73,7 @@ interface ApiService {
 
     @PUT("api/v1/customers/{customerId}")
     suspend fun updateCustomer(@Path("customerId") customerId: Int, @Body customer: Customer): Response<Unit>
+
+    @POST("api/v1/device/heartbeat")
+    suspend fun sendDeviceHeartbeat(@Body request: DeviceHeartbeatRequest): Response<Unit>
 }
