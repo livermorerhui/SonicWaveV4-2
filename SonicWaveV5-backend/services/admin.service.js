@@ -208,6 +208,9 @@ async function getFeatureFlagsSnapshot() {
 
 async function updateOfflineModeFlag({ actorId, enabled, notifyOnline = false, ip, userAgent }) {
   const updated = await featureFlagsService.setOfflineModeFlag({ enabled, actorId });
+
+  await deviceService.setAllDevicesOfflinePermission(enabled);
+
   if (notifyOnline) {
     offlineControlChannel.broadcastOfflineModeUpdate({
       enabled,

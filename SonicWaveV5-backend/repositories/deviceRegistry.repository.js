@@ -155,6 +155,17 @@ async function setDeviceOfflineAllowed(deviceId, offlineAllowed) {
   return result.affectedRows;
 }
 
+async function setAllDevicesOfflineAllowed(offlineAllowed) {
+  const [result] = await dbPool.execute(
+    `
+      UPDATE device_registry
+      SET offline_allowed = ?, updated_at = NOW()
+    `,
+    [offlineAllowed ? 1 : 0]
+  );
+  return result.affectedRows;
+}
+
 const normalizeBoolean = value => {
   if (value === undefined || value === null) return undefined;
   if (typeof value === 'boolean') return value;
@@ -260,5 +271,6 @@ module.exports = {
   upsertDeviceRecord,
   findDeviceById,
   setDeviceOfflineAllowed,
+  setAllDevicesOfflineAllowed,
   listDevices
 };

@@ -77,6 +77,10 @@ async function listDevices(params) {
   return deviceRepository.listDevices(params);
 }
 
+async function setAllDevicesOfflinePermission(offlineAllowed) {
+  await deviceRepository.setAllDevicesOfflineAllowed(offlineAllowed);
+}
+
 async function setOfflinePermission({
   actorId,
   deviceId,
@@ -163,6 +167,7 @@ module.exports = {
   touchDevice,
   findDevice,
   listDevices,
+  setAllDevicesOfflinePermission,
   setOfflinePermission,
   forceExitOffline
 };
