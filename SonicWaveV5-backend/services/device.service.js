@@ -1,6 +1,7 @@
 const deviceRepository = require('../repositories/deviceRegistry.repository');
 const auditService = require('./audit.service');
 const offlineControlChannel = require('../realtime/offlineControlChannel');
+const logger = require('../logger');
 
 const DeviceServiceError = (code, message) => {
   const err = new Error(message);
@@ -132,6 +133,16 @@ async function forceExitOffline({
     updatedBy: actorId,
     targetDeviceIds: [normalizedId]
   });
+  let updatedDevice = null;
+  try {
+    await deviceRepository.setDeviceOfflineAllowed(normalizedId, false);
+    updatedDevice = await findDevice(normalizedId);
+  } catch (error) {
+    logger.warn('[DeviceService] Failed to update offline flag after force exit', {
+      deviceId: normalizedId,
+      error: error.message
+    });
+  }
   await auditService.logAction({
     actorId,
     action: 'DEVICE_FORCE_EXIT_TRIGGERED',
@@ -143,7 +154,7 @@ async function forceExitOffline({
     ip,
     userAgent
   });
-  return { countdownSec };
+  return { countdownSec, device: updatedDevice };
 }
 
 module.exports = {

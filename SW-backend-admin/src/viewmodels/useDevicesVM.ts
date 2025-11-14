@@ -138,8 +138,15 @@ export const useDevicesVM = () => {
       setActionDeviceId(device.deviceId);
       setError(null);
       try {
-        await forceExitDeviceOffline(device.deviceId, countdownSec, token);
+        const response = await forceExitDeviceOffline(device.deviceId, countdownSec, token);
         setInfoMessage(`已下发 ${countdownSec}s 强制退出指令`);
+        if (response.device) {
+          setItems(prev =>
+            prev.map(item =>
+              item.deviceId === response.device!.deviceId ? response.device! : item
+            )
+          );
+        }
       } catch (err) {
         if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
           logout();

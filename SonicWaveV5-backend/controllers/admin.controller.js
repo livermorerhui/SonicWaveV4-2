@@ -354,7 +354,8 @@ const forceExitDeviceOffline = async (req, res) => {
     res.json(
       buildSuccess('已下发强制退出指令', {
         deviceId,
-        countdownSec: result.countdownSec
+        countdownSec: result.countdownSec,
+        device: result.device || null
       })
     );
   } catch (error) {

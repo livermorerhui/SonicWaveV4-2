@@ -268,7 +268,7 @@ export const patchDeviceOfflinePermission = (
   });
 
 export const forceExitDeviceOffline = (deviceId: string, countdownSec: number, token: string) =>
-  request<{ message: string; deviceId: string; countdownSec: number }>(
+  request<{ message: string; deviceId: string; countdownSec: number; device: DeviceDTO | null }>(
     `/api/admin/devices/${deviceId}/force-exit`,
     {
       method: 'POST',
