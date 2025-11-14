@@ -240,6 +240,7 @@ async function forceExitOfflineMode({ actorId, countdownSec, ip, userAgent }) {
   setTimeout(async () => {
     try {
       await featureFlagsService.setOfflineModeFlag({ enabled: false, actorId });
+      await deviceService.setAllDevicesOfflinePermission(false);
       offlineControlChannel.broadcastOfflineModeUpdate({
         enabled: false,
         updatedBy: actorId

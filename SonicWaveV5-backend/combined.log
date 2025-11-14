@@ -22263,3 +22263,133 @@
 {"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:00:29.646Z"}
 {"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:00:44.843Z"}
 {"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:00:59.752Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:01:14.872Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:01:30.055Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:01:45.164Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:02:00.259Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:02:15.362Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T14:02:23.362Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T14:02:23.369Z"}
+{"level":"debug","message":"Payload size: PATCH /api/admin/feature-flags/offline-mode payload=36B","timestamp":"2025-11-14T14:02:24.562Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-14T14:02:24.563Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-14T14:02:24.584Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:02:26.519Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:02:26.521Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:02:26.525Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:02:26.528Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:02:26.530Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:02:26.533Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T14:02:27.669Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T14:02:27.677Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:02:30.578Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:02:45.720Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:03:00.814Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:03:15.894Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:03:30.995Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:03:46.252Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:04:01.348Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:04:16.520Z"}
+{"level":"info","message":"✅ Successfully connected to the database.","timestamp":"2025-11-14T14:04:26.083Z"}
+{"level":"info","message":"[AdminService] Admin seed user already exists with admin role.","timestamp":"2025-11-14T14:04:26.094Z"}
+{"level":"info","message":"✅ Server (HTTP + WebSocket) is running on http://localhost:3000","timestamp":"2025-11-14T14:04:26.095Z"}
+{"level":"info","message":"✅ Online user status manager starting intervals...","timestamp":"2025-11-14T14:04:26.095Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:04:31.673Z"}
+{"level":"info","message":"[ControlChannel] Control client connected. total=%d","timestamp":"2025-11-14T14:04:35.803Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:04:46.823Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:05:01.924Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:05:17.027Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:05:32.137Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:05:47.281Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:06:02.450Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:06:17.594Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:06:32.713Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:06:47.864Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:07:02.954Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:07:18.055Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:07:33.182Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:07:48.298Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:08:03.405Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:08:18.506Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:08:33.617Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:08:48.733Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:08:57.489Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:08:57.498Z"}
+{"level":"debug","message":"Payload size: POST /api/v1/users/login payload=46B","timestamp":"2025-11-14T14:08:58.800Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-14T14:08:58.930Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-14T14:08:58.950Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-14T14:08:58.969Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T14:09:00.472Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T14:09:00.482Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:09:01.818Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:09:01.823Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:09:01.834Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:09:01.837Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:09:01.839Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:09:01.842Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T14:09:03.722Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T14:09:03.728Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:09:03.836Z"}
+{"level":"debug","message":"Payload size: POST /api/admin/feature-flags/offline-mode/force-exit payload=18B","timestamp":"2025-11-14T14:09:08.406Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode/force-exit'.","timestamp":"2025-11-14T14:09:08.407Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-14T14:09:08.409Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-14T14:09:13.426Z"}
+{"level":"info","message":"[AdminService] Force exit countdown elapsed, offline mode disabled.","timestamp":"2025-11-14T14:09:13.427Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:09:18.904Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:09:22.667Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:09:22.668Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:09:22.675Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:09:22.681Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:09:22.683Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:09:22.688Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:09:34.017Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T14:09:36.416Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T14:09:36.430Z"}
+{"level":"debug","message":"Payload size: PATCH /api/admin/feature-flags/offline-mode payload=36B","timestamp":"2025-11-14T14:09:37.270Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags/offline-mode'.","timestamp":"2025-11-14T14:09:37.271Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-14T14:09:37.285Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:09:38.292Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:09:38.299Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:09:38.304Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:09:38.306Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:09:38.306Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:09:38.309Z"}
+{"level":"debug","message":"Payload size: POST /api/admin/devices/sw-33e5c05fbe040250c6cf114b63d856b1/force-exit payload=18B","timestamp":"2025-11-14T14:09:43.366Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices/sw-33e5c05fbe040250c6cf114b63d856b1/force-exit'.","timestamp":"2025-11-14T14:09:43.368Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-14T14:09:43.372Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:09:49.072Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:09:52.220Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:09:52.221Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:09:52.226Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:10:04.163Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:10:19.261Z"}
+{"level":"debug","message":"Payload size: PATCH /api/admin/devices/sw-33e5c05fbe040250c6cf114b63d856b1/offline payload=43B","timestamp":"2025-11-14T14:10:28.616Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices/sw-33e5c05fbe040250c6cf114b63d856b1/offline'.","timestamp":"2025-11-14T14:10:28.616Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-14T14:10:28.626Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:10:28.645Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:10:28.647Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:10:28.687Z"}
+{"level":"debug","message":"Payload size: POST /api/admin/devices/sw-33e5c05fbe040250c6cf114b63d856b1/force-exit payload=18B","timestamp":"2025-11-14T14:10:34.198Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices/sw-33e5c05fbe040250c6cf114b63d856b1/force-exit'.","timestamp":"2025-11-14T14:10:34.199Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-14T14:10:34.203Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:10:45.585Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:10:45.586Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:10:45.590Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:10:49.461Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:11:04.618Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:11:19.730Z"}
+{"level":"debug","message":"Payload size: PATCH /api/admin/devices/sw-33e5c05fbe040250c6cf114b63d856b1/offline payload=43B","timestamp":"2025-11-14T14:11:22.700Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices/sw-33e5c05fbe040250c6cf114b63d856b1/offline'.","timestamp":"2025-11-14T14:11:22.702Z"}
+{"level":"info","message":"[ControlChannel] Broadcast offline %s to %d clients.","timestamp":"2025-11-14T14:11:22.713Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:11:22.723Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:11:22.725Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:11:22.729Z"}
+{"level":"debug","message":"Payload size: POST /api/admin/devices/sw-33e5c05fbe040250c6cf114b63d856b1/force-exit payload=18B","timestamp":"2025-11-14T14:11:24.097Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices/sw-33e5c05fbe040250c6cf114b63d856b1/force-exit'.","timestamp":"2025-11-14T14:11:24.098Z"}
+{"level":"warn","message":"[ControlChannel] Broadcast offline force exit (%ds) to %d clients.","timestamp":"2025-11-14T14:11:24.101Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:11:34.835Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:11:49.978Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T14:11:56.881Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T14:11:56.882Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T14:11:56.886Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:12:05.078Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T14:12:20.192Z"}
