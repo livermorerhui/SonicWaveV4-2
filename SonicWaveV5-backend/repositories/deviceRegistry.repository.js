@@ -50,7 +50,8 @@ const mapDeviceRow = row => ({
   appVersion: row.app_version,
   offlineAllowed: Boolean(row.offline_allowed),
   metadata: safeParseJson(row.metadata),
-  updatedAt: toIsoString(row.updated_at)
+  updatedAt: toIsoString(row.updated_at),
+  isOnline: row.is_online === undefined ? undefined : Boolean(row.is_online)
 });
 
 const sanitizeMetadata = metadata => {
@@ -201,10 +202,8 @@ async function listDevices({
   const normalizedOnlyOnline = normalizeBoolean(onlyOnline) === true;
   const normalizedWindowSeconds = Math.max(10, Math.min(normalizeNumber(onlineWindowSeconds, 90), 3600));
   if (normalizedOnlyOnline) {
-    const windowMs = normalizedWindowSeconds;
-    const boundary = new Date(Date.now() - windowMs * 1000);
-    filters.push('last_seen_at >= ?');
-    params.push(boundary);
+    filters.push('TIMESTAMPDIFF(SECOND, d.last_seen_at, NOW()) <= ?');
+    params.push(normalizedWindowSeconds);
   }
 
   const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
@@ -224,7 +223,12 @@ async function listDevices({
            d.app_version,
            d.offline_allowed,
            d.metadata,
-           d.updated_at
+           d.updated_at,
+           CASE
+             WHEN TIMESTAMPDIFF(SECOND, d.last_seen_at, NOW()) <= ${normalizedWindowSeconds}
+             THEN 1
+             ELSE 0
+           END AS is_online
     FROM device_registry d
     LEFT JOIN users u ON u.id = CAST(NULLIF(d.last_user_id, '') AS UNSIGNED)
     ${whereClause}

@@ -46,6 +46,9 @@ export const DevicesPage = () => {
   } = useDevicesVM();
 
   const isDeviceOnline = (item: DeviceDTO) => {
+    if (typeof item.isOnline === 'boolean') {
+      return item.isOnline;
+    }
     const diff = Date.now() - new Date(item.lastSeenAt).getTime();
     return diff <= onlineWindowSeconds * 1000;
   };

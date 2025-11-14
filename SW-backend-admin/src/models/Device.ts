@@ -12,6 +12,7 @@ export interface DeviceDTO {
   offlineAllowed: boolean;
   metadata?: Record<string, unknown> | null;
   updatedAt: string;
+  isOnline?: boolean;
 }
 
 export interface DeviceListResponse {
