@@ -51,6 +51,7 @@ class PersetmodeFragment : Fragment() {
     private val modeButtons: List<Button> by lazy {
         listOf(
             binding.btnWholeBody,
+            binding.btnVisionMode,
             binding.btnUpperHead,
             binding.btnChestAbdomen,
             binding.btnLowerLimb
@@ -156,9 +157,10 @@ class PersetmodeFragment : Fragment() {
         }
 
         binding.imgHighlightWhole.isVisible = state.selectedModeIndex == 0
-        binding.imgHighlightUpperHead.isVisible = state.selectedModeIndex == 1
-        binding.imgHighlightChestAbdomen.isVisible = state.selectedModeIndex == 2
-        binding.imgHighlightLowerLimb.isVisible = state.selectedModeIndex == 3
+        binding.imgHighlightVision.isVisible = state.selectedModeIndex == 1
+        binding.imgHighlightUpperHead.isVisible = state.selectedModeIndex == 2
+        binding.imgHighlightChestAbdomen.isVisible = state.selectedModeIndex == 3
+        binding.imgHighlightLowerLimb.isVisible = state.selectedModeIndex == 4
 
         binding.tvFrequencyValue.text = state.frequencyHz?.toString() ?: "--"
         binding.tvIntensityValue.text = state.intensity01V?.toString() ?: "--"

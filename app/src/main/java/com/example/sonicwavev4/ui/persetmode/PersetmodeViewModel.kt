@@ -16,6 +16,7 @@ import com.example.sonicwavev4.ui.persetmode.modes.LowerLimb10m
 import com.example.sonicwavev4.ui.persetmode.modes.PresetMode
 import com.example.sonicwavev4.ui.persetmode.modes.Step
 import com.example.sonicwavev4.ui.persetmode.modes.UpperLimbAndHead10m
+import com.example.sonicwavev4.ui.persetmode.modes.Vision10m
 import com.example.sonicwavev4.ui.persetmode.modes.WholeBody10m
 import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.utils.TestToneSettings
@@ -95,6 +96,7 @@ class PersetmodeViewModel(
 
     private val presetModes: List<PresetMode> = listOf(
         WholeBody10m,
+        Vision10m,
         UpperLimbAndHead10m,
         AbdomenChest10m,
         LowerLimb10m

@@ -23415,3 +23415,210 @@
 {"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:28:05.053Z"}
 {"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:28:05.053Z"}
 {"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:28:05.054Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:28:20.123Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:28:20.123Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:28:20.123Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:28:35.196Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:28:35.196Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:28:35.196Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:28:50.271Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:28:50.272Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:28:50.272Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:29:01.082Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:29:01.084Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:29:01.092Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:29:05.365Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:29:05.365Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:29:05.365Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:29:20.527Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:29:20.528Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:29:20.528Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:29:35.650Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:29:35.651Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:29:35.651Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:29:50.735Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:29:50.736Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:29:50.736Z"}
+{"level":"warn","message":"[Auth Middleware] Token expired for request to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:30:01.078Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:30:05.887Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:30:05.888Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:30:05.888Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:30:20.989Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:30:20.989Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:30:20.989Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:30:36.092Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:30:36.092Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:30:36.092Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:30:51.175Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:30:51.175Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:30:51.175Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:31:06.309Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:31:06.309Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:31:06.309Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:31:21.375Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:31:21.375Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:31:21.375Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:31:36.500Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:31:36.500Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:31:36.500Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:31:51.584Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:31:51.584Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:31:51.584Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:32:06.730Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:32:06.730Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:32:06.730Z"}
+{"level":"info","message":"为 1 个活跃会话批量更新了心跳时间。","timestamp":"2025-11-14T15:32:11.868Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:32:21.864Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:32:21.865Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:32:21.865Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:32:36.953Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:32:36.954Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:32:36.954Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:32:52.026Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:32:52.027Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:32:52.027Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:33:07.148Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:33:07.148Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:33:07.149Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:33:22.249Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:33:22.250Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:33:22.250Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:33:37.365Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:33:37.365Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:33:37.365Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:33:52.466Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:33:52.467Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:33:52.467Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:34:07.548Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:34:07.548Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:34:07.548Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:34:22.641Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:34:22.642Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:34:22.642Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:34:37.726Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:34:37.726Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:34:37.726Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:34:52.809Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:34:52.809Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:34:52.809Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/heartbeat'.","timestamp":"2025-11-14T15:35:07.891Z"}
+{"level":"info","message":"[Heartbeat Controller] Received request for userId: 1","timestamp":"2025-11-14T15:35:07.892Z"}
+{"level":"info","message":"[Heartbeat] Received from user: 1, session: 139","timestamp":"2025-11-14T15:35:07.892Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 1. Granting access to '/api/v1/auth/logout-event'.","timestamp":"2025-11-14T15:35:11.930Z"}
+{"level":"info","message":"[Logout Attempt] Received request for userId: '1', sessionId: '139'","timestamp":"2025-11-14T15:35:11.931Z"}
+{"level":"info","message":"[Logout Check] Performing security SELECT for sessionId: 139 and userId: 1","timestamp":"2025-11-14T15:35:11.931Z"}
+{"level":"info","message":"[Logout Check Result] Found 1 matching active session(s).","timestamp":"2025-11-14T15:35:11.936Z"}
+{"level":"info","message":"[Logout Success] Security check passed. Proceeding to update session 139.","timestamp":"2025-11-14T15:35:11.936Z"}
+{"level":"info","message":"[Logout DB Update] Database update complete. Affected rows: 1.","timestamp":"2025-11-14T15:35:11.942Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:35:22.332Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:35:37.463Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:35:52.473Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:36:07.604Z"}
+{"level":"info","message":"发现 1 个超时会话，正在数据库中标为非活跃。","timestamp":"2025-11-14T15:36:11.896Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:36:22.696Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:36:37.777Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:36:52.898Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:37:07.990Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:37:23.108Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:37:38.204Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:37:53.308Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:38:08.465Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:38:23.546Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:38:38.669Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:38:53.772Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:39:08.882Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:39:23.981Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:39:39.106Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:39:54.202Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:40:09.306Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:40:24.403Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:40:39.512Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:40:54.603Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:41:09.705Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:41:24.793Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:41:39.891Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:41:55.086Z"}
+{"level":"debug","message":"Payload size: POST /api/v1/users/login payload=46B","timestamp":"2025-11-14T15:42:01.713Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/v1/users/me'.","timestamp":"2025-11-14T15:42:01.812Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-14T15:42:01.870Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/users?page=1&pageSize=20&role=all&accountType=all&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-14T15:42:01.893Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-14T15:42:03.490Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/customers?page=1&pageSize=20&sortBy=createdAt&sortOrder=desc'.","timestamp":"2025-11-14T15:42:03.499Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:42:04.603Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:42:04.605Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:42:04.609Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:42:04.611Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:42:04.612Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:42:04.617Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T15:42:05.834Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/feature-flags'.","timestamp":"2025-11-14T15:42:05.839Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:42:06.649Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:42:06.650Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:42:06.654Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:42:06.656Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:42:06.657Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:42:06.662Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:42:10.193Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:42:25.368Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:42:40.534Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:42:55.687Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:43:06.653Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:43:06.656Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:43:06.668Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:43:10.801Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:43:25.995Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:43:41.149Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:43:56.268Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:44:06.649Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:44:06.650Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:44:06.654Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:44:11.474Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:44:26.579Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:44:41.671Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:44:56.790Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:45:06.644Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:45:06.644Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:45:06.648Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:45:11.979Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:45:27.153Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:45:42.292Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:45:57.442Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:46:06.643Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:46:06.644Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:46:06.650Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:46:12.604Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:46:27.713Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:46:42.815Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:46:57.907Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:47:06.640Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:47:06.641Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:47:06.645Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:47:13.017Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:47:28.107Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:47:43.218Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:47:58.313Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:48:06.646Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:48:06.651Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:48:06.672Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:48:13.412Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:48:28.511Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:48:43.623Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:48:58.723Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:49:06.631Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:49:06.632Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:49:06.647Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:49:13.833Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:49:28.924Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:49:44.023Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:49:59.122Z"}
+{"level":"info","message":"[Auth Middleware] Token verified for userId: 8. Granting access to '/api/admin/devices?page=1&pageSize=20&onlyOnline=false&onlineWindowSeconds=120'.","timestamp":"2025-11-14T15:50:06.629Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices whereClause=%s params=%o","timestamp":"2025-11-14T15:50:06.630Z"}
+{"level":"debug","message":"[DeviceRepository] listDevices result total=%d items=%d","timestamp":"2025-11-14T15:50:06.643Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:50:14.252Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:50:29.430Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:50:44.548Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:50:59.717Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:51:14.815Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:51:30.046Z"}
+{"deviceId":"sw-33e5c05fbe040250c6cf114b63d856b1","ipAddress":"192.168.3.28","level":"info","message":"[DeviceController] Incoming heartbeat","timestamp":"2025-11-14T15:51:45.149Z"}
+{"level":"info","message":"[ControlChannel] Control client disconnected. total=%d","timestamp":"2025-11-14T15:51:46.093Z"}

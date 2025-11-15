@@ -23,17 +23,22 @@
         app:layout_constraintGuide_percent="0.78"/>
 
     <!-- 左侧：模式按钮 -->
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/panel_modes"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:gravity="top|center_horizontal"
+        android:fillViewport="true"
         android:padding="12dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guide_left"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="top|center_horizontal">
 
         <Button
             android:id="@+id/btn_whole_body"
@@ -45,6 +50,19 @@
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:text="全身模式"
+            android:textAllCaps="false"
+            android:textColor="@color/color_preset_mode_button_text"/>
+
+        <Button
+            android:id="@+id/btn_vision_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_preset_mode_button_default"
+            style="@style/Widget.SonicWave.PresetModeButton"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="视力模式"
             android:textAllCaps="false"
             android:textColor="@color/color_preset_mode_button_text"/>
 
@@ -86,7 +104,9 @@
             android:textAllCaps="false"
             android:textColor="@color/color_preset_mode_button_text"/>
 
-    </LinearLayout>
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
     <!-- 中间：人形轮廓 + 高亮层 + 开始/停止按钮 -->
     <LinearLayout
@@ -126,6 +146,15 @@
                 android:alpha="0.6"
                 android:visibility="gone"
                 android:src="@drawable/ic_highlight_whole"/>
+
+            <ImageView
+                android:id="@+id/img_highlight_vision"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:alpha="0.6"
+                android:visibility="gone"
+                android:src="@drawable/ic_highlight_vision"/>
 
             <ImageView
                 android:id="@+id/img_highlight_upper_head"
