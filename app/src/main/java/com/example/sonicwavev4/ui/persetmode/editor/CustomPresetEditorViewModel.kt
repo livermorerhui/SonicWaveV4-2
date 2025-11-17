@@ -7,6 +7,7 @@ import com.example.sonicwavev4.data.custompreset.CustomPresetConstraints
 import com.example.sonicwavev4.data.custompreset.model.CreateCustomPresetRequest
 import com.example.sonicwavev4.data.custompreset.model.CustomPresetStep
 import com.example.sonicwavev4.data.custompreset.model.UpdateCustomPresetRequest
+import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,11 +31,10 @@ data class EditorUiState(
     val originalSteps: List<CustomPresetStep> = emptyList(),
     val editingStepId: String? = null,
     val isSaving: Boolean = false,
-    val canSave: Boolean = false
+    val canSave: Boolean = false,
+    val playingStepIndex: Int? = null
 ) {
     val isEditingExisting: Boolean get() = presetId != null
-    val isEditingStep: Boolean get() = editingStepId != null
-    val isEditingNewStep: Boolean get() = editingStepId == NEW_STEP_ID
 }
 
 fun EditorUiState.hasUnsavedChanges(): Boolean {
@@ -55,7 +55,8 @@ sealed class EditorEvent {
  */
 class CustomPresetEditorViewModel(
     private val repository: CustomPresetRepository,
-    private val customerId: Long?
+    private val customerId: Long?,
+    private val hardwareRepository: HomeHardwareRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -63,6 +64,9 @@ class CustomPresetEditorViewModel(
 
     private val _events = MutableSharedFlow<EditorEvent>(extraBufferCapacity = 8)
     val events: SharedFlow<EditorEvent> = _events.asSharedFlow()
+
+    private val previewPlayer = StepPreviewPlayer()
+    private var previewUsingHardware = false
 
     fun startNewPreset() {
         _uiState.value = EditorUiState(originalName = "", originalSteps = emptyList())
@@ -105,77 +109,16 @@ class CustomPresetEditorViewModel(
         _uiState.update { it.copy(durationInput = value) }
     }
 
-    fun startAddingStep() {
-        _uiState.update {
-            it.copy(
-                editingStepId = NEW_STEP_ID,
-                frequencyInput = "",
-                intensityInput = "",
-                durationInput = ""
-            )
-        }
-    }
-
-    fun startEditingStep(stepId: String) {
+    fun addStepInline() {
         val current = _uiState.value
-        val step = current.steps.firstOrNull { it.id == stepId } ?: return
-        _uiState.update {
-            it.copy(
-                editingStepId = stepId,
-                frequencyInput = step.frequencyHz.toString(),
-                intensityInput = step.intensity01V.toString(),
-                durationInput = step.durationSec.toString()
-            )
-        }
-    }
-
-    fun saveEditingStep() {
-        val current = _uiState.value
-        if (current.editingStepId == null) {
-            emitMessage("请先点击“添加步骤”或编辑某一步骤")
-            return
-        }
-        val frequency = current.frequencyInput.toIntOrNull()
-        val intensity = current.intensityInput.toIntOrNull()
-        val duration = current.durationInput.toIntOrNull()
-        if (frequency == null || intensity == null || duration == null) {
-            emitMessage("请正确输入频率、强度和时间")
-            return
-        }
-        val sanitized = CustomPresetStep(
-            id = if (current.isEditingNewStep) UUID.randomUUID().toString() else current.editingStepId,
-            frequencyHz = CustomPresetConstraints.clampFrequency(frequency),
-            intensity01V = CustomPresetConstraints.clampIntensity(intensity),
-            durationSec = CustomPresetConstraints.clampDuration(duration),
+        val newStep = CustomPresetStep(
+            id = UUID.randomUUID().toString(),
+            frequencyHz = 0,
+            intensity01V = 0,
+            durationSec = 1,
             order = current.steps.size
         )
-        val updatedSteps = if (current.isEditingNewStep) {
-            (current.steps + sanitized).normalizeOrder()
-        } else {
-            current.steps.map { step ->
-                if (step.id == sanitized.id) sanitized.copy(order = step.order) else step
-            }.normalizeOrder()
-        }
-        _uiState.update {
-            it.copy(
-                steps = updatedSteps,
-                editingStepId = null,
-                frequencyInput = "",
-                intensityInput = "",
-                durationInput = ""
-            ).recomputeCanSave()
-        }
-    }
-
-    fun cancelStepEditing() {
-        _uiState.update {
-            it.copy(
-                editingStepId = null,
-                frequencyInput = "",
-                intensityInput = "",
-                durationInput = ""
-            )
-        }
+        _uiState.update { it.copy(steps = (it.steps + newStep).normalizeOrder()).recomputeCanSave() }
     }
 
     fun deleteStep(stepId: String) {
@@ -185,23 +128,123 @@ class CustomPresetEditorViewModel(
         }
     }
 
-    fun moveStepUp(stepId: String) {
-        reorderStep(stepId, -1)
+    fun moveStepUp(index: Int) {
+        onStepReordered(index, index - 1)
     }
 
-    fun moveStepDown(stepId: String) {
-        reorderStep(stepId, 1)
+    fun moveStepDown(index: Int) {
+        onStepReordered(index, index + 1)
     }
 
-    private fun reorderStep(stepId: String, delta: Int) {
+    fun updateStep(index: Int, newStep: CustomPresetStep) {
         val current = _uiState.value
-        val index = current.steps.indexOfFirst { it.id == stepId }
-        if (index == -1) return
-        val targetIndex = index + delta
-        if (targetIndex < 0 || targetIndex >= current.steps.size) return
+        if (index !in current.steps.indices) return
+        val updated = current.steps.toMutableList()
+        updated[index] = newStep.copy(
+            frequencyHz = CustomPresetConstraints.clampFrequency(newStep.frequencyHz),
+            intensity01V = CustomPresetConstraints.clampIntensity(newStep.intensity01V),
+            durationSec = CustomPresetConstraints.clampDuration(newStep.durationSec),
+            order = current.steps[index].order
+        )
+        _uiState.update { it.copy(steps = updated.normalizeOrder()).recomputeCanSave() }
+        val playingIdx = _uiState.value.playingStepIndex
+        if (playingIdx == index) {
+            previewPlayer.updateFrequency(updated[index].frequencyHz)
+            previewPlayer.updateIntensity(updated[index].intensity01V)
+            viewModelScope.launch {
+                if (previewUsingHardware) {
+                    hardwareRepository.applyFrequency(updated[index].frequencyHz)
+                    hardwareRepository.applyIntensity(updated[index].intensity01V)
+                } else {
+                    hardwareRepository.playStandaloneTone(
+                        updated[index].frequencyHz,
+                        updated[index].intensity01V
+                    )
+                }
+            }
+        }
+    }
+
+    fun updateStepFrequency(index: Int, value: Int) {
+        val current = _uiState.value
+        if (index !in current.steps.indices) return
+        val step = current.steps[index]
+        updateStep(index, step.copy(frequencyHz = value))
+    }
+
+    fun updateStepIntensity(index: Int, value: Int) {
+        val current = _uiState.value
+        if (index !in current.steps.indices) return
+        val step = current.steps[index]
+        updateStep(index, step.copy(intensity01V = value))
+    }
+
+    fun updateStepDuration(index: Int, value: Int) {
+        val current = _uiState.value
+        if (index !in current.steps.indices) return
+        val step = current.steps[index]
+        updateStep(index, step.copy(durationSec = value))
+    }
+
+    fun onPlayStepClicked(index: Int) {
+        val state = _uiState.value
+        val currentPlaying = state.playingStepIndex
+        if (currentPlaying == index) {
+            stopPlaybackInternal()
+            _uiState.update { it.copy(playingStepIndex = null) }
+            return
+        }
+        if (currentPlaying != null) {
+            stopPlaybackInternal()
+        }
+        if (index !in state.steps.indices) return
+        val step = state.steps[index]
+        startPlaybackInternal(step)
+        _uiState.update { it.copy(playingStepIndex = index) }
+    }
+
+    fun stopCurrentStepPlayback() {
+        val state = _uiState.value
+        if (state.playingStepIndex != null) {
+            stopPlaybackInternal()
+            _uiState.update { it.copy(playingStepIndex = null) }
+        }
+    }
+
+    private fun startPlaybackInternal(step: CustomPresetStep) {
+        previewPlayer.start(step)
+        viewModelScope.launch {
+            hardwareRepository.start()
+            val success = hardwareRepository.startOutput(
+                targetFrequency = step.frequencyHz,
+                targetIntensity = step.intensity01V,
+                playTone = true
+            )
+            previewUsingHardware = success
+            if (!success) {
+                hardwareRepository.playStandaloneTone(step.frequencyHz, step.intensity01V)
+            }
+        }
+    }
+
+    private fun stopPlaybackInternal() {
+        previewPlayer.stop()
+        viewModelScope.launch {
+            if (previewUsingHardware) {
+                hardwareRepository.stopOutput()
+            } else {
+                hardwareRepository.stopStandaloneTone()
+            }
+            previewUsingHardware = false
+        }
+    }
+
+    fun onStepReordered(fromIndex: Int, toIndex: Int) {
+        val current = _uiState.value
+        if (fromIndex !in current.steps.indices || toIndex !in current.steps.indices) return
         val mutable = current.steps.toMutableList()
-        val step = mutable.removeAt(index)
-        mutable.add(targetIndex, step)
+        val step = mutable.removeAt(fromIndex)
+        mutable.add(toIndex, step)
         _uiState.update { it.copy(steps = mutable.normalizeOrder()).recomputeCanSave() }
     }
 

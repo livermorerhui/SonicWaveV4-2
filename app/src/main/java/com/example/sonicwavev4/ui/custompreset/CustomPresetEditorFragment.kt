@@ -15,10 +15,14 @@ import androidx.fragment.app.viewModels
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.data.custompreset.CustomPresetRepositoryImpl
+import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.databinding.FragmentCustomPresetEditorBinding
+import com.example.sonicwavev4.ui.common.NumericKeypadDialogFragment
 import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetEditorViewModel
 import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetEditorViewModelFactory
 import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetStepAdapter
@@ -40,7 +44,8 @@ class CustomPresetEditorFragment : DialogFragment() {
         val application = requireActivity().application
         val repository = CustomPresetRepositoryImpl.getInstance(application)
         val customerId = userViewModel.selectedCustomer.value?.id?.toLong()
-        CustomPresetEditorViewModelFactory(repository, customerId)
+        val hardwareRepo = HomeHardwareRepository.getInstance(application)
+        CustomPresetEditorViewModelFactory(repository, customerId, hardwareRepo)
     }
 
     private lateinit var stepAdapter: CustomPresetStepAdapter
@@ -64,6 +69,7 @@ class CustomPresetEditorFragment : DialogFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        editorViewModel.stopCurrentStepPlayback()
         _binding = null
     }
 
@@ -82,28 +88,50 @@ class CustomPresetEditorFragment : DialogFragment() {
 
     private fun setupRecycler() {
         stepAdapter = CustomPresetStepAdapter(
-            onMoveUp = { editorViewModel.moveStepUp(it) },
-            onMoveDown = { editorViewModel.moveStepDown(it) },
-            onEdit = { editorViewModel.startEditingStep(it) },
-            onDelete = { editorViewModel.deleteStep(it) },
-            onInputChanged = { freq, intensity, duration ->
-                freq?.let { editorViewModel.setFrequencyInput(it) }
-                intensity?.let { editorViewModel.setIntensityInput(it) }
-                duration?.let { editorViewModel.setDurationInput(it) }
-            },
-            onSave = { editorViewModel.saveEditingStep() },
-            onCancel = { editorViewModel.cancelStepEditing() },
-            onScrolledToBottomRequest = { scrollToBottom() }
+            onStepChanged = { index, step -> editorViewModel.updateStep(index, step) },
+            onPlayClicked = { editorViewModel.onPlayStepClicked(it) },
+            onMoveUpClicked = { editorViewModel.moveStepUp(it) },
+            onMoveDownClicked = { editorViewModel.moveStepDown(it) },
+            onDeleteClicked = { editorViewModel.deleteStep(editorViewModel.uiState.value.steps.getOrNull(it)?.id ?: return@CustomPresetStepAdapter) },
+            onFrequencyFieldClicked = { showFrequencyKeypad(it) },
+            onIntensityFieldClicked = { showIntensityKeypad(it) },
+            onDurationFieldClicked = { showDurationKeypad(it) },
+            onItemMoved = { from, to -> editorViewModel.onStepReordered(from, to) }
         )
         binding.listSteps.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = stepAdapter
         }
+        val callback = object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+            0
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val from = viewHolder.bindingAdapterPosition
+                val to = target.bindingAdapterPosition
+                stepAdapter.onItemMove(from, to)
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                // no-op
+            }
+
+            override fun isLongPressDragEnabled(): Boolean = true
+        }
+        ItemTouchHelper(callback).attachToRecyclerView(binding.listSteps)
     }
 
     private fun setupInputs() {
         binding.etName.addTextChangedListener { editorViewModel.setName(it?.toString().orEmpty()) }
-        binding.btnAddStep.setOnClickListener { editorViewModel.startAddingStep() }
+        binding.btnAddStep.setOnClickListener {
+            editorViewModel.addStepInline()
+            scrollToBottom()
+        }
         binding.btnSavePreset.setOnClickListener { editorViewModel.savePreset() }
         binding.btnCancel.setOnClickListener { handleCancel() }
         binding.viewScrim.setOnClickListener { /* ignore scrim clicks to avoid accidental dismiss */ }
@@ -143,33 +171,9 @@ class CustomPresetEditorFragment : DialogFragment() {
 
         updateField(binding.etName, state.name)
         val sortedSteps = state.steps.sortedBy { it.order }
-        val displayItems = mutableListOf<com.example.sonicwavev4.ui.persetmode.editor.StepDisplay>()
-        sortedSteps.forEachIndexed { index, step ->
-            val isEditing = state.editingStepId == step.id
-            displayItems += com.example.sonicwavev4.ui.persetmode.editor.StepDisplay(
-                id = step.id,
-                title = "步骤 ${index + 1}",
-                detail = "频率 ${step.frequencyHz}Hz · 强度 ${step.intensity01V} · 时长 ${step.durationSec}秒",
-                isEditing = isEditing,
-                isNew = false
-            )
-        }
-        if (state.isEditingNewStep) {
-            displayItems += com.example.sonicwavev4.ui.persetmode.editor.StepDisplay(
-                id = com.example.sonicwavev4.ui.persetmode.editor.NEW_STEP_ID,
-                title = "步骤 ${sortedSteps.size + 1}",
-                detail = "",
-                isEditing = true,
-                isNew = true
-            )
-        }
-        stepAdapter.submit(
-            displayItems,
-            state.frequencyInput,
-            state.intensityInput,
-            state.durationInput
-        )
-        binding.tvStepsEmpty.isVisible = displayItems.isEmpty()
+        stepAdapter.submitList(sortedSteps)
+        stepAdapter.playingStepIndex = state.playingStepIndex
+        binding.tvStepsEmpty.isVisible = sortedSteps.isEmpty()
         binding.btnSavePreset.isEnabled = state.canSave && !state.isSaving
         binding.btnCancel.isEnabled = !state.isSaving
     }
@@ -209,6 +213,61 @@ class CustomPresetEditorFragment : DialogFragment() {
         binding.listSteps.post {
             binding.listSteps.smoothScrollToPosition((binding.listSteps.adapter?.itemCount ?: 1) - 1)
         }
+    }
+
+    private fun showFrequencyKeypad(index: Int) {
+        val step = editorViewModel.uiState.value.steps.getOrNull(index) ?: return
+        val currentPlaying = editorViewModel.uiState.value.playingStepIndex
+        if (currentPlaying != null && currentPlaying != index) {
+            editorViewModel.stopCurrentStepPlayback()
+        }
+        val requestKey = "freq_step_$index"
+        parentFragmentManager.setFragmentResultListener(requestKey, viewLifecycleOwner) { _, bundle ->
+            val value = bundle.getInt(NumericKeypadDialogFragment.RESULT_VALUE, step.frequencyHz)
+            editorViewModel.updateStepFrequency(index, value)
+        }
+        NumericKeypadDialogFragment.newInstance(
+            initialValue = step.frequencyHz,
+            minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_FREQUENCY_HZ,
+            maxValue = if (com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_FREQUENCY_HZ > 0)
+                com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_FREQUENCY_HZ else Int.MAX_VALUE,
+            requestKey = requestKey
+        ).show(parentFragmentManager, requestKey)
+    }
+
+    private fun showIntensityKeypad(index: Int) {
+        val step = editorViewModel.uiState.value.steps.getOrNull(index) ?: return
+        val currentPlaying = editorViewModel.uiState.value.playingStepIndex
+        if (currentPlaying != null && currentPlaying != index) {
+            editorViewModel.stopCurrentStepPlayback()
+        }
+        val requestKey = "intensity_step_$index"
+        parentFragmentManager.setFragmentResultListener(requestKey, viewLifecycleOwner) { _, bundle ->
+            val value = bundle.getInt(NumericKeypadDialogFragment.RESULT_VALUE, step.intensity01V)
+            editorViewModel.updateStepIntensity(index, value)
+        }
+        NumericKeypadDialogFragment.newInstance(
+            initialValue = step.intensity01V,
+            minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_INTENSITY_01V,
+            maxValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_INTENSITY_01V,
+            requestKey = requestKey
+        ).show(parentFragmentManager, requestKey)
+    }
+
+    private fun showDurationKeypad(index: Int) {
+        val step = editorViewModel.uiState.value.steps.getOrNull(index) ?: return
+        val requestKey = "duration_step_$index"
+        parentFragmentManager.setFragmentResultListener(requestKey, viewLifecycleOwner) { _, bundle ->
+            val value = bundle.getInt(NumericKeypadDialogFragment.RESULT_VALUE, step.durationSec)
+            editorViewModel.updateStepDuration(index, value)
+        }
+        NumericKeypadDialogFragment.newInstance(
+            initialValue = step.durationSec,
+            minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_DURATION_SEC,
+            maxValue = if (com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_DURATION_SEC > 0)
+                com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_DURATION_SEC else Int.MAX_VALUE,
+            requestKey = requestKey
+        ).show(parentFragmentManager, requestKey)
     }
 
     private fun updateField(
