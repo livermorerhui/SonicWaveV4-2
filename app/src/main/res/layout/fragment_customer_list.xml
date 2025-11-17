@@ -6,19 +6,42 @@
     android:layout_height="match_parent"
     tools:context=".ui.customer.CustomerListFragment">
 
+    <TextView
+        android:id="@+id/customer_list_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="客户列表"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@+id/search_box"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/search_box" />
+
     <EditText
         android:id="@+id/search_box"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
+        android:background="@drawable/rounded_edittext_background"
         android:hint="搜索客户姓名"
         android:padding="12dp"
-        android:background="@drawable/rounded_edittext_background"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/add_customer_button"
+        app:layout_constraintStart_toEndOf="@+id/customer_list_textview"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/add_customer_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_add_customer"
+        app:layout_constraintBottom_toBottomOf="@+id/search_box"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/search_box" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/customer_recycler_view"

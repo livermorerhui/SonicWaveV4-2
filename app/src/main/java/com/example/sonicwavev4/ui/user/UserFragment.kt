@@ -15,8 +15,6 @@ import com.example.sonicwavev4.core.currentAppMode
 import com.example.sonicwavev4.databinding.FragmentUserBinding
 import com.example.sonicwavev4.network.LogoutEventRequest
 import com.example.sonicwavev4.network.RetrofitClient
-import com.example.sonicwavev4.ui.AddCustomerDialogFragment
-import com.example.sonicwavev4.ui.OfflineAddCustomerDialogFragment
 import com.example.sonicwavev4.ui.customer.CustomerListFragment
 import com.example.sonicwavev4.ui.login.LoginFragment
 import com.example.sonicwavev4.utils.GlobalLogoutManager
@@ -49,7 +47,6 @@ class UserFragment : Fragment() {
         sessionManager = SessionManager(requireContext())
         setupUsernameDisplay()
         setupLogoutButton()
-        setupAddCustomerButton()
         ensureCustomerListFragment()
         observeOfflineMode()
         setupToneSwitch()
@@ -62,25 +59,11 @@ class UserFragment : Fragment() {
         binding.userNameTextview.text = "欢迎, ${username ?: "用户"}!"
     }
 
-    private fun setupAddCustomerButton() {
-        binding.addCustomerButton.setOnClickListener {
-            if (currentAppMode() == AppMode.OFFLINE) {
-                OfflineAddCustomerDialogFragment.newInstance().show(childFragmentManager, "OfflineAddCustomerDialog")
-            } else {
-                AddCustomerDialogFragment.newInstance().show(childFragmentManager, "AddCustomerDialog")
-            }
-        }
-    }
-
     private fun observeOfflineMode() {
         viewLifecycleOwner.lifecycleScope.launch {
             OfflineTestModeManager.isOfflineTestMode.collectLatest { offline ->
-                binding.addCustomerButton.isVisible = true
                 binding.customerListContainer.isVisible = true
-                binding.offlineModeHint.isVisible = offline
-                if (offline) {
-                    binding.offlineModeHint.text = getString(R.string.offline_mode_hint)
-                }
+
                 ensureCustomerListFragment()
             }
         }

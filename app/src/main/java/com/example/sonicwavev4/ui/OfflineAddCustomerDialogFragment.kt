@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import android.view.ViewGroup.LayoutParams
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import com.example.sonicwavev4.databinding.DialogAddOfflineCustomerBinding
@@ -29,6 +30,14 @@ class OfflineAddCustomerDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupClickListeners()
+    }
+
+    // 设置离线模式新增客户对话框的宽高-修改文档dimensions.xml中的值
+    override fun onStart() {
+        super.onStart()
+        val width = resources.getDimensionPixelSize(com.example.sonicwavev4.R.dimen.offline_add_customer_dialog_width)
+        val height = resources.getDimensionPixelSize(com.example.sonicwavev4.R.dimen.offline_add_customer_dialog_height)
+        dialog?.window?.setLayout(width, height)
     }
 
     private fun setupClickListeners() {

@@ -14,6 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sonicwavev4.databinding.FragmentCustomerListBinding
 import com.example.sonicwavev4.network.Customer
 import com.example.sonicwavev4.ui.AddCustomerDialogFragment
+import com.example.sonicwavev4.ui.OfflineAddCustomerDialogFragment
+import com.example.sonicwavev4.core.AppMode
+import com.example.sonicwavev4.core.currentAppMode
 import com.example.sonicwavev4.ui.user.UserViewModel
 import com.example.sonicwavev4.utils.OfflineTestModeManager
 import kotlinx.coroutines.flow.collectLatest
@@ -42,6 +45,7 @@ class CustomerListFragment : Fragment() {
         setupRecyclerView()
         setupSearchBox()
         observeViewModel()
+        setupAddCustomerButton()
 
         if (OfflineTestModeManager.isOfflineMode()) {
             binding.emptyView.text = getString(R.string.offline_mode_hint)
@@ -73,6 +77,16 @@ class CustomerListFragment : Fragment() {
         binding.customerRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = customerAdapter
+        }
+    }
+
+    private fun setupAddCustomerButton() {
+        binding.addCustomerButton.setOnClickListener {
+            if (currentAppMode() == AppMode.OFFLINE) {
+                OfflineAddCustomerDialogFragment.newInstance().show(parentFragmentManager, "OfflineAddCustomerDialog")
+            } else {
+                AddCustomerDialogFragment.newInstance().show(parentFragmentManager, "AddCustomerDialog")
+            }
         }
     }
 

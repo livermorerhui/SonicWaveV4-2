@@ -13,13 +13,6 @@
         android:text="@string/offline_add_customer_title"
         android:textAppearance="?attr/textAppearanceHeadline6" />
 
-    <TextView
-        android:id="@+id/messageTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/offline_add_customer_message" />
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/name_input_layout"
         android:layout_width="match_parent"
