@@ -22,6 +22,7 @@ import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetEditorViewModel
 import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetEditorViewModelFactory
 import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetStepAdapter
 import com.example.sonicwavev4.ui.persetmode.editor.EditorEvent
+import com.example.sonicwavev4.ui.persetmode.editor.hasUnsavedChanges
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -99,8 +100,8 @@ class CustomPresetEditorFragment : DialogFragment() {
         binding.etName.addTextChangedListener { editorViewModel.setName(it?.toString().orEmpty()) }
         binding.btnAddStep.setOnClickListener { editorViewModel.startAddingStep() }
         binding.btnSavePreset.setOnClickListener { editorViewModel.savePreset() }
-        binding.btnCancel.setOnClickListener { confirmExit() }
-        binding.viewScrim.setOnClickListener { confirmExit() }
+        binding.btnCancel.setOnClickListener { handleCancel() }
+        binding.viewScrim.setOnClickListener { /* ignore scrim clicks to avoid accidental dismiss */ }
         binding.cardContainer.setOnClickListener { /* consume to avoid scrim click */ }
     }
 
@@ -166,6 +167,15 @@ class CustomPresetEditorFragment : DialogFragment() {
         binding.tvStepsEmpty.isVisible = displayItems.isEmpty()
         binding.btnSavePreset.isEnabled = state.canSave && !state.isSaving
         binding.btnCancel.isEnabled = !state.isSaving
+    }
+
+    private fun handleCancel() {
+        val state = editorViewModel.uiState.value
+        if (!state.hasUnsavedChanges()) {
+            dismiss()
+            return
+        }
+        confirmExit()
     }
 
     private fun confirmExit() {

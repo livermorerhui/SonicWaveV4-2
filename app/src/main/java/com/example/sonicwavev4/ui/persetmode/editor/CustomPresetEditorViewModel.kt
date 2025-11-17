@@ -22,10 +22,12 @@ internal const val NEW_STEP_ID = "__new_step__"
 data class EditorUiState(
     val presetId: String? = null,
     val name: String = "",
+    val originalName: String = "",
     val frequencyInput: String = "",
     val intensityInput: String = "",
     val durationInput: String = "",
     val steps: List<CustomPresetStep> = emptyList(),
+    val originalSteps: List<CustomPresetStep> = emptyList(),
     val editingStepId: String? = null,
     val isSaving: Boolean = false,
     val canSave: Boolean = false
@@ -33,6 +35,13 @@ data class EditorUiState(
     val isEditingExisting: Boolean get() = presetId != null
     val isEditingStep: Boolean get() = editingStepId != null
     val isEditingNewStep: Boolean get() = editingStepId == NEW_STEP_ID
+}
+
+fun EditorUiState.hasUnsavedChanges(): Boolean {
+    val hasStepEditing = editingStepId != null
+    val nameChanged = name != originalName
+    val stepsChanged = steps.normalizeOrder() != originalSteps.normalizeOrder()
+    return hasStepEditing || nameChanged || stepsChanged
 }
 
 sealed class EditorEvent {
@@ -55,7 +64,7 @@ class CustomPresetEditorViewModel(
     val events: SharedFlow<EditorEvent> = _events.asSharedFlow()
 
     fun startNewPreset() {
-        _uiState.value = EditorUiState()
+        _uiState.value = EditorUiState(originalName = "", originalSteps = emptyList())
     }
 
     fun loadPreset(presetId: String) {
@@ -65,11 +74,14 @@ class CustomPresetEditorViewModel(
                 emitMessage("未找到该自设模式，保存后将创建新的模式")
                 _uiState.update { EditorUiState(presetId = null) }
             } else {
+                val ordered = preset.steps.sortedBy { it.order }
                 _uiState.update {
                     EditorUiState(
                         presetId = preset.id,
                         name = preset.name,
-                        steps = preset.steps.sortedBy { it.order }
+                        originalName = preset.name,
+                        steps = ordered,
+                        originalSteps = ordered
                     ).recomputeCanSave()
                 }
             }
@@ -223,21 +235,21 @@ class CustomPresetEditorViewModel(
                 }
                 _events.emit(EditorEvent.Saved(presetId))
                 val refreshed = repository.getPresetById(presetId)
-                if (refreshed != null) {
-                    _uiState.update {
-                        it.copy(
-                            presetId = presetId,
-                            name = refreshed.name,
-                            steps = refreshed.steps.sortedBy { step -> step.order },
-                            isSaving = false,
-                            editingStepId = null,
-                            frequencyInput = "",
-                            intensityInput = "",
-                            durationInput = ""
-                        ).recomputeCanSave()
-                    }
-                } else {
-                    _uiState.update { it.copy(presetId = presetId, isSaving = false).recomputeCanSave() }
+                val refreshedSteps = refreshed?.steps?.sortedBy { it.order } ?: current.steps.normalizeOrder()
+                val refreshedName = refreshed?.name ?: current.name
+                _uiState.update {
+                    it.copy(
+                        presetId = presetId,
+                        name = refreshedName,
+                        originalName = refreshedName,
+                        steps = refreshedSteps,
+                        originalSteps = refreshedSteps,
+                        isSaving = false,
+                        editingStepId = null,
+                        frequencyInput = "",
+                        intensityInput = "",
+                        durationInput = ""
+                    ).recomputeCanSave()
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isSaving = false) }
