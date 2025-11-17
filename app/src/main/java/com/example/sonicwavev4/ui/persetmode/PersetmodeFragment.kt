@@ -20,8 +20,11 @@ import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentPersetmodeBinding
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.common.UiEvent
+import com.example.sonicwavev4.ui.custompreset.CustomPresetEditorFragment
+import com.example.sonicwavev4.ui.persetmode.PresetCategory.BUILT_IN
 import com.example.sonicwavev4.ui.user.UserViewModel
 import com.example.sonicwavev4.utils.SessionManager
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -72,6 +75,7 @@ class PersetmodeFragment : Fragment() {
         setupListeners()
         observeViewModel()
         observeUserSession()
+        observeEditButtonVisibility()
         viewModel.selectMode(0)
     }
 
@@ -97,6 +101,14 @@ class PersetmodeFragment : Fragment() {
         binding.btnStartStop.setOnClickListener {
             val customer = userViewModel.selectedCustomer.value
             viewModel.toggleStartStop(customer)
+        }
+        binding.btnEditPreset.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val presetId = viewModel.cloneCurrentExpertToCustomPresetIfNeeded()
+                if (presetId != null) {
+                    openCustomPresetEditorFor(presetId)
+                }
+            }
         }
     }
 
@@ -165,6 +177,28 @@ class PersetmodeFragment : Fragment() {
         binding.tvFrequencyValue.text = state.frequencyHz?.toString() ?: "--"
         binding.tvIntensityValue.text = state.intensity01V?.toString() ?: "--"
         binding.tvRemainingValue.text = formatAsMMSS(state.remainingSeconds)
+    }
+
+    private fun observeEditButtonVisibility() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                combine(
+                    userViewModel.selectedCustomer,
+                    viewModel.uiState
+                ) { selectedCustomer, state ->
+                    val inCustomerDetail = selectedCustomer != null
+                    val isExpertMode = state.category == BUILT_IN
+                    inCustomerDetail && isExpertMode
+                }.collect { shouldShow ->
+                    binding.btnEditPreset.isVisible = shouldShow
+                }
+            }
+        }
+    }
+
+    private fun openCustomPresetEditorFor(presetId: String) {
+        val dialog = CustomPresetEditorFragment.newInstance(presetId)
+        dialog.show(parentFragmentManager, CustomPresetEditorFragment.TAG)
     }
 
     private fun handleEvent(event: UiEvent) {

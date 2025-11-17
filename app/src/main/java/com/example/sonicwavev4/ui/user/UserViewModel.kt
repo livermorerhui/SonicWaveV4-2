@@ -1,7 +1,9 @@
 package com.example.sonicwavev4.ui.user
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sonicwavev4.data.offlinecustomer.OfflineCustomerRepository
 import com.example.sonicwavev4.network.Customer
 import com.example.sonicwavev4.repository.CustomerRepository
 import com.example.sonicwavev4.utils.OfflineTestModeManager
@@ -11,9 +13,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
-class UserViewModel : ViewModel() {
+class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     private val customerRepository = CustomerRepository()
+    private val offlineCustomerRepository = OfflineCustomerRepository.getInstance(application)
 
     private val _accountType = MutableStateFlow<String?>(null)
     val accountType: StateFlow<String?> = _accountType.asStateFlow()
@@ -42,6 +45,19 @@ class UserViewModel : ViewModel() {
     val loading: StateFlow<Boolean> = _loading
 
     // For Selected Customer
+    /**
+     * Tracks the customer currently being detailed.
+     *
+     * - null => Not in any customer detail context.
+     * - non-null => Inside some customer's detail context.
+     *
+     * This state is the single source of truth for showing/hiding
+     * contextual UI elements (e.g., "custom preset" menu, "edit" button).
+     *
+     * TODO(stage2+):
+     *  - This StateFlow may eventually hold a common Customer model/interface
+     *    that can represent both ONLINE (server) and OFFLINE (local) customers.
+     */
     private val _selectedCustomer = MutableStateFlow<Customer?>(null)
     val selectedCustomer: StateFlow<Customer?> = _selectedCustomer.asStateFlow()
 
@@ -60,9 +76,20 @@ class UserViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Called when the user selects a customer (typically when entering
+     * the customer detail page). Only updates state, does not navigate.
+     */
     fun selectCustomer(customer: Customer?) {
         _selectedCustomer.value = customer
     }
+    /**
+     * Called when leaving the customer detail page.
+     * Resets the current customer context.
+     *
+     * Future stages will use this to hide the "custom preset" entry
+     * and the expert-mode "edit" button when there is no active customer.
+     */
     fun clearSelectedCustomer() {
         _selectedCustomer.value = null
     }
@@ -73,8 +100,9 @@ class UserViewModel : ViewModel() {
     fun fetchCustomers() {
         viewModelScope.launch {
             if (OfflineTestModeManager.isOfflineMode()) {
-                _customers.value = emptyList()
-                _filteredCustomers.value = emptyList()
+                val snapshot = offlineCustomerRepository.listCustomers()
+                _customers.value = snapshot
+                _filteredCustomers.value = snapshot
                 _loading.value = false
                 return@launch
             }
@@ -142,6 +170,24 @@ class UserViewModel : ViewModel() {
 
     fun resetUpdateCustomerResult() {
         _updateCustomerResult.value = null
+    }
+
+    fun addOfflineCustomer(name: String) {
+        val trimmedName = name.trim()
+        if (trimmedName.isEmpty()) return
+        viewModelScope.launch {
+            val newCustomer = offlineCustomerRepository.addCustomer(trimmedName)
+            if (OfflineTestModeManager.isOfflineMode()) {
+                val snapshot = offlineCustomerRepository.listCustomers()
+                _customers.value = snapshot
+                _filteredCustomers.value = snapshot
+            } else {
+                val current = _customers.value.orEmpty().toMutableList()
+                current.add(0, newCustomer)
+                _customers.value = current
+                _filteredCustomers.value = current
+            }
+        }
     }
 
     fun onLoginSuccess(accountType: String?) {

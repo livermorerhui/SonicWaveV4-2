@@ -47,7 +47,8 @@ class CustomerDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         customer?.let {
-            binding.customerNameToolbar.text = it.name
+            binding.tvCustomerName.text = it.name
+            binding.tvCustomerInfo.text = "客户详情"
         }
 
         binding.backButton.setOnClickListener {

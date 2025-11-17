@@ -210,28 +210,23 @@ class CustomPresetEditorViewModel(
                     )
                     current.presetId
                 }
-                if (presetId != null) {
-                    _events.emit(EditorEvent.Saved(presetId))
-                    val refreshed = repository.getPresetById(presetId)
-                    if (refreshed != null) {
-                        _uiState.update {
-                            it.copy(
-                                presetId = presetId,
-                                name = refreshed.name,
-                                steps = refreshed.steps.sortedBy { step -> step.order },
-                                isSaving = false,
-                                editingStepId = null,
-                                frequencyInput = "",
-                                intensityInput = "",
-                                durationInput = ""
-                            ).recomputeCanSave()
-                        }
-                    } else {
-                        _uiState.update { it.copy(presetId = presetId, isSaving = false).recomputeCanSave() }
+                _events.emit(EditorEvent.Saved(presetId))
+                val refreshed = repository.getPresetById(presetId)
+                if (refreshed != null) {
+                    _uiState.update {
+                        it.copy(
+                            presetId = presetId,
+                            name = refreshed.name,
+                            steps = refreshed.steps.sortedBy { step -> step.order },
+                            isSaving = false,
+                            editingStepId = null,
+                            frequencyInput = "",
+                            intensityInput = "",
+                            durationInput = ""
+                        ).recomputeCanSave()
                     }
                 } else {
-                    emitMessage("保存失败，请稍后重试")
-                    _uiState.update { it.copy(isSaving = false) }
+                    _uiState.update { it.copy(presetId = presetId, isSaving = false).recomputeCanSave() }
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isSaving = false) }

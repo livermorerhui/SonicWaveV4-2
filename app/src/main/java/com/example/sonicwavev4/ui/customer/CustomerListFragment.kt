@@ -44,10 +44,7 @@ class CustomerListFragment : Fragment() {
         observeViewModel()
 
         if (OfflineTestModeManager.isOfflineMode()) {
-            binding.loadingSpinner.visibility = View.GONE
-            binding.emptyView.visibility = View.VISIBLE
             binding.emptyView.text = getString(R.string.offline_mode_hint)
-            return
         }
 
         // Fetch customers when the fragment is created
@@ -93,13 +90,14 @@ class CustomerListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             userViewModel.filteredCustomers.collectLatest {
                 customers ->
-                binding.loadingSpinner.visibility = View.GONE
+                val currentBinding = _binding ?: return@collectLatest
+                currentBinding.loadingSpinner.visibility = View.GONE
                 if (customers.isNullOrEmpty()) {
-                    binding.emptyView.visibility = View.VISIBLE
-                    binding.customerRecyclerView.visibility = View.GONE
+                    currentBinding.emptyView.visibility = View.VISIBLE
+                    currentBinding.customerRecyclerView.visibility = View.GONE
                 } else {
-                    binding.emptyView.visibility = View.GONE
-                    binding.customerRecyclerView.visibility = View.VISIBLE
+                    currentBinding.emptyView.visibility = View.GONE
+                    currentBinding.customerRecyclerView.visibility = View.VISIBLE
                     customerAdapter.submitList(customers)
                 }
             }
@@ -108,7 +106,8 @@ class CustomerListFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             userViewModel.loading.collectLatest {
                 isLoading ->
-                binding.loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
+                val currentBinding = _binding ?: return@collectLatest
+                currentBinding.loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
             }
         }
     }

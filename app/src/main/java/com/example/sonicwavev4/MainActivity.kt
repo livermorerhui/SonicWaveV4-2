@@ -30,6 +30,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -54,6 +55,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.sonicwavev4.databinding.ActivityMainBinding
 import com.example.sonicwavev4.network.AppUsageRequest
 import com.example.sonicwavev4.network.RetrofitClient
+import com.example.sonicwavev4.ui.user.UserViewModel
 import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
 import com.example.sonicwavev4.utils.DeviceIdentityProvider
 import com.example.sonicwavev4.utils.GlobalLogoutManager
@@ -68,6 +70,8 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
+
+    private val userViewModel: UserViewModel by viewModels()
 
     private lateinit var sessionManager: SessionManager
     private var musicAreaLayout: ConstraintLayout? = null
@@ -104,6 +108,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private var isUserSeeking = false
     private var forceExitDialog: AlertDialog? = null
     private val navButtonViews = mutableMapOf<Int, Pair<ImageButton, TextView>>()
+    private var customPresetItemView: View? = null
     private var currentNavItemId: Int = R.id.navigation_home
 
     private val requestPermissionLauncher =
@@ -139,6 +144,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         }
 
         setupCustomNavigationRail()
+        observeSelectedCustomerContext()
 
         musicAreaLayout = binding.mainContentConstraintLayout?.findViewById(R.id.fragment_bottom_left)
         musicDownloader = MusicDownloader(this)
@@ -532,6 +538,16 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         ).toInt()
     }
 
+    /**
+     * Initializes the left navigation menu.
+     *
+     * Stage 0:
+     *  - Keep behavior as-is, including always showing the "custom preset" entry.
+     *
+     * Future:
+     *  - Control "custom preset" visibility based on selectedCustomer
+     *    (only show it when in a customer detail context).
+     */
     private fun setupCustomNavigationRail() {
         navButtonViews.clear()
         val topSectionContainer: LinearLayout? = binding.mainContentConstraintLayout?.findViewById(R.id.nav_rail_top_section)
@@ -543,6 +559,9 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             menuInflater.inflate(R.menu.nav_rail_top_menu, topMenu)
             topMenu.forEach { menuItem ->
                 createNavRailButton(menuItem, topSection)?.let { buttonView ->
+                    if (menuItem.itemId == R.id.navigation_custom_preset) {
+                        customPresetItemView = buttonView
+                    }
                     topSection.addView(buttonView)
                 }
             }
@@ -559,6 +578,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             }
         }
         updateNavRailSelection(currentNavItemId)
+        applyCustomPresetVisibility(userViewModel.selectedCustomer.value)
     }
 
     private fun createNavRailButton(item: MenuItem, parent: ViewGroup): View? {
@@ -619,6 +639,26 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         val color = ContextCompat.getColor(this, colorRes)
         ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(color))
         title.setTextColor(color)
+    }
+
+    private fun observeSelectedCustomerContext() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                userViewModel.selectedCustomer.collect { customer ->
+                    applyCustomPresetVisibility(customer)
+                    val currentDest = navController.currentDestination?.id
+                    if (customer == null && currentDest == R.id.navigation_custom_preset) {
+                        navController.navigate(R.id.navigation_persetmode)
+                        updateNavRailSelection(R.id.navigation_persetmode)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun applyCustomPresetVisibility(customer: Any?) {
+        val hasCustomer = customer != null
+        customPresetItemView?.visibility = if (hasCustomer) View.VISIBLE else View.GONE
     }
 
     

@@ -1,6 +1,7 @@
 package com.example.sonicwavev4
 
 import android.app.Application
+import android.util.Log
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
@@ -9,6 +10,7 @@ import cn.wch.ch341lib.CH341Manager
 import com.example.sonicwavev4.logging.LogUploadWorker
 import com.example.sonicwavev4.network.OfflineControlWebSocket
 import com.example.sonicwavev4.network.RetrofitClient
+import com.example.sonicwavev4.core.currentAppMode
 import com.example.sonicwavev4.utils.DeviceHeartbeatManager
 import com.example.sonicwavev4.utils.DeviceIdentityProvider
 import com.example.sonicwavev4.utils.HeartbeatManager
@@ -42,6 +44,7 @@ class MainApplication : Application() {
         val isOffline = sessionManager.isOfflineTestMode()
         OfflineCapabilityManager.initialize(sessionManager.isOfflineModeAllowed())
         OfflineTestModeManager.initialize(isOffline)
+        Log.d("MainApplication", "currentAppMode=${currentAppMode()}")
         val hasSession = sessionManager.hasActiveSession() && sessionManager.fetchSessionId() != -1L
         if (!isOffline && hasSession) {
             HeartbeatManager.start(this)

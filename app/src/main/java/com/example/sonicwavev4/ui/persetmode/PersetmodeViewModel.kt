@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.sonicwavev4.data.custompreset.CustomPresetRepository
 import com.example.sonicwavev4.data.custompreset.model.CustomPreset
 import com.example.sonicwavev4.data.custompreset.model.CustomPresetStep
+import com.example.sonicwavev4.data.custompreset.model.CreateCustomPresetRequest
 import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.network.Customer
@@ -20,6 +21,7 @@ import com.example.sonicwavev4.ui.persetmode.modes.Vision10m
 import com.example.sonicwavev4.ui.persetmode.modes.WholeBody10m
 import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.utils.TestToneSettings
+import java.util.UUID
 import kotlin.coroutines.coroutineContext
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Job
@@ -478,6 +480,56 @@ class PersetmodeViewModel(
     private fun CustomPreset.toSteps(): List<Step> =
         steps.sortedBy { it.order }
             .map { Step(intensity01V = it.intensity01V, frequencyHz = it.frequencyHz, durationSec = it.durationSec) }
+
+    /**
+     * 将当前选中的专家模式复制为自设模式，并返回新建或复用的 presetId。
+     * 如果当前不在专家模式类别，则返回 null。
+     */
+    suspend fun cloneCurrentExpertToCustomPresetIfNeeded(): String? {
+        val state = _uiState.value
+        if (state.category != PresetCategory.BUILT_IN) return null
+
+        val mode = currentMode()
+        val targetName = "${mode.displayName} - 自设"
+
+        customPresetsCache.firstOrNull { it.name == targetName }?.let { existing ->
+            applyCustomPresetSelection(existing)
+            return existing.id
+        }
+
+        val steps = scaledSteps(mode).mapIndexed { index, step ->
+            CustomPresetStep(
+                id = UUID.randomUUID().toString(),
+                frequencyHz = step.frequencyHz,
+                intensity01V = step.intensity01V,
+                durationSec = step.durationSec,
+                order = index
+            )
+        }
+
+        val presetId = customPresetRepository.create(
+            CreateCustomPresetRequest(
+                name = targetName,
+                steps = steps
+            )
+        )
+
+        pendingCustomSelectionId = presetId
+        val first = steps.firstOrNull()
+        val totalDuration = steps.sumOf { it.durationSec }
+        _uiState.update {
+            it.copy(
+                category = PresetCategory.CUSTOM,
+                selectedCustomPresetId = presetId,
+                frequencyHz = first?.frequencyHz,
+                intensity01V = first?.intensity01V,
+                remainingSeconds = totalDuration,
+                totalDurationSeconds = totalDuration
+            )
+        }
+        recomputeStartButtonEnabled()
+        return presetId
+    }
 
     fun stopIfRunning() {
         if (_uiState.value.isRunning || currentRunId != null) {

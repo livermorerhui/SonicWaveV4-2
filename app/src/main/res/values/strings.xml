@@ -16,7 +16,9 @@
     <string name="label_intensity">强度</string>
     <string name="label_time">时间</string>
     <string name="label_sine_tone_switch">正弦波声音</string>
-    <string name="offline_mode_hint">离线测试模式：客户列表及新增功能已关闭</string>
+    <string name="offline_mode_hint">离线模式：新增的客户只保存在本地，关闭应用后会丢失。</string>
+    <string name="offline_add_customer_title">离线新增客户</string>
+    <string name="offline_add_customer_message">此客户仅保存在本地，退出或重启后将丢失。</string>
     <string name="download">下载</string>
     <string name="previous">上一首</string>
     <string name="next">下一首</string>

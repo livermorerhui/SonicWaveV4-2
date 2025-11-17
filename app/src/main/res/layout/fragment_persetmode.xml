@@ -267,6 +267,14 @@
                 android:layout_height="wrap_content"
                 android:textSize="24sp"
                 tools:text="09:42"/>
+
+            <Button
+                android:id="@+id/btn_edit_preset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="编辑"
+                android:visibility="gone" />
         </LinearLayout>
 
     </LinearLayout>

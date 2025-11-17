@@ -10,10 +10,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.sonicwavev4.R
+import com.example.sonicwavev4.core.AppMode
+import com.example.sonicwavev4.core.currentAppMode
 import com.example.sonicwavev4.databinding.FragmentUserBinding
 import com.example.sonicwavev4.network.LogoutEventRequest
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.AddCustomerDialogFragment
+import com.example.sonicwavev4.ui.OfflineAddCustomerDialogFragment
 import com.example.sonicwavev4.ui.customer.CustomerListFragment
 import com.example.sonicwavev4.ui.login.LoginFragment
 import com.example.sonicwavev4.utils.GlobalLogoutManager
@@ -47,6 +50,7 @@ class UserFragment : Fragment() {
         setupUsernameDisplay()
         setupLogoutButton()
         setupAddCustomerButton()
+        ensureCustomerListFragment()
         observeOfflineMode()
         setupToneSwitch()
         observeAccountType()
@@ -60,23 +64,24 @@ class UserFragment : Fragment() {
 
     private fun setupAddCustomerButton() {
         binding.addCustomerButton.setOnClickListener {
-            AddCustomerDialogFragment.newInstance().show(childFragmentManager, "AddCustomerDialog")
+            if (currentAppMode() == AppMode.OFFLINE) {
+                OfflineAddCustomerDialogFragment.newInstance().show(childFragmentManager, "OfflineAddCustomerDialog")
+            } else {
+                AddCustomerDialogFragment.newInstance().show(childFragmentManager, "AddCustomerDialog")
+            }
         }
     }
 
     private fun observeOfflineMode() {
         viewLifecycleOwner.lifecycleScope.launch {
             OfflineTestModeManager.isOfflineTestMode.collectLatest { offline ->
-                binding.addCustomerButton.isVisible = !offline
-                binding.customerListContainer.isVisible = !offline
+                binding.addCustomerButton.isVisible = true
+                binding.customerListContainer.isVisible = true
                 binding.offlineModeHint.isVisible = offline
                 if (offline) {
-                    removeCustomerListFragmentIfNeeded()
-                } else if (childFragmentManager.findFragmentById(R.id.customer_list_container) == null) {
-                    childFragmentManager.beginTransaction()
-                        .replace(R.id.customer_list_container, CustomerListFragment())
-                        .commit()
+                    binding.offlineModeHint.text = getString(R.string.offline_mode_hint)
                 }
+                ensureCustomerListFragment()
             }
         }
     }
@@ -126,9 +131,11 @@ class UserFragment : Fragment() {
         }
     }
 
-    private fun removeCustomerListFragmentIfNeeded() {
-        childFragmentManager.findFragmentById(R.id.customer_list_container)?.let {
-            childFragmentManager.beginTransaction().remove(it).commit()
+    private fun ensureCustomerListFragment() {
+        if (childFragmentManager.findFragmentById(R.id.customer_list_container) == null) {
+            childFragmentManager.beginTransaction()
+                .replace(R.id.customer_list_container, CustomerListFragment())
+                .commit()
         }
     }
 
