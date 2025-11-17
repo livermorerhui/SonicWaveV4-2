@@ -79,7 +79,15 @@ class CustomPresetEditorFragment : DialogFragment() {
             onMoveUp = { editorViewModel.moveStepUp(it) },
             onMoveDown = { editorViewModel.moveStepDown(it) },
             onEdit = { editorViewModel.startEditingStep(it) },
-            onDelete = { editorViewModel.deleteStep(it) }
+            onDelete = { editorViewModel.deleteStep(it) },
+            onInputChanged = { freq, intensity, duration ->
+                freq?.let { editorViewModel.setFrequencyInput(it) }
+                intensity?.let { editorViewModel.setIntensityInput(it) }
+                duration?.let { editorViewModel.setDurationInput(it) }
+            },
+            onSave = { editorViewModel.saveEditingStep() },
+            onCancel = { editorViewModel.cancelStepEditing() },
+            onScrolledToBottomRequest = { scrollToBottom() }
         )
         binding.listSteps.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -89,11 +97,7 @@ class CustomPresetEditorFragment : DialogFragment() {
 
     private fun setupInputs() {
         binding.etName.addTextChangedListener { editorViewModel.setName(it?.toString().orEmpty()) }
-        binding.etFrequency.addTextChangedListener { editorViewModel.setFrequencyInput(it?.toString().orEmpty()) }
-        binding.etIntensity.addTextChangedListener { editorViewModel.setIntensityInput(it?.toString().orEmpty()) }
-        binding.etDuration.addTextChangedListener { editorViewModel.setDurationInput(it?.toString().orEmpty()) }
-
-        binding.btnAddOrUpdateStep.setOnClickListener { editorViewModel.addOrUpdateStep() }
+        binding.btnAddStep.setOnClickListener { editorViewModel.startAddingStep() }
         binding.btnSavePreset.setOnClickListener { editorViewModel.savePreset() }
         binding.btnCancel.setOnClickListener { confirmExit() }
         binding.viewScrim.setOnClickListener { confirmExit() }
@@ -132,15 +136,35 @@ class CustomPresetEditorFragment : DialogFragment() {
         binding.tvEditorTitle.text = title
 
         updateField(binding.etName, state.name)
-        updateField(binding.etFrequency, state.frequencyInput)
-        updateField(binding.etIntensity, state.intensityInput)
-        updateField(binding.etDuration, state.durationInput)
-
-        stepAdapter.submitList(state.steps)
-        binding.tvStepsEmpty.isVisible = state.steps.isEmpty()
-        binding.btnAddOrUpdateStep.text = if (state.isEditingStep) "更新步骤" else "添加步骤"
+        val sortedSteps = state.steps.sortedBy { it.order }
+        val displayItems = mutableListOf<com.example.sonicwavev4.ui.persetmode.editor.StepDisplay>()
+        sortedSteps.forEachIndexed { index, step ->
+            val isEditing = state.editingStepId == step.id
+            displayItems += com.example.sonicwavev4.ui.persetmode.editor.StepDisplay(
+                id = step.id,
+                title = "步骤 ${index + 1}",
+                detail = "频率 ${step.frequencyHz}Hz · 强度 ${step.intensity01V} · 时长 ${step.durationSec}秒",
+                isEditing = isEditing,
+                isNew = false
+            )
+        }
+        if (state.isEditingNewStep) {
+            displayItems += com.example.sonicwavev4.ui.persetmode.editor.StepDisplay(
+                id = com.example.sonicwavev4.ui.persetmode.editor.NEW_STEP_ID,
+                title = "步骤 ${sortedSteps.size + 1}",
+                detail = "",
+                isEditing = true,
+                isNew = true
+            )
+        }
+        stepAdapter.submit(
+            displayItems,
+            state.frequencyInput,
+            state.intensityInput,
+            state.durationInput
+        )
+        binding.tvStepsEmpty.isVisible = displayItems.isEmpty()
         binding.btnSavePreset.isEnabled = state.canSave && !state.isSaving
-        binding.btnAddOrUpdateStep.isEnabled = !state.isSaving
         binding.btnCancel.isEnabled = !state.isSaving
     }
 
@@ -164,6 +188,12 @@ class CustomPresetEditorFragment : DialogFragment() {
     private fun showToast(message: String) {
         if (!isAdded) return
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun scrollToBottom() {
+        binding.listSteps.post {
+            binding.listSteps.smoothScrollToPosition((binding.listSteps.adapter?.itemCount ?: 1) - 1)
+        }
     }
 
     private fun updateField(

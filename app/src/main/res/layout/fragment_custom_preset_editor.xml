@@ -85,62 +85,12 @@
                             android:maxLines="1" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/input_layout_frequency"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:layout_weight="1"
-                        android:hint="频率(Hz)">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_frequency"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/input_layout_intensity"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:layout_weight="1"
-                        android:hint="强度(0.01V)">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_intensity"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/input_layout_duration"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:layout_weight="1"
-                        android:hint="时长(秒)">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_duration"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_add_or_update_step"
+                        android:id="@+id/btn_add_step"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="添加" />
+                        android:text="添加步骤" />
 
                 </LinearLayout>
 
@@ -172,7 +122,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:padding="12dp"
-                android:text="暂无步骤，输入参数后点击“添加步骤”"
+                android:text="暂无步骤，点击“添加步骤”开始配置"
                 android:textColor="@android:color/darker_gray"
                 app:layout_constraintTop_toTopOf="@id/list_steps"
                 app:layout_constraintBottom_toBottomOf="@id/list_steps"

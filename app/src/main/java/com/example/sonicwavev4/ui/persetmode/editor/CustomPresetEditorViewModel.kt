@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+internal const val NEW_STEP_ID = "__new_step__"
+
 data class EditorUiState(
     val presetId: String? = null,
     val name: String = "",
@@ -30,6 +32,7 @@ data class EditorUiState(
 ) {
     val isEditingExisting: Boolean get() = presetId != null
     val isEditingStep: Boolean get() = editingStepId != null
+    val isEditingNewStep: Boolean get() = editingStepId == NEW_STEP_ID
 }
 
 sealed class EditorEvent {
@@ -89,6 +92,17 @@ class CustomPresetEditorViewModel(
         _uiState.update { it.copy(durationInput = value) }
     }
 
+    fun startAddingStep() {
+        _uiState.update {
+            it.copy(
+                editingStepId = NEW_STEP_ID,
+                frequencyInput = "",
+                intensityInput = "",
+                durationInput = ""
+            )
+        }
+    }
+
     fun startEditingStep(stepId: String) {
         val current = _uiState.value
         val step = current.steps.firstOrNull { it.id == stepId } ?: return
@@ -102,19 +116,12 @@ class CustomPresetEditorViewModel(
         }
     }
 
-    fun cancelStepEditing() {
-        _uiState.update {
-            it.copy(
-                editingStepId = null,
-                frequencyInput = "",
-                intensityInput = "",
-                durationInput = ""
-            )
-        }
-    }
-
-    fun addOrUpdateStep() {
+    fun saveEditingStep() {
         val current = _uiState.value
+        if (current.editingStepId == null) {
+            emitMessage("请先点击“添加步骤”或编辑某一步骤")
+            return
+        }
         val frequency = current.frequencyInput.toIntOrNull()
         val intensity = current.intensityInput.toIntOrNull()
         val duration = current.durationInput.toIntOrNull()
@@ -123,34 +130,38 @@ class CustomPresetEditorViewModel(
             return
         }
         val sanitized = CustomPresetStep(
-            id = current.editingStepId ?: UUID.randomUUID().toString(),
+            id = if (current.isEditingNewStep) UUID.randomUUID().toString() else current.editingStepId,
             frequencyHz = CustomPresetConstraints.clampFrequency(frequency),
             intensity01V = CustomPresetConstraints.clampIntensity(intensity),
             durationSec = CustomPresetConstraints.clampDuration(duration),
             order = current.steps.size
         )
-        if (current.editingStepId == null) {
-            _uiState.update {
-                it.copy(
-                    steps = (it.steps + sanitized).normalizeOrder(),
-                    frequencyInput = "",
-                    intensityInput = "",
-                    durationInput = ""
-                ).recomputeCanSave()
-            }
+        val updatedSteps = if (current.isEditingNewStep) {
+            (current.steps + sanitized).normalizeOrder()
         } else {
-            val updatedSteps = current.steps.map { step ->
+            current.steps.map { step ->
                 if (step.id == sanitized.id) sanitized.copy(order = step.order) else step
-            }
-            _uiState.update {
-                it.copy(
-                    steps = updatedSteps.normalizeOrder(),
-                    editingStepId = null,
-                    frequencyInput = "",
-                    intensityInput = "",
-                    durationInput = ""
-                ).recomputeCanSave()
-            }
+            }.normalizeOrder()
+        }
+        _uiState.update {
+            it.copy(
+                steps = updatedSteps,
+                editingStepId = null,
+                frequencyInput = "",
+                intensityInput = "",
+                durationInput = ""
+            ).recomputeCanSave()
+        }
+    }
+
+    fun cancelStepEditing() {
+        _uiState.update {
+            it.copy(
+                editingStepId = null,
+                frequencyInput = "",
+                intensityInput = "",
+                durationInput = ""
+            )
         }
     }
 
