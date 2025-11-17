@@ -12,6 +12,7 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +23,7 @@ import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetEditorViewModel
 import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetEditorViewModelFactory
 import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetStepAdapter
 import com.example.sonicwavev4.ui.persetmode.editor.EditorEvent
+import com.example.sonicwavev4.ui.user.UserViewModel
 import com.example.sonicwavev4.ui.persetmode.editor.hasUnsavedChanges
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.collect
@@ -32,10 +34,13 @@ class CustomPresetEditorFragment : DialogFragment() {
     private var _binding: FragmentCustomPresetEditorBinding? = null
     private val binding get() = _binding!!
 
+    private val userViewModel: UserViewModel by activityViewModels()
+
     private val editorViewModel: CustomPresetEditorViewModel by viewModels {
         val application = requireActivity().application
         val repository = CustomPresetRepositoryImpl.getInstance(application)
-        CustomPresetEditorViewModelFactory(repository)
+        val customerId = userViewModel.selectedCustomer.value?.id?.toLong()
+        CustomPresetEditorViewModelFactory(repository, customerId)
     }
 
     private lateinit var stepAdapter: CustomPresetStepAdapter

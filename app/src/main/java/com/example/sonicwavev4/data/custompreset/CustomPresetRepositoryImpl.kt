@@ -30,8 +30,8 @@ class CustomPresetRepositoryImpl private constructor(
     private val dispatcher: CoroutineDispatcher
 ) : CustomPresetRepository {
 
-    override val customPresets: Flow<List<CustomPreset>> =
-        dao.observeAll()
+    override fun customPresets(customerId: Long?): Flow<List<CustomPreset>> =
+        dao.observeByCustomer(customerId)
             .map { entities -> entities.map { it.toDomain(gson) } }
             .flowOn(dispatcher)
 
@@ -39,6 +39,7 @@ class CustomPresetRepositoryImpl private constructor(
         val now = System.currentTimeMillis()
         val entity = CustomPresetEntity(
             id = UUID.randomUUID().toString(),
+            customerId = request.customerId,
             name = request.name.trim(),
             stepsJson = gson.toJson(request.steps.normalizeOrder(), STEP_LIST_TYPE),
             sortOrder = (dao.maxSortOrder() ?: 0) + 1,
@@ -55,6 +56,7 @@ class CustomPresetRepositoryImpl private constructor(
         val existing = dao.findById(request.id) ?: return@withContext
         val now = System.currentTimeMillis()
         val updated = existing.copy(
+            customerId = request.customerId,
             name = request.name.trim(),
             stepsJson = gson.toJson(request.steps.normalizeOrder(), STEP_LIST_TYPE),
             updatedAt = now,
@@ -98,6 +100,7 @@ class CustomPresetRepositoryImpl private constructor(
             val now = System.currentTimeMillis()
             val entity = CustomPresetEntity(
                 id = preset.id.ifBlank { UUID.randomUUID().toString() },
+                customerId = preset.customerId,
                 name = preset.name,
                 stepsJson = gson.toJson(preset.steps.normalizeOrder(), STEP_LIST_TYPE),
                 sortOrder = preset.sortOrder,
@@ -143,6 +146,7 @@ private val STEP_LIST_TYPE = object : TypeToken<List<CustomPresetStep>>() {}.typ
 private fun CustomPresetEntity.toDomain(gson: Gson): CustomPreset =
     CustomPreset(
         id = id,
+        customerId = customerId,
         name = name,
         steps = gson.fromJson(stepsJson, STEP_LIST_TYPE),
         sortOrder = sortOrder,

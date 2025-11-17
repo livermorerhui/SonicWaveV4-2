@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CustomPresetDao {
-    @Query("SELECT * FROM custom_presets ORDER BY sort_order ASC, created_at ASC")
-    fun observeAll(): Flow<List<CustomPresetEntity>>
+    @Query("SELECT * FROM custom_presets WHERE (:customerId IS NULL AND customer_id IS NULL) OR customer_id = :customerId ORDER BY sort_order ASC, created_at ASC")
+    fun observeByCustomer(customerId: Long?): Flow<List<CustomPresetEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entity: CustomPresetEntity)

@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -106,6 +107,7 @@ class PersetmodeViewModel(
 
     private var customPresetsCache: List<CustomPreset> = emptyList()
     private var pendingCustomSelectionId: String? = null
+    private val activeCustomerId = MutableStateFlow<Long?>(null)
 
     private val intensityScalePct = MutableStateFlow(100)
 
@@ -177,33 +179,35 @@ class PersetmodeViewModel(
         }
 
         viewModelScope.launch {
-            customPresetRepository.customPresets.collect { presets ->
-                customPresetsCache = presets
-                val currentSelectedId = _uiState.value.selectedCustomPresetId
-                val hasCurrent = currentSelectedId != null && presets.any { it.id == currentSelectedId }
-                val normalizedSelectedId = if (hasCurrent) currentSelectedId else null
-                _uiState.update { state ->
-                    val updated = state.copy(
-                        customPresets = presets.map { it.toUiModel(normalizedSelectedId) },
-                        selectedCustomPresetId = normalizedSelectedId
-                    )
-                    if (state.category == PresetCategory.CUSTOM && normalizedSelectedId == null) {
-                        updated.copy(
-                            frequencyHz = null,
-                            intensity01V = null,
-                            remainingSeconds = 0,
-                            totalDurationSeconds = 0
+            activeCustomerId.collectLatest { customerId ->
+                customPresetRepository.customPresets(customerId).collect { presets ->
+                    customPresetsCache = presets
+                    val currentSelectedId = _uiState.value.selectedCustomPresetId
+                    val hasCurrent = currentSelectedId != null && presets.any { it.id == currentSelectedId }
+                    val normalizedSelectedId = if (hasCurrent) currentSelectedId else null
+                    _uiState.update { state ->
+                        val updated = state.copy(
+                            customPresets = presets.map { it.toUiModel(normalizedSelectedId) },
+                            selectedCustomPresetId = normalizedSelectedId
                         )
-                    } else {
-                        updated
+                        if (state.category == PresetCategory.CUSTOM && normalizedSelectedId == null) {
+                            updated.copy(
+                                frequencyHz = null,
+                                intensity01V = null,
+                                remainingSeconds = 0,
+                                totalDurationSeconds = 0
+                            )
+                        } else {
+                            updated
+                        }
                     }
-                }
-                val pendingSelection = pendingCustomSelectionId
-                if (pendingSelection != null && presets.any { it.id == pendingSelection }) {
-                    pendingCustomSelectionId = null
-                    selectCustomPreset(pendingSelection)
-                } else {
-                    recomputeStartButtonEnabled()
+                    val pendingSelection = pendingCustomSelectionId
+                    if (pendingSelection != null && presets.any { it.id == pendingSelection }) {
+                        pendingCustomSelectionId = null
+                        selectCustomPreset(pendingSelection)
+                    } else {
+                        recomputeStartButtonEnabled()
+                    }
                 }
             }
         }
@@ -481,6 +485,10 @@ class PersetmodeViewModel(
         steps.sortedBy { it.order }
             .map { Step(intensity01V = it.intensity01V, frequencyHz = it.frequencyHz, durationSec = it.durationSec) }
 
+    fun setActiveCustomer(customer: Customer?) {
+        activeCustomerId.value = customer?.id?.toLong()
+    }
+
     /**
      * 将当前选中的专家模式复制为自设模式，并返回新建或复用的 presetId。
      * 如果当前不在专家模式类别，则返回 null。
@@ -497,6 +505,7 @@ class PersetmodeViewModel(
             return existing.id
         }
 
+        val customerId = activeCustomerId.value
         val steps = scaledSteps(mode).mapIndexed { index, step ->
             CustomPresetStep(
                 id = UUID.randomUUID().toString(),
@@ -509,6 +518,7 @@ class PersetmodeViewModel(
 
         val presetId = customPresetRepository.create(
             CreateCustomPresetRequest(
+                customerId = customerId,
                 name = targetName,
                 steps = steps
             )

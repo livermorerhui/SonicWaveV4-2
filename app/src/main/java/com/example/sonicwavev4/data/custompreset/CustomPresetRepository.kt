@@ -7,7 +7,7 @@ import com.example.sonicwavev4.data.custompreset.model.UpdateCustomPresetRequest
 import kotlinx.coroutines.flow.Flow
 
 interface CustomPresetRepository {
-    val customPresets: Flow<List<CustomPreset>>
+    fun customPresets(customerId: Long?): Flow<List<CustomPreset>>
 
     suspend fun create(request: CreateCustomPresetRequest): String
     suspend fun update(request: UpdateCustomPresetRequest)

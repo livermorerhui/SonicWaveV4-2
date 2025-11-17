@@ -71,6 +71,7 @@ class CustomPresetFragment : Fragment() {
         setupPresetList()
         observePresetViewModel()
         observeUserSession()
+        observeSelectedCustomer()
         setupEditorResultListener()
 
         binding.btnNewPreset.setOnClickListener {
@@ -173,6 +174,14 @@ class CustomPresetFragment : Fragment() {
                         presetViewModel.setSessionActive(loggedIn)
                     }
                 }
+            }
+        }
+    }
+
+    private fun observeSelectedCustomer() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                userViewModel.selectedCustomer.collect { presetViewModel.setActiveCustomer(it) }
             }
         }
     }

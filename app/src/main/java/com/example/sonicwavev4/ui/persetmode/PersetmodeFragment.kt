@@ -75,6 +75,7 @@ class PersetmodeFragment : Fragment() {
         setupListeners()
         observeViewModel()
         observeUserSession()
+        observeSelectedCustomerContext()
         observeEditButtonVisibility()
         viewModel.selectMode(0)
     }
@@ -139,6 +140,14 @@ class PersetmodeFragment : Fragment() {
                         viewModel.setSessionActive(loggedIn)
                     }
                 }
+            }
+        }
+    }
+
+    private fun observeSelectedCustomerContext() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                userViewModel.selectedCustomer.collect { viewModel.setActiveCustomer(it) }
             }
         }
     }

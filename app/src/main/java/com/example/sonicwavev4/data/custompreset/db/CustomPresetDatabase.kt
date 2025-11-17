@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [CustomPresetEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(CustomPresetConverters::class)
@@ -30,6 +30,14 @@ abstract class CustomPresetDatabase : RoomDatabase() {
                 context,
                 CustomPresetDatabase::class.java,
                 "custom_presets.db"
-            ).build()
+            )
+                .addMigrations(MIGRATION_1_2)
+                .build()
+    }
+}
+
+val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+    override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE custom_presets ADD COLUMN customer_id INTEGER")
     }
 }

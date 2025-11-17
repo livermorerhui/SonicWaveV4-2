@@ -54,7 +54,8 @@ sealed class EditorEvent {
  * 所有步骤顺序统一通过 normalizeOrder，避免执行过程中出现跳号。
  */
 class CustomPresetEditorViewModel(
-    private val repository: CustomPresetRepository
+    private val repository: CustomPresetRepository,
+    private val customerId: Long?
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -219,6 +220,7 @@ class CustomPresetEditorViewModel(
                 val presetId = if (current.presetId == null) {
                     repository.create(
                         CreateCustomPresetRequest(
+                            customerId = customerId,
                             name = current.name.trim(),
                             steps = steps
                         )
@@ -227,6 +229,7 @@ class CustomPresetEditorViewModel(
                     repository.update(
                         UpdateCustomPresetRequest(
                             id = current.presetId,
+                            customerId = customerId,
                             name = current.name.trim(),
                             steps = steps
                         )

@@ -11,6 +11,8 @@ data class CustomPresetEntity(
     @PrimaryKey
     @ColumnInfo(name = "id")
     val id: String = UUID.randomUUID().toString(),
+    @ColumnInfo(name = "customer_id")
+    val customerId: Long?,
     @ColumnInfo(name = "name")
     val name: String,
     @ColumnInfo(name = "steps_json")

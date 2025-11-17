@@ -8,6 +8,7 @@ import java.util.UUID
  */
 data class CustomPreset(
     val id: String = UUID.randomUUID().toString(),
+    val customerId: Long?,
     val name: String,
     val steps: List<CustomPresetStep>,
     val sortOrder: Int,
