@@ -23,7 +23,9 @@ import com.example.sonicwavev4.ui.common.NumericKeypadView
 import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetEditorViewModel
 import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetEditorViewModelFactory
 import com.example.sonicwavev4.ui.persetmode.editor.CustomPresetStepAdapter
+import com.example.sonicwavev4.ui.persetmode.editor.FieldType
 import com.example.sonicwavev4.ui.persetmode.editor.EditorEvent
+import com.example.sonicwavev4.ui.persetmode.editor.SelectedField
 import com.example.sonicwavev4.ui.persetmode.editor.hasUnsavedChanges
 import com.example.sonicwavev4.ui.user.UserViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -46,6 +48,7 @@ class CustomPresetEditorFragment : DialogFragment() {
 
     private lateinit var stepAdapter: CustomPresetStepAdapter
     private lateinit var keypadView: NumericKeypadView
+    private var lastSelectedField: SelectedField? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,7 +95,8 @@ class CustomPresetEditorFragment : DialogFragment() {
             onFrequencyFieldClicked = { showFrequencyKeypad(it) },
             onIntensityFieldClicked = { showIntensityKeypad(it) },
             onDurationFieldClicked = { showDurationKeypad(it) },
-            onItemMoved = { from, to -> editorViewModel.onStepReordered(from, to) }
+            onItemMoved = { from, to -> editorViewModel.onStepReordered(from, to) },
+            onFieldSelected = { index, field -> editorViewModel.setSelectedField(index, field) }
         )
         binding.listSteps.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -167,9 +171,15 @@ class CustomPresetEditorFragment : DialogFragment() {
         val sortedSteps = state.steps.sortedBy { it.order }
         stepAdapter.submitList(sortedSteps)
         stepAdapter.playingStepIndex = state.playingStepIndex
+        stepAdapter.setSelectedField(state.selectedField)
         binding.tvStepsEmpty.isVisible = sortedSteps.isEmpty()
         binding.btnSavePreset.isEnabled = state.canSave && !state.isSaving
         binding.btnCancel.isEnabled = !state.isSaving
+
+        if (state.selectedField != lastSelectedField && state.selectedField != null) {
+            bindKeypadForSelected(state.selectedField, sortedSteps)
+        }
+        lastSelectedField = state.selectedField
     }
 
     private fun handleCancel() {
@@ -179,6 +189,59 @@ class CustomPresetEditorFragment : DialogFragment() {
             return
         }
         confirmExit()
+    }
+
+    private fun bindKeypadForSelected(selected: SelectedField, steps: List<com.example.sonicwavev4.data.custompreset.model.CustomPresetStep>) {
+        val index = selected.stepIndex
+        if (index !in steps.indices) return
+        val step = steps[index]
+        when (selected.fieldType) {
+            FieldType.FREQUENCY -> {
+                keypadView.bindConfig(
+                    NumericKeypadView.Config(
+                        labelText = "频率(Hz)",
+                        initialValue = step.frequencyHz,
+                        minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_FREQUENCY_HZ,
+                        maxValue = Int.MAX_VALUE,
+                        replaceOnFirstKey = true
+                    )
+                )
+                keypadView.focusForEditing()
+                keypadView.onValueConfirmed = { value ->
+                    editorViewModel.updateStepFrequency(index, value)
+                }
+            }
+            FieldType.INTENSITY -> {
+                keypadView.bindConfig(
+                    NumericKeypadView.Config(
+                        labelText = "强度(0.01V)",
+                        initialValue = step.intensity01V,
+                        minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_INTENSITY_01V,
+                        maxValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_INTENSITY_01V,
+                        replaceOnFirstKey = true
+                    )
+                )
+                keypadView.focusForEditing()
+                keypadView.onValueConfirmed = { value ->
+                    editorViewModel.updateStepIntensity(index, value)
+                }
+            }
+            FieldType.DURATION -> {
+                keypadView.bindConfig(
+                    NumericKeypadView.Config(
+                        labelText = "时长(秒)",
+                        initialValue = step.durationSec,
+                        minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_DURATION_SEC,
+                        maxValue = Int.MAX_VALUE,
+                        replaceOnFirstKey = true
+                    )
+                )
+                keypadView.focusForEditing()
+                keypadView.onValueConfirmed = { value ->
+                    editorViewModel.updateStepDuration(index, value)
+                }
+            }
+        }
     }
 
     private fun confirmExit() {
@@ -215,12 +278,17 @@ class CustomPresetEditorFragment : DialogFragment() {
         if (currentPlaying != null && currentPlaying != index) {
             editorViewModel.stopCurrentStepPlayback()
         }
+        editorViewModel.setSelectedField(index, FieldType.FREQUENCY)
         keypadView.bindConfig(
-            labelText = "频率(Hz)",
-            initialValue = step.frequencyHz,
-            minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_FREQUENCY_HZ,
-            maxValue = Int.MAX_VALUE
+            NumericKeypadView.Config(
+                labelText = "频率(Hz)",
+                initialValue = step.frequencyHz,
+                minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_FREQUENCY_HZ,
+                maxValue = Int.MAX_VALUE,
+                replaceOnFirstKey = true
+            )
         )
+        keypadView.focusForEditing()
         keypadView.onValueConfirmed = { value ->
             editorViewModel.updateStepFrequency(index, value)
         }
@@ -232,12 +300,17 @@ class CustomPresetEditorFragment : DialogFragment() {
         if (currentPlaying != null && currentPlaying != index) {
             editorViewModel.stopCurrentStepPlayback()
         }
+        editorViewModel.setSelectedField(index, FieldType.INTENSITY)
         keypadView.bindConfig(
-            labelText = "强度(0.01V)",
-            initialValue = step.intensity01V,
-            minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_INTENSITY_01V,
-            maxValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_INTENSITY_01V
+            NumericKeypadView.Config(
+                labelText = "强度(0.01V)",
+                initialValue = step.intensity01V,
+                minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_INTENSITY_01V,
+                maxValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_INTENSITY_01V,
+                replaceOnFirstKey = true
+            )
         )
+        keypadView.focusForEditing()
         keypadView.onValueConfirmed = { value ->
             editorViewModel.updateStepIntensity(index, value)
         }
@@ -249,12 +322,17 @@ class CustomPresetEditorFragment : DialogFragment() {
         if (currentPlaying != null && currentPlaying != index) {
             editorViewModel.stopCurrentStepPlayback()
         }
+        editorViewModel.setSelectedField(index, FieldType.DURATION)
         keypadView.bindConfig(
-            labelText = "时长(秒)",
-            initialValue = step.durationSec,
-            minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_DURATION_SEC,
-            maxValue = Int.MAX_VALUE
+            NumericKeypadView.Config(
+                labelText = "时长(秒)",
+                initialValue = step.durationSec,
+                minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_DURATION_SEC,
+                maxValue = Int.MAX_VALUE,
+                replaceOnFirstKey = true
+            )
         )
+        keypadView.focusForEditing()
         keypadView.onValueConfirmed = { value ->
             editorViewModel.updateStepDuration(index, value)
         }

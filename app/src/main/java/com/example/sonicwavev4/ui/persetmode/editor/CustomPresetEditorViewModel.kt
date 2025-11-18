@@ -33,7 +33,8 @@ data class EditorUiState(
     val editingStepId: String? = null,
     val isSaving: Boolean = false,
     val canSave: Boolean = false,
-    val playingStepIndex: Int? = null
+    val playingStepIndex: Int? = null,
+    val selectedField: SelectedField? = null
 ) {
     val isEditingExisting: Boolean get() = presetId != null
 }
@@ -118,6 +119,10 @@ class CustomPresetEditorViewModel(
         _uiState.update { it.copy(durationInput = value) }
     }
 
+    fun setSelectedField(index: Int, fieldType: FieldType) {
+        _uiState.update { it.copy(selectedField = SelectedField(index, fieldType)) }
+    }
+
     fun addStepInline() {
         val current = _uiState.value
         val newStep = CustomPresetStep(
@@ -132,8 +137,9 @@ class CustomPresetEditorViewModel(
 
     fun deleteStep(stepId: String) {
         _uiState.update {
-            it.copy(steps = it.steps.filterNot { step -> step.id == stepId }.normalizeOrder())
-                .recomputeCanSave()
+            val newSteps = it.steps.filterNot { step -> step.id == stepId }.normalizeOrder()
+            val selected = it.selectedField?.takeIf { sf -> sf.stepIndex in newSteps.indices }
+            it.copy(steps = newSteps, selectedField = selected).recomputeCanSave()
         }
     }
 
@@ -255,7 +261,7 @@ class CustomPresetEditorViewModel(
         val mutable = current.steps.toMutableList()
         val step = mutable.removeAt(fromIndex)
         mutable.add(toIndex, step)
-        _uiState.update { it.copy(steps = mutable.normalizeOrder()).recomputeCanSave() }
+        _uiState.update { it.copy(steps = mutable.normalizeOrder(), selectedField = null).recomputeCanSave() }
     }
 
     fun savePreset() {

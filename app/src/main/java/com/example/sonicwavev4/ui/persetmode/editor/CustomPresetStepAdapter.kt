@@ -5,6 +5,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.sonicwavev4.R
 import com.example.sonicwavev4.data.custompreset.model.CustomPresetStep
 import com.example.sonicwavev4.databinding.ItemCustomPresetStepBinding
 
@@ -17,10 +18,12 @@ class CustomPresetStepAdapter(
     private val onFrequencyFieldClicked: (Int) -> Unit,
     private val onIntensityFieldClicked: (Int) -> Unit,
     private val onDurationFieldClicked: (Int) -> Unit,
-    private val onItemMoved: (from: Int, to: Int) -> Unit
+    private val onItemMoved: (from: Int, to: Int) -> Unit,
+    private val onFieldSelected: (Int, FieldType) -> Unit
 ) : RecyclerView.Adapter<CustomPresetStepAdapter.StepViewHolder>() {
 
     private val items: MutableList<CustomPresetStep> = mutableListOf()
+    private var selectedField: SelectedField? = null
 
     fun submitList(newItems: List<CustomPresetStep>) {
         items.clear()
@@ -55,6 +58,16 @@ class CustomPresetStepAdapter(
             notifyDataSetChanged()
         }
 
+    fun setSelectedField(selected: SelectedField?) {
+        val previous = selectedField
+        selectedField = selected
+        // Refresh only affected rows to avoid forcing a second tap.
+        previous?.stepIndex?.takeIf { it in items.indices }?.let { notifyItemChanged(it) }
+        selected?.stepIndex?.takeIf { it in items.indices }?.let {
+            if (it != previous?.stepIndex) notifyItemChanged(it)
+        }
+    }
+
     inner class StepViewHolder(
         private val binding: ItemCustomPresetStepBinding
     ) : RecyclerView.ViewHolder(binding.root) {
@@ -88,15 +101,34 @@ class CustomPresetStepAdapter(
             binding.etIntensity.isFocusableInTouchMode = false
             binding.etDuration.isFocusable = false
             binding.etDuration.isFocusableInTouchMode = false
+            binding.etFrequency.isClickable = true
+            binding.etIntensity.isClickable = true
+            binding.etDuration.isClickable = true
             binding.etFrequency.isLongClickable = false
             binding.etIntensity.isLongClickable = false
             binding.etDuration.isLongClickable = false
             binding.etFrequency.setTextIsSelectable(false)
             binding.etIntensity.setTextIsSelectable(false)
             binding.etDuration.setTextIsSelectable(false)
-            binding.etFrequency.setOnClickListener { onFrequencyFieldClicked(bindingAdapterPosition) }
-            binding.etIntensity.setOnClickListener { onIntensityFieldClicked(bindingAdapterPosition) }
-            binding.etDuration.setOnClickListener { onDurationFieldClicked(bindingAdapterPosition) }
+            binding.etFrequency.setOnClickListener {
+                onFieldSelected(bindingAdapterPosition, FieldType.FREQUENCY)
+                onFrequencyFieldClicked(bindingAdapterPosition)
+            }
+            binding.etIntensity.setOnClickListener {
+                onFieldSelected(bindingAdapterPosition, FieldType.INTENSITY)
+                onIntensityFieldClicked(bindingAdapterPosition)
+            }
+            binding.etDuration.setOnClickListener {
+                onFieldSelected(bindingAdapterPosition, FieldType.DURATION)
+                onDurationFieldClicked(bindingAdapterPosition)
+            }
+
+            val isFreqSelected = selectedField?.stepIndex == bindingAdapterPosition && selectedField?.fieldType == FieldType.FREQUENCY
+            val isIntSelected = selectedField?.stepIndex == bindingAdapterPosition && selectedField?.fieldType == FieldType.INTENSITY
+            val isDurSelected = selectedField?.stepIndex == bindingAdapterPosition && selectedField?.fieldType == FieldType.DURATION
+            binding.etFrequency.setBackgroundResource(if (isFreqSelected) R.drawable.rounded_display_highlight else R.drawable.rounded_display)
+            binding.etIntensity.setBackgroundResource(if (isIntSelected) R.drawable.rounded_display_highlight else R.drawable.rounded_display)
+            binding.etDuration.setBackgroundResource(if (isDurSelected) R.drawable.rounded_display_highlight else R.drawable.rounded_display)
 
             binding.btnFrequencyPlus.setOnClickListener {
                 val updated = step.copy(frequencyHz = step.frequencyHz + 1)
@@ -119,7 +151,7 @@ class CustomPresetStepAdapter(
                 onStepChanged(bindingAdapterPosition, updated)
             }
             binding.btnDurationMinus.setOnClickListener {
-                val updated = step.copy(durationSec = (step.durationSec - 1).coerceAtLeast(1))
+                val updated = step.copy(durationSec = (step.durationSec - 1).coerceAtLeast(0))
                 onStepChanged(bindingAdapterPosition, updated)
             }
 

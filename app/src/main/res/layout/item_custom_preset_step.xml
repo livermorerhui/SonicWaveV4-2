@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="790dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="820dp"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="10dp"
@@ -25,7 +26,7 @@
 
         <LinearLayout
             android:id="@+id/layout_frequency"
-            android:layout_width="150dp"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:gravity="center_vertical"
@@ -38,34 +39,40 @@
 
             <ImageButton
                 android:id="@+id/btn_frequency_minus"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_marginStart="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/bg_login_secondary_button"
                 android:contentDescription="频率减"
-                android:src="@drawable/ic_param_minus" />
+                android:padding="8dp"
+                android:src="@drawable/ic_param_minus"
+                app:tint="@android:color/white" />
 
-            <EditText
-                android:id="@+id/et_frequency"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:inputType="number"
-                android:paddingHorizontal="8dp" />
+        <EditText
+            android:id="@+id/et_frequency"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:inputType="number"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:background="@drawable/rounded_display" />
 
             <ImageButton
                 android:id="@+id/btn_frequency_plus"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/bg_login_secondary_button"
                 android:contentDescription="频率加"
-                android:src="@drawable/ic_param_plus" />
+                android:padding="8dp"
+                android:src="@drawable/ic_param_plus"
+                app:tint="@android:color/white" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layout_intensity"
-            android:layout_width="150dp"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:gravity="center_vertical"
@@ -78,34 +85,40 @@
 
             <ImageButton
                 android:id="@+id/btn_intensity_minus"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_marginStart="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/bg_login_secondary_button"
                 android:contentDescription="强度减"
-                android:src="@drawable/ic_param_minus" />
+                android:padding="8dp"
+                android:src="@drawable/ic_param_minus"
+                app:tint="@android:color/white" />
 
-            <EditText
-                android:id="@+id/et_intensity"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:inputType="number"
-                android:paddingHorizontal="8dp" />
+        <EditText
+            android:id="@+id/et_intensity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:inputType="number"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:background="@drawable/rounded_display" />
 
             <ImageButton
                 android:id="@+id/btn_intensity_plus"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/bg_login_secondary_button"
                 android:contentDescription="强度加"
-                android:src="@drawable/ic_param_plus" />
+                android:padding="8dp"
+                android:src="@drawable/ic_param_plus"
+                app:tint="@android:color/white" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layout_duration"
-            android:layout_width="150dp"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:gravity="center_vertical"
@@ -118,29 +131,35 @@
 
             <ImageButton
                 android:id="@+id/btn_duration_minus"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_marginStart="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/bg_login_secondary_button"
                 android:contentDescription="时长减"
-                android:src="@drawable/ic_param_minus" />
+                android:padding="8dp"
+                android:src="@drawable/ic_param_minus"
+                app:tint="@android:color/white" />
 
-            <EditText
-                android:id="@+id/et_duration"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:inputType="number"
-                android:paddingHorizontal="8dp" />
+        <EditText
+            android:id="@+id/et_duration"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:inputType="number"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:background="@drawable/rounded_display" />
 
             <ImageButton
                 android:id="@+id/btn_duration_plus"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/bg_login_secondary_button"
                 android:contentDescription="时长加"
-                android:src="@drawable/ic_param_plus" />
+                android:padding="8dp"
+                android:src="@drawable/ic_param_plus"
+                app:tint="@android:color/white" />
         </LinearLayout>
 
         <ImageButton

@@ -14,29 +14,55 @@ class NumericKeypadView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    data class Config(
+        val labelText: String,
+        val initialValue: Int,
+        val minValue: Int = 0,
+        val maxValue: Int = Int.MAX_VALUE,
+        val replaceOnFirstKey: Boolean = true
+    )
+
     var onValueConfirmed: ((Int) -> Unit)? = null
     var onCancel: (() -> Unit)? = null
 
     private var minValue: Int = 0
     private var maxValue: Int = Int.MAX_VALUE
     private var currentValue: Int = 0
+    private var replaceOnFirstKey: Boolean = true
+    private var firstKeyPending: Boolean = true
 
     private val display: TextView
     private val label: TextView
 
     init {
+        isFocusable = true
+        isFocusableInTouchMode = true
         inflate(context, R.layout.view_numeric_keypad, this)
         display = findViewById(R.id.tv_display)
         label = findViewById(R.id.tv_label)
         setupButtons()
     }
 
-    fun bindConfig(labelText: String, initialValue: Int, minValue: Int, maxValue: Int) {
-        this.label.text = labelText
-        this.minValue = minValue
-        this.maxValue = maxValue
-        currentValue = initialValue.coerceIn(minValue, maxValue)
+    fun bindConfig(config: Config) {
+        label.text = config.labelText
+        minValue = config.minValue
+        maxValue = config.maxValue
+        replaceOnFirstKey = config.replaceOnFirstKey
+        currentValue = config.initialValue.coerceIn(minValue, maxValue)
         display.text = currentValue.toString()
+        firstKeyPending = replaceOnFirstKey
+        requestFocus()
+        requestFocusFromTouch()
+    }
+
+    /**
+     * Prepare for immediate editing after a field is selected.
+     * 保持显示当前值，但首击可覆盖。
+     */
+    fun focusForEditing() {
+        firstKeyPending = replaceOnFirstKey
+        requestFocus()
+        requestFocusFromTouch()
     }
 
     private fun setupButtons() {
@@ -60,15 +86,18 @@ class NumericKeypadView @JvmOverloads constructor(
     }
 
     private fun appendDigit(digit: String) {
-        val newValue = (display.text.toString() + digit).toIntOrNull() ?: return
+        val baseText = if (replaceOnFirstKey && firstKeyPending) "" else display.text.toString()
+        val newValue = (baseText + digit).toIntOrNull() ?: return
         currentValue = newValue.coerceIn(minValue, maxValue)
         display.text = currentValue.toString()
+        firstKeyPending = false
     }
 
     private fun clearLastDigit() {
         val currentText = display.text.toString()
-        val newText = if (currentText.length > 1) currentText.dropLast(1) else "0"
+        val newText = if (currentText.length > 1) currentText.dropLast(1) else minValue.toString()
         currentValue = newText.toIntOrNull()?.coerceIn(minValue, maxValue) ?: minValue
         display.text = currentValue.toString()
+        // 清除后，再次输入仍按首击覆盖/追加规则
     }
 }
