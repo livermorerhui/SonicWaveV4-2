@@ -12,7 +12,7 @@ object CustomPresetConstraints {
     const val MIN_INTENSITY_01V = 0
     const val MAX_INTENSITY_01V = 255         // TODO: 根据硬件实际强度上限调整
 
-    const val MIN_DURATION_SEC = 1
+    const val MIN_DURATION_SEC = 0
     const val MAX_DURATION_SEC = 0            // TODO: 向硬件确认允许的最长单步时长
 
     const val FREQUENCY_UNIT = "Hz"

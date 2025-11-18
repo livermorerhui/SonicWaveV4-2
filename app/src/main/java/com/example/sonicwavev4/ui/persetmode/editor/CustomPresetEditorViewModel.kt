@@ -8,6 +8,7 @@ import com.example.sonicwavev4.data.custompreset.model.CreateCustomPresetRequest
 import com.example.sonicwavev4.data.custompreset.model.CustomPresetStep
 import com.example.sonicwavev4.data.custompreset.model.UpdateCustomPresetRequest
 import com.example.sonicwavev4.data.home.HomeHardwareRepository
+import com.example.sonicwavev4.utils.TestToneSettings
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,8 +66,16 @@ class CustomPresetEditorViewModel(
     private val _events = MutableSharedFlow<EditorEvent>(extraBufferCapacity = 8)
     val events: SharedFlow<EditorEvent> = _events.asSharedFlow()
 
-    private val previewPlayer = StepPreviewPlayer()
     private var previewUsingHardware = false
+    private var playToneEnabled = false
+
+    init {
+        viewModelScope.launch {
+            TestToneSettings.sineToneEnabled.collect { desired ->
+                playToneEnabled = desired
+            }
+        }
+    }
 
     fun startNewPreset() {
         _uiState.value = EditorUiState(originalName = "", originalSteps = emptyList())
@@ -149,17 +158,17 @@ class CustomPresetEditorViewModel(
         _uiState.update { it.copy(steps = updated.normalizeOrder()).recomputeCanSave() }
         val playingIdx = _uiState.value.playingStepIndex
         if (playingIdx == index) {
-            previewPlayer.updateFrequency(updated[index].frequencyHz)
-            previewPlayer.updateIntensity(updated[index].intensity01V)
             viewModelScope.launch {
                 if (previewUsingHardware) {
                     hardwareRepository.applyFrequency(updated[index].frequencyHz)
                     hardwareRepository.applyIntensity(updated[index].intensity01V)
                 } else {
-                    hardwareRepository.playStandaloneTone(
-                        updated[index].frequencyHz,
-                        updated[index].intensity01V
-                    )
+                    if (playToneEnabled) {
+                        hardwareRepository.playStandaloneTone(
+                            updated[index].frequencyHz,
+                            updated[index].intensity01V
+                        )
+                    }
                 }
             }
         }
@@ -199,6 +208,7 @@ class CustomPresetEditorViewModel(
         }
         if (index !in state.steps.indices) return
         val step = state.steps[index]
+        playToneEnabled = TestToneSettings.sineToneEnabled.value
         startPlaybackInternal(step)
         _uiState.update { it.copy(playingStepIndex = index) }
     }
@@ -212,23 +222,23 @@ class CustomPresetEditorViewModel(
     }
 
     private fun startPlaybackInternal(step: CustomPresetStep) {
-        previewPlayer.start(step)
         viewModelScope.launch {
             hardwareRepository.start()
             val success = hardwareRepository.startOutput(
                 targetFrequency = step.frequencyHz,
                 targetIntensity = step.intensity01V,
-                playTone = true
+                playTone = playToneEnabled
             )
             previewUsingHardware = success
             if (!success) {
-                hardwareRepository.playStandaloneTone(step.frequencyHz, step.intensity01V)
+                if (playToneEnabled) {
+                    hardwareRepository.playStandaloneTone(step.frequencyHz, step.intensity01V)
+                }
             }
         }
     }
 
     private fun stopPlaybackInternal() {
-        previewPlayer.stop()
         viewModelScope.launch {
             if (previewUsingHardware) {
                 hardwareRepository.stopOutput()

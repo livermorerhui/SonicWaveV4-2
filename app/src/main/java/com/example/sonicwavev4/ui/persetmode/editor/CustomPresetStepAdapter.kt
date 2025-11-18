@@ -82,6 +82,18 @@ class CustomPresetStepAdapter(
             binding.etFrequency.showSoftInputOnFocus = false
             binding.etIntensity.showSoftInputOnFocus = false
             binding.etDuration.showSoftInputOnFocus = false
+            binding.etFrequency.isFocusable = false
+            binding.etFrequency.isFocusableInTouchMode = false
+            binding.etIntensity.isFocusable = false
+            binding.etIntensity.isFocusableInTouchMode = false
+            binding.etDuration.isFocusable = false
+            binding.etDuration.isFocusableInTouchMode = false
+            binding.etFrequency.isLongClickable = false
+            binding.etIntensity.isLongClickable = false
+            binding.etDuration.isLongClickable = false
+            binding.etFrequency.setTextIsSelectable(false)
+            binding.etIntensity.setTextIsSelectable(false)
+            binding.etDuration.setTextIsSelectable(false)
             binding.etFrequency.setOnClickListener { onFrequencyFieldClicked(bindingAdapterPosition) }
             binding.etIntensity.setOnClickListener { onIntensityFieldClicked(bindingAdapterPosition) }
             binding.etDuration.setOnClickListener { onDurationFieldClicked(bindingAdapterPosition) }
