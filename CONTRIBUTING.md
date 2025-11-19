@@ -3,8 +3,8 @@
 本文档说明 SonicWave 各端的技术栈、架构规则和协作流程，适用于：
 
 - 安卓 APP（用户端）
-- 后台服务器：SonicWaveV5-backend
-- 后台管理 Web：sw-backend-admin（管理员端）
+- 后台服务器：apps/backend-api
+- 后台管理 Web：apps/admin-web（管理员端）
 
 > 如果你在使用 ChatGPT/Codex 等 AI 辅助开发，建议同时查看仓库中的 `AI_DEV_PROMPT.md`，并在对话中贴给 AI。
 
@@ -45,7 +45,7 @@
 
 ---
 
-## 3. 后台服务器：SonicWaveV5-backend
+## 3. 后台服务器：apps/backend-api
 
 ### 3.1 语言与模块系统
 
@@ -92,7 +92,7 @@
 
 ---
 
-## 4. 后台管理 Web：sw-backend-admin
+## 4. 后台管理 Web：apps/admin-web
 
 ### 4.1 语言与工具链
 

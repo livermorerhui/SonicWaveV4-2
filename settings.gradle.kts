@@ -31,3 +31,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "SonicWave-D"
 include(":app")
+project(":app").projectDir = file("apps/android")

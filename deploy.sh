@@ -5,8 +5,8 @@ set -e
 # --- 在这里配置您的服务器信息 ---
 REMOTE_USER="root"
 REMOTE_HOST="8.148.182.90"
-REMOTE_PROJECT_PATH="/root/SonicWaveV5-backend"
-LOCAL_PROJECT_PATH="./SonicWaveV5-backend"
+REMOTE_PROJECT_PATH="/root/apps/backend-api"
+LOCAL_PROJECT_PATH="./apps/backend-api"
 # ---------------------------------
 
 echo "✅ 步骤 1/5: 停止服务器上旧的服务..."
