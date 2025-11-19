@@ -12,6 +12,7 @@
 
 ## 1. 技术栈总览
 
+- 当前主流的最佳实践，使用MVVM的结构
 - **安卓 APP**：Kotlin + MVVM
 - **后台服务器**：Node.js + JavaScript（CommonJS）+ Knex + MySQL
 - **后台管理 Web**：TypeScript + React 18 + React Router + Vite + Vitest
