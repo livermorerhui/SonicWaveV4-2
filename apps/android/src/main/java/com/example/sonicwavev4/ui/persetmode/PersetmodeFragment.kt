@@ -22,7 +22,8 @@ import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.common.UiEvent
 import com.example.sonicwavev4.ui.custompreset.CustomPresetEditorFragment
 import com.example.sonicwavev4.ui.persetmode.PresetCategory.BUILT_IN
-import com.example.sonicwavev4.ui.user.UserViewModel
+import com.example.sonicwavev4.ui.customer.CustomerViewModel
+import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collect
@@ -33,7 +34,8 @@ class PersetmodeFragment : Fragment() {
     private var _binding: FragmentPersetmodeBinding? = null
     private val binding get() = _binding!!
 
-    private val userViewModel: UserViewModel by activityViewModels()
+    private val authViewModel: LoginViewModel by activityViewModels()
+    private val customerViewModel: CustomerViewModel by activityViewModels()
 
     private val viewModel: PersetmodeViewModel by activityViewModels {
         val application = requireActivity().application
@@ -130,14 +132,10 @@ class PersetmodeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 launch {
-                    userViewModel.accountType.collect { type ->
-                        val isTest = type?.equals("test", ignoreCase = true) == true
+                    authViewModel.uiState.collect { state ->
+                        val isTest = state.accountType?.equals("test", ignoreCase = true) == true
                         viewModel.updateAccountAccess(isTest)
-                    }
-                }
-                launch {
-                    userViewModel.isLoggedIn.collect { loggedIn ->
-                        viewModel.setSessionActive(loggedIn)
+                        viewModel.setSessionActive(state.isLoggedIn)
                     }
                 }
             }
@@ -147,7 +145,7 @@ class PersetmodeFragment : Fragment() {
     private fun observeSelectedCustomerContext() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
-                userViewModel.selectedCustomer.collect { viewModel.setActiveCustomer(it) }
+                customerViewModel.selectedCustomer.collect { viewModel.setActiveCustomer(it) }
             }
         }
     }

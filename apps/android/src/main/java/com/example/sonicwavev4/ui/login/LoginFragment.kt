@@ -9,24 +9,22 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.sonicwavev4.R
+import com.example.sonicwavev4.core.account.AuthEvent
+import com.example.sonicwavev4.core.account.AuthIntent
 import com.example.sonicwavev4.databinding.FragmentLoginBinding
 import com.example.sonicwavev4.ui.register.RegisterFragment
 import com.example.sonicwavev4.ui.user.UserFragment
-import com.example.sonicwavev4.ui.user.UserViewModel
-import com.example.sonicwavev4.utils.OfflineCapabilityManager
 import com.example.sonicwavev4.utils.OfflineModeRemoteSync
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
-    private val loginViewModel: LoginViewModel by viewModels()
-    private val userViewModel: UserViewModel by activityViewModels()
+    private val loginViewModel: LoginViewModel by activityViewModels()
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
 
@@ -41,8 +39,8 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupClickListeners()
-        observeViewModel()
-        observeOfflineCapability()
+        collectUiState()
+        collectEvents()
     }
 
     override fun onResume() {
@@ -54,14 +52,9 @@ class LoginFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.loginButton.setOnClickListener {
-            val email = binding.usernameEditText.text.toString().trim()
-            val password = binding.passwordEditText.text.toString().trim()
-            if (email.isNotEmpty() && password.isNotEmpty()) {
-                binding.loginButton.isEnabled = false
-                loginViewModel.login(email, password)
-            } else {
-                Toast.makeText(requireContext(), "请输入邮箱和密码", Toast.LENGTH_SHORT).show()
-            }
+            val email = binding.usernameEditText.text.toString()
+            val password = binding.passwordEditText.text.toString()
+            loginViewModel.handleIntent(AuthIntent.Login(email, password))
         }
         binding.registerTextView.setOnClickListener {
             parentFragmentManager.beginTransaction()
@@ -69,54 +62,47 @@ class LoginFragment : Fragment() {
                 .commit()
         }
         binding.offlineModeButton.setOnClickListener {
-            binding.offlineModeButton.isEnabled = false
-            loginViewModel.enterOfflineMode()
+            loginViewModel.handleIntent(AuthIntent.EnterOfflineMode)
         }
     }
 
-    private fun observeViewModel() {
-        loginViewModel.loginResult.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { result ->
-                result.onSuccess { loginResponse ->
-                    userViewModel.onLoginSuccess(loginResponse.accountType)
-                    // Login success is handled by the navigation event
-                    Log.d("LoginFragment", "Login API call successful.")
-                }.onFailure { error ->
-                    handleLoginFailure(error)
+    private fun collectUiState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                loginViewModel.uiState.collectLatest { state ->
+                    binding.loginButton.isEnabled = !state.isLoading
+                    binding.offlineModeButton.isVisible = state.offlineModeAllowed
+                    binding.offlineModeButton.isEnabled = state.offlineModeAllowed && !state.isLoading
                 }
             }
         }
-
-        loginViewModel.navigationEvent.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { // No userName needed here anymore
-                navigateToUserFragment()
-            }
-        }
     }
 
-    private fun observeOfflineCapability() {
+    private fun collectEvents() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                OfflineCapabilityManager.isOfflineAllowed.collectLatest { allowed ->
-                    binding.offlineModeButton.isVisible = allowed
-                    binding.offlineModeButton.isEnabled = allowed
+                loginViewModel.events.collectLatest { event ->
+                    when (event) {
+                        is AuthEvent.ShowToast -> Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                        is AuthEvent.ShowError -> handleLoginFailure(event.message)
+                        AuthEvent.NavigateToUser -> navigateToUserFragment()
+                        AuthEvent.NavigateToLogin -> Unit
+                    }
                 }
             }
         }
     }
 
     private fun navigateToUserFragment() {
-        Toast.makeText(requireContext(), "登录成功！", Toast.LENGTH_SHORT).show()
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_right_main, UserFragment())
             .commit()
     }
 
-    private fun handleLoginFailure(error: Throwable) {
-        Log.e("LoginFragment", "登录失败", error)
-        Toast.makeText(requireContext(), error.message ?: "登录失败，请稍后再试", Toast.LENGTH_LONG).show()
-        binding.loginButton.isEnabled = true
-        binding.offlineModeButton.isEnabled = binding.offlineModeButton.isVisible
+    private fun handleLoginFailure(message: String) {
+        Log.e("LoginFragment", "登录失败: $message")
+        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+        loginViewModel.handleIntent(AuthIntent.ClearError)
     }
 
     override fun onDestroyView() {

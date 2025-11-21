@@ -19,7 +19,10 @@ import androidx.lifecycle.lifecycleScope
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.databinding.DialogAddCustomerBinding
 import com.example.sonicwavev4.network.Customer
-import com.example.sonicwavev4.ui.user.UserViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.sonicwavev4.core.account.CustomerEvent
+import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -29,7 +32,7 @@ class AddCustomerDialogFragment : DialogFragment() {
     private var _binding: DialogAddCustomerBinding? = null
     private val binding get() = _binding!!
 
-    private val userViewModel: UserViewModel by activityViewModels()
+    private val customerViewModel: CustomerViewModel by activityViewModels()
 
     private var customerToEdit: Customer? = null
 
@@ -93,7 +96,7 @@ class AddCustomerDialogFragment : DialogFragment() {
         }
 
         setupClickListeners()
-        observeViewModel()
+        observeEvents()
     }
 
     private fun setupClickListeners() {
@@ -182,9 +185,9 @@ class AddCustomerDialogFragment : DialogFragment() {
             )
 
             if (customerToEdit != null && customerToEdit?.id != null) {
-                userViewModel.updateCustomer(customerToEdit!!.id!!, customer)
+                customerViewModel.updateCustomer(customerToEdit!!.id!!, customer)
             } else {
-                userViewModel.addCustomer(customer)
+                customerViewModel.addCustomer(customer)
             }
         }
     }
@@ -248,31 +251,19 @@ class AddCustomerDialogFragment : DialogFragment() {
 
 
 
-    private fun observeViewModel() {
+    private fun observeEvents() {
         viewLifecycleOwner.lifecycleScope.launch {
-            userViewModel.addCustomerResult.collectLatest { result ->
-                result?.let {
-                    if (it.isSuccess) {
-                        Toast.makeText(requireContext(), "客户添加成功", Toast.LENGTH_SHORT).show()
-                        dismiss()
-                    } else {
-                        Toast.makeText(requireContext(), "添加失败: ${it.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                customerViewModel.events.collectLatest { event ->
+                    when (event) {
+                        is CustomerEvent.CustomerSaved -> {
+                            Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                            dismiss()
+                        }
+                        is CustomerEvent.Error -> {
+                            Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
+                        }
                     }
-                    userViewModel.resetAddCustomerResult() // Reset the state
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            userViewModel.updateCustomerResult.collectLatest { result ->
-                result?.let {
-                    if (it.isSuccess) {
-                        Toast.makeText(requireContext(), "客户更新成功", Toast.LENGTH_SHORT).show()
-                        dismiss()
-                    } else {
-                        Toast.makeText(requireContext(), "更新失败: ${it.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
-                    }
-                    userViewModel.resetUpdateCustomerResult() // Reset the state
                 }
             }
         }

@@ -27,7 +27,7 @@ import com.example.sonicwavev4.ui.persetmode.editor.FieldType
 import com.example.sonicwavev4.ui.persetmode.editor.EditorEvent
 import com.example.sonicwavev4.ui.persetmode.editor.SelectedField
 import com.example.sonicwavev4.ui.persetmode.editor.hasUnsavedChanges
-import com.example.sonicwavev4.ui.user.UserViewModel
+import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
@@ -36,12 +36,12 @@ class CustomPresetEditorFragment : DialogFragment() {
     private var _binding: FragmentCustomPresetEditorBinding? = null
     private val binding get() = _binding!!
 
-    private val userViewModel: UserViewModel by activityViewModels()
+    private val customerViewModel: CustomerViewModel by activityViewModels()
 
     private val editorViewModel: CustomPresetEditorViewModel by viewModels {
         val application = requireActivity().application
         val repository = CustomPresetRepositoryImpl.getInstance(application)
-        val customerId = userViewModel.selectedCustomer.value?.id?.toLong()
+        val customerId = customerViewModel.selectedCustomer.value?.id?.toLong()
         val hardwareRepo = HomeHardwareRepository.getInstance(application)
         CustomPresetEditorViewModelFactory(repository, customerId, hardwareRepo)
     }

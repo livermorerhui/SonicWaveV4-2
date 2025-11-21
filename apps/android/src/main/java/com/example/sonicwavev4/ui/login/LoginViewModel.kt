@@ -1,135 +1,153 @@
 package com.example.sonicwavev4.ui.login
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.sonicwavev4.core.account.AuthEvent
+import com.example.sonicwavev4.core.account.AuthGateway
+import com.example.sonicwavev4.core.account.AuthIntent
+import com.example.sonicwavev4.core.account.AuthResult
+import com.example.sonicwavev4.core.account.AuthUiState
 import com.example.sonicwavev4.network.ErrorMessageResolver
-import com.example.sonicwavev4.network.LoginEventRequest
-import com.example.sonicwavev4.network.LoginRequest
-import com.example.sonicwavev4.network.LoginResponse
-import com.example.sonicwavev4.network.RetrofitClient
-import com.example.sonicwavev4.util.Event
-import com.example.sonicwavev4.utils.HeartbeatManager
-import com.example.sonicwavev4.utils.OfflineTestModeManager
-import com.example.sonicwavev4.utils.SessionManager
+import com.example.sonicwavev4.repository.AuthRepository
+import com.example.sonicwavev4.utils.GlobalLogoutManager
+import com.example.sonicwavev4.utils.LogoutReason
+import com.example.sonicwavev4.utils.OfflineCapabilityManager
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
-    companion object {
-        private const val OFFLINE_USERNAME = "test"
-        private const val OFFLINE_PASSWORD = "test123"
-        private const val OFFLINE_USER_ID = "offline-test"
-        private const val OFFLINE_EMAIL = "test@test.local"
-        private const val OFFLINE_USERNAME_DISPLAY = "测试账号"
+    internal var authGateway: AuthGateway = AuthRepository(application)
+
+    private val _uiState = MutableStateFlow(AuthUiState())
+    val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
+    private val _events = MutableSharedFlow<AuthEvent>(extraBufferCapacity = 8)
+    val events: SharedFlow<AuthEvent> = _events.asSharedFlow()
+
+    init {
+        observeOfflineCapability()
+        observeGlobalLogout()
     }
 
-    private val _loginResult = MutableLiveData<Event<Result<LoginResponse>>>()
-    val loginResult: LiveData<Event<Result<LoginResponse>>> = _loginResult
+    fun handleIntent(intent: AuthIntent) {
+        when (intent) {
+            is AuthIntent.Login -> performLogin(intent.email.trim(), intent.password.trim())
+            is AuthIntent.Register -> performRegister(intent)
+            AuthIntent.EnterOfflineMode -> enterOfflineMode()
+            is AuthIntent.Logout -> performLogout(intent.reason)
+            AuthIntent.ClearError -> clearError()
+        }
+    }
 
-    private val _navigationEvent = MutableLiveData<Event<String>>()
-    val navigationEvent: LiveData<Event<String>> = _navigationEvent
-
-    private val sessionManager = SessionManager(application)
-
-    fun login(email: String, password: String) {
-        if (isOfflineTestCredential(email, password)) {
-            viewModelScope.launch { handleOfflineLogin() }
+    private fun performLogin(email: String, password: String) {
+        if (email.isBlank() || password.isBlank()) {
+            emitToast("请输入邮箱和密码")
+            return
+        }
+        if (AuthRepository.isOfflineTestCredential(email, password)) {
+            enterOfflineMode()
             return
         }
         viewModelScope.launch {
-            try {
-                // Step 1: Login with credentials
-                val loginApiResponse = RetrofitClient.api.login(LoginRequest(email, password))
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            val result = authGateway.login(email, password)
+            handleAuthResult(result, successMessage = "登录成功！")
+        }
+    }
 
-                if (loginApiResponse.isSuccessful && loginApiResponse.body() != null) {
-                    val loginResponse = loginApiResponse.body()!!
+    private fun performRegister(intent: AuthIntent.Register) {
+        if (intent.username.isBlank() || intent.email.isBlank() || intent.password.isBlank()) {
+            emitToast("请填写完整的注册信息")
+            return
+        }
+        if (intent.password != intent.confirmPassword) {
+            emitToast("两次输入的密码不一致")
+            return
+        }
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            emitToast("注册成功，正在登录...")
+            val result = authGateway.registerAndLogin(intent.username, intent.email, intent.password)
+            handleAuthResult(result, successMessage = "登录成功！")
+        }
+    }
 
-                    // Step 2: Save Access and Refresh tokens immediately
-                    sessionManager.saveTokens(loginResponse.accessToken, loginResponse.refreshToken)
-                    // Save user details (userId, username, email) to SessionManager
-                    sessionManager.saveUserSession(
-                        loginResponse.userId.toString(),
-                        loginResponse.username,
-                        email
-                    ) // Assuming email is the login email
-                    sessionManager.setOfflineTestMode(false)
-                    OfflineTestModeManager.setOfflineTestMode(false)
-                    RetrofitClient.updateToken(loginResponse.accessToken)
-                    Log.d("DEBUG_FLOW", "LoginViewModel: Tokens and user details saved.")
+    private fun enterOfflineMode() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            val result = authGateway.enterOfflineMode()
+            handleAuthResult(result, successMessage = "登录成功！")
+        }
+    }
 
-                    // Step 3: Record the login event to get a session ID
-                    Log.d("DEBUG_FLOW", "LoginViewModel: Recording login event to get session ID...")
-                    val loginEventResponse = RetrofitClient.api.recordLoginEvent(LoginEventRequest())
+    private fun performLogout(reason: LogoutReason) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            authGateway.logout(reason)
+            _uiState.value = AuthUiState(offlineModeAllowed = _uiState.value.offlineModeAllowed)
+            _events.emit(AuthEvent.NavigateToLogin)
+        }
+    }
 
-                    if (loginEventResponse.isSuccessful && loginEventResponse.body() != null) {
-                        val sessionId = loginEventResponse.body()!!.sessionId
-                        sessionManager.saveSessionId(sessionId)
-                        Log.d("DEBUG_FLOW", "LoginViewModel: Session ID ($sessionId) saved.")
+    private suspend fun handleAuthResult(result: Result<AuthResult>, successMessage: String) {
+        result.onSuccess { authResult ->
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    isLoggedIn = true,
+                    isOfflineMode = authResult.isOfflineMode,
+                    accountType = authResult.accountType,
+                    username = authResult.username,
+                    errorMessage = null
+                )
+            }
+            emitToast(successMessage)
+            _events.emit(AuthEvent.NavigateToUser)
+        }.onFailure { throwable ->
+            val message = resolveErrorMessage(throwable)
+            _uiState.update { it.copy(isLoading = false, errorMessage = message) }
+            _events.emit(AuthEvent.ShowError(message))
+        }
+    }
 
-                        // Step 4: Start background services
-                        HeartbeatManager.start(getApplication())
-                        Log.d("DEBUG_FLOW", "LoginViewModel: HeartbeatManager started.")
+    private fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
 
-                        // Step 5: Notify UI that all background tasks are done and it can navigate
-                        _loginResult.postValue(Event(Result.success(loginResponse)))
-                        _navigationEvent.postValue(Event(loginResponse.username))
-                        Log.d("DEBUG_FLOW", "LoginViewModel: Navigation event posted.")
+    private fun emitToast(message: String) {
+        viewModelScope.launch { _events.emit(AuthEvent.ShowToast(message)) }
+    }
 
-                    } else {
-                        throw Exception("Failed to record login event after a successful login. Code: ${loginEventResponse.code()}")
-                    }
-                } else {
-                    val message = ErrorMessageResolver.fromResponse(loginApiResponse.errorBody(), loginApiResponse.code())
-                    throw Exception(message)
-                }
-            } catch (e: Exception) {
-                Log.e("DEBUG_FLOW", "Exception in login flow", e)
-                val message = if (e is java.io.IOException) {
-                    ErrorMessageResolver.networkFailure(e)
-                } else {
-                    ErrorMessageResolver.unexpectedFailure(e)
-                }
-                _loginResult.postValue(Event(Result.failure(Exception(message))))
+    private fun observeOfflineCapability() {
+        viewModelScope.launch {
+            OfflineCapabilityManager.isOfflineAllowed.collect { allowed ->
+                _uiState.update { it.copy(offlineModeAllowed = allowed) }
             }
         }
     }
 
-    private fun isOfflineTestCredential(email: String, password: String): Boolean {
-        return email.equals(OFFLINE_USERNAME, ignoreCase = true) && password == OFFLINE_PASSWORD
-    }
-
-    fun enterOfflineMode() {
+    private fun observeGlobalLogout() {
         viewModelScope.launch {
-            handleOfflineLogin()
+            GlobalLogoutManager.logoutEvent.collect {
+                _uiState.value = AuthUiState(offlineModeAllowed = _uiState.value.offlineModeAllowed)
+                _events.emit(AuthEvent.NavigateToLogin)
+            }
         }
     }
 
-    private suspend fun handleOfflineLogin() {
-        sessionManager.setOfflineTestMode(true)
-        OfflineTestModeManager.setOfflineTestMode(true)
-        sessionManager.saveUserSession(
-            userId = OFFLINE_USER_ID,
-            userName = OFFLINE_USERNAME_DISPLAY,
-            email = OFFLINE_EMAIL
-        )
-        sessionManager.saveSessionId(-1L)
-        RetrofitClient.updateToken(null)
-        HeartbeatManager.stop()
-
-        val offlineResponse = LoginResponse(
-            message = "Offline login success",
-            accessToken = "",
-            refreshToken = "",
-            username = OFFLINE_USERNAME_DISPLAY,
-            userId = -1,
-            accountType = "test"
-        )
-
-        _loginResult.postValue(Event(Result.success(offlineResponse)))
-        _navigationEvent.postValue(Event(offlineResponse.username))
+    private fun resolveErrorMessage(throwable: Throwable): String {
+        return if (throwable is java.io.IOException) {
+            ErrorMessageResolver.networkFailure(throwable)
+        } else {
+            throwable.message ?: "登录失败，请稍后再试"
+        }
     }
 }
