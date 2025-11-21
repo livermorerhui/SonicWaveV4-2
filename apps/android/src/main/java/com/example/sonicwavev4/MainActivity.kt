@@ -55,7 +55,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.sonicwavev4.databinding.ActivityMainBinding
 import com.example.sonicwavev4.network.AppUsageRequest
 import com.example.sonicwavev4.network.RetrofitClient
-import com.example.sonicwavev4.ui.user.UserViewModel
+import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
 import com.example.sonicwavev4.utils.DeviceIdentityProvider
 import com.example.sonicwavev4.utils.GlobalLogoutManager
@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    private val userViewModel: UserViewModel by viewModels()
+    private val customerViewModel: CustomerViewModel by viewModels()
 
     private lateinit var sessionManager: SessionManager
     private var musicAreaLayout: ConstraintLayout? = null
@@ -578,7 +578,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             }
         }
         updateNavRailSelection(currentNavItemId)
-        applyCustomPresetVisibility(userViewModel.selectedCustomer.value)
+        applyCustomPresetVisibility(customerViewModel.selectedCustomer.value)
     }
 
     private fun createNavRailButton(item: MenuItem, parent: ViewGroup): View? {
@@ -644,7 +644,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private fun observeSelectedCustomerContext() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                userViewModel.selectedCustomer.collect { customer ->
+                customerViewModel.selectedCustomer.collect { customer ->
                     applyCustomPresetVisibility(customer)
                     val currentDest = navController.currentDestination?.id
                     if (customer == null && currentDest == R.id.navigation_custom_preset) {

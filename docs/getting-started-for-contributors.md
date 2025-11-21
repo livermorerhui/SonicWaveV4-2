@@ -15,3 +15,14 @@
 - **原则**：UI 只负责展示与收集输入，不直接调用硬件或网络；业务状态、参数转换、Start/Stop 流程统一在 ViewModel 或 UseCase 层完成。
 
 后续 Phase 会逐步将预设模式、自设模式、专家模式等其他振动入口迁移到同一模板，保持行为稳定的同时降低 UI 逻辑重复。
+
+## Android 客户与账户域（Phase 3 收敛）
+- **核心入口**：`apps/android/src/main/java/com/example/sonicwavev4/ui/login/`（登录/注册）、`ui/customer/`（客户列表、详情与新增弹窗）、`ui/user/UserFragment`（账户主页与登出）。
+- **MVVM 结构**：
+  - `LoginViewModel` 暴露 `AuthUiState` / `AuthEvent`，处理登录、注册、离线登录、登出，依赖 `AuthRepository` 统一管理 Token、Session 与心跳。
+  - `CustomerViewModel` 暴露 `CustomerListUiState` / `CustomerEvent`，统一客户列表加载、搜索、选中、在线新增/更新与离线新增，桥接 `CustomerRepository` 与 `OfflineCustomerRepository`。
+  - UI Fragment/Dialog 只负责采集输入并订阅状态/事件，导航逻辑与提示保持原有行为。
+- **阅读顺序建议**：
+  1. 阅读 `docs/architecture/domain-overview.md`、`docs/architecture/domain-usecases.md` 了解用例 2-1/2-2/2-3。 
+  2. 参考 `docs/architecture/phase2-android-vibration-mvvm.md` 与 `docs/architecture/phase3-android-account-customer-mvvm.md` 了解跨域的 UiState/Intent 模板。 
+  3. 进入 `LoginViewModel`、`CustomerViewModel` 对照 UI 文件查看状态渲染与事件分发路径，再根据需要下钻到对应仓库/数据源。

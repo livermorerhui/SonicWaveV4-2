@@ -21,7 +21,8 @@ import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentHomeBinding
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.common.UiEvent
-import com.example.sonicwavev4.ui.user.UserViewModel
+import com.example.sonicwavev4.ui.customer.CustomerViewModel
+import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -33,7 +34,8 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val userViewModel: UserViewModel by activityViewModels()
+    private val authViewModel: LoginViewModel by activityViewModels()
+    private val customerViewModel: CustomerViewModel by activityViewModels()
 
     private val viewModel: HomeViewModel by viewModels {
         val application = requireActivity().application
@@ -110,14 +112,10 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 launch {
-                    userViewModel.accountType.collect { accountType ->
-                        val isTestAccount = accountType.equals("test", ignoreCase = true)
+                    authViewModel.uiState.collect { state ->
+                        val isTestAccount = state.accountType?.equals("test", ignoreCase = true) == true
                         viewModel.updateAccountAccess(isTestAccount)
-                    }
-                }
-                launch {
-                    userViewModel.isLoggedIn.collect { loggedIn ->
-                        viewModel.setSessionActive(loggedIn)
+                        viewModel.setSessionActive(state.isLoggedIn)
                     }
                 }
             }
@@ -177,7 +175,7 @@ class HomeFragment : Fragment() {
         }
 
         binding.btnStartStop.setOnClickListener {
-            val selectedCustomer = userViewModel.selectedCustomer.value
+            val selectedCustomer = customerViewModel.selectedCustomer.value
             viewModel.handleIntent(VibrationSessionIntent.ToggleStartStop(selectedCustomer))
             viewModel.playTapSound()
         }

@@ -20,12 +20,13 @@ import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentCustomPresetBinding
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.common.UiEvent
+import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.ui.persetmode.CustomPresetUiModel
 import com.example.sonicwavev4.ui.persetmode.PersetmodeViewModel
 import com.example.sonicwavev4.ui.persetmode.PersetmodeViewModelFactory
 import com.example.sonicwavev4.ui.persetmode.PresetCategory
 import com.example.sonicwavev4.ui.persetmode.custom.CustomPresetAdapter
-import com.example.sonicwavev4.ui.user.UserViewModel
+import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.utils.SessionManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.collect
@@ -36,7 +37,8 @@ class CustomPresetFragment : Fragment() {
     private var _binding: FragmentCustomPresetBinding? = null
     private val binding get() = _binding!!
 
-    private val userViewModel: UserViewModel by activityViewModels()
+    private val authViewModel: LoginViewModel by activityViewModels()
+    private val customerViewModel: CustomerViewModel by activityViewModels()
 
     private val presetViewModel: PersetmodeViewModel by activityViewModels {
         val application = requireActivity().application
@@ -79,7 +81,7 @@ class CustomPresetFragment : Fragment() {
             navigateToEditor(null)
         }
         binding.btnStartStop.setOnClickListener {
-            val customer = userViewModel.selectedCustomer.value
+            val customer = customerViewModel.selectedCustomer.value
             presetViewModel.toggleStartStop(customer)
         }
         presetViewModel.enterCustomMode()
@@ -164,14 +166,10 @@ class CustomPresetFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 launch {
-                    userViewModel.accountType.collect { type ->
-                        val isTest = type?.equals("test", ignoreCase = true) == true
+                    authViewModel.uiState.collect { state ->
+                        val isTest = state.accountType?.equals("test", ignoreCase = true) == true
                         presetViewModel.updateAccountAccess(isTest)
-                    }
-                }
-                launch {
-                    userViewModel.isLoggedIn.collect { loggedIn ->
-                        presetViewModel.setSessionActive(loggedIn)
+                        presetViewModel.setSessionActive(state.isLoggedIn)
                     }
                 }
             }
@@ -181,7 +179,7 @@ class CustomPresetFragment : Fragment() {
     private fun observeSelectedCustomer() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
-                userViewModel.selectedCustomer.collect { presetViewModel.setActiveCustomer(it) }
+                customerViewModel.selectedCustomer.collect { presetViewModel.setActiveCustomer(it) }
             }
         }
     }
