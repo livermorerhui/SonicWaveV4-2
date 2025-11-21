@@ -1,27 +1,43 @@
-*.iml
-.gradle
-/local.properties
+# ------------------------
+# IDE & OS artifacts
+# ------------------------
+
+# IntelliJ IDEA / Android Studio
+/.idea/
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+
+# Project files
+*.iml
+*.iws
+*.ipr
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+
+# VS Code
+.vscode/
+
+# ------------------------
+# Gradle & local config
+# ------------------------
+
+# Gradle cache
+.gradle
+.gradle/
+
+# Local machine specific config
 local.properties
+/local.properties
 
-# Node dependencies
-node_modules/
-SonicWaveV5-backend/node_modules/
-SW-backend-admin/node_modules/
-apps/backend-api/node_modules/
-apps/admin-web/node_modules/
+# ------------------------
+# Android / Java build outputs
+# ------------------------
 
-# Android build outputs
+# Android build directories
+/build
 /app/build/
 /app/release/
 /app/**/*.apk
@@ -29,19 +45,76 @@ apps/admin-web/node_modules/
 /apps/android/release/
 /apps/android/**/*.apk
 
+# Generic build / generated directories
+bin/
+gen/
+out/
+captures
+captures/
+externalNativeBuild/
+.externalNativeBuild
+.cxx/
+.cxx
+
+# Built application files
+*.apk
+*.aab
+*.ap_
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated protobuf / binary artifacts
+*.pb
+
 # Kotlin incremental caches
 **/.kotlin/
 
+# ------------------------
+# Node dependencies
+# ------------------------
+
+node_modules/
+SonicWaveV5-backend/node_modules/
+SW-backend-admin/node_modules/
+apps/backend-api/node_modules/
+apps/admin-web/node_modules/
+
+# ------------------------
 # Backend runtime data & logs
+# ------------------------
+
 SonicWaveV5-backend/data/
 SonicWaveV5-backend/*.log
 apps/backend-api/data/
 apps/backend-api/*.log
 
+# ------------------------
 # Admin web logs
+# ------------------------
+
 SW-backend-admin/*.log
 apps/admin-web/*.log
 
-# Local databases and generic logs
+# ------------------------
+# Local databases & generic logs
+# ------------------------
+
 database.db
 *.log
+
+# ------------------------
+# Android Studio Navigation editor temp files
+# ------------------------
+
+.navigation/
+
+# ------------------------
+# Keystore files (do not commit real keys)
+# ------------------------
+
+*.jks
+*.keystore
