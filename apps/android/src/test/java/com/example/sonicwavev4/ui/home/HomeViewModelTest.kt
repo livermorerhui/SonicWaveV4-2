@@ -104,6 +104,7 @@ class HomeViewModelTest {
         }
         override suspend fun stopOutput() {}
         override suspend fun playStandaloneTone(frequency: Int, intensity: Int): Boolean = true
+        override suspend fun stopStandaloneTone() {}
         override fun playTapSound() {}
     }
 

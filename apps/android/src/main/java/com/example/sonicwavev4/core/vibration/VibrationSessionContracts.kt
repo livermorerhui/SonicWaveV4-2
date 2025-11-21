@@ -22,6 +22,7 @@ interface VibrationHardwareGateway {
     suspend fun startOutput(targetFrequency: Int, targetIntensity: Int, playTone: Boolean = true): Boolean
     suspend fun stopOutput()
     suspend fun playStandaloneTone(frequency: Int, intensity: Int): Boolean
+    suspend fun stopStandaloneTone()
     fun playTapSound()
 }
 

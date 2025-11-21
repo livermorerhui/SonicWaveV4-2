@@ -159,7 +159,7 @@ class HomeHardwareRepository(
     override suspend fun startOutput(
         targetFrequency: Int,
         targetIntensity: Int,
-        playTone: Boolean = true
+        playTone: Boolean
     ): Boolean =
         mutex.withLock {
             desiredState = desiredState.copy(
@@ -214,7 +214,7 @@ class HomeHardwareRepository(
         }
     }
 
-    suspend fun stopStandaloneTone() = mutex.withLock {
+    override suspend fun stopStandaloneTone() = mutex.withLock {
         desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
         if (state.value.isHardwareReady) {
             setOutputModeInternal(false)
