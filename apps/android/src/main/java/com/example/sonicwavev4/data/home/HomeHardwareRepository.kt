@@ -14,6 +14,7 @@ import cn.wch.ch347lib.exception.NoPermissionException
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.harddriver.Ad9833Controller
 import com.example.sonicwavev4.harddriver.Mcp41010Controller
+import com.example.sonicwavev4.core.vibration.VibrationHardwareGateway
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,7 +61,7 @@ class HomeHardwareRepository(
     private val ad9833Controller: Ad9833Controller = Ad9833Controller(),
     private val mcp41010Controller: Mcp41010Controller = Mcp41010Controller(),
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
-) {
+) : VibrationHardwareGateway {
 
     companion object {
         @Volatile
@@ -76,10 +77,10 @@ class HomeHardwareRepository(
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
     private val enableTapSound = false
     private val _state = MutableStateFlow(HardwareState())
-    val state: StateFlow<HardwareState> = _state.asStateFlow()
+    override val state: StateFlow<HardwareState> = _state.asStateFlow()
 
     private val _events = MutableSharedFlow<HardwareEvent>(extraBufferCapacity = 16)
-    val events: SharedFlow<HardwareEvent> = _events.asSharedFlow()
+    override val events: SharedFlow<HardwareEvent> = _events.asSharedFlow()
 
     private val mutex = Mutex()
     private var desiredState = DesiredHardwareState()
@@ -123,13 +124,13 @@ class HomeHardwareRepository(
         }
     }
 
-    fun start() {
+    override fun start() {
         initializeAudioResources()
         ch341Manager.setUsbStateListener(usbStateListener)
         scope.launch { openDeviceIfNeeded() }
     }
 
-    suspend fun stop() {
+    override suspend fun stop() {
         ch341Manager.setUsbStateListener(emptyUsbStateListener)
         mutex.withLock {
             desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
@@ -141,21 +142,21 @@ class HomeHardwareRepository(
         scope.coroutineContext.cancelChildren()
     }
 
-    suspend fun applyFrequency(freq: Int) = mutex.withLock {
+    override suspend fun applyFrequency(freq: Int) = mutex.withLock {
         val clamped = freq.coerceAtLeast(0)
         desiredState = desiredState.copy(frequency = clamped)
         applyFrequencyInternal(clamped, force = true)
         logOutputState("applyFrequency($clamped)")
     }
 
-    suspend fun applyIntensity(intensity: Int) = mutex.withLock {
+    override suspend fun applyIntensity(intensity: Int) = mutex.withLock {
         val clamped = intensity.coerceIn(0, 255)
         desiredState = desiredState.copy(intensity = clamped)
         applyIntensityInternal(clamped, force = true)
         logOutputState("applyIntensity($clamped)")
     }
 
-    suspend fun startOutput(
+    override suspend fun startOutput(
         targetFrequency: Int,
         targetIntensity: Int,
         playTone: Boolean = true
@@ -181,13 +182,13 @@ class HomeHardwareRepository(
             success
         }
 
-    suspend fun stopOutput() = mutex.withLock {
+    override suspend fun stopOutput() = mutex.withLock {
         desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
         setOutputModeInternal(false)
         logOutputState("stopOutput")
     }
 
-    suspend fun playStandaloneTone(frequency: Int, intensity: Int): Boolean = mutex.withLock {
+    override suspend fun playStandaloneTone(frequency: Int, intensity: Int): Boolean = mutex.withLock {
         val clampedFrequency = frequency.coerceAtLeast(0)
         val clampedIntensity = intensity.coerceIn(0, 255)
         desiredState = desiredState.copy(
@@ -223,7 +224,7 @@ class HomeHardwareRepository(
         logOutputState("stopStandaloneTone")
     }
 
-    fun playTapSound() {
+    override fun playTapSound() {
         if (enableTapSound && isSoundPoolReady) {
             soundPool.play(tapSoundId, 1f, 1f, 1, 0, 1f)
         }
