@@ -13,7 +13,35 @@
 .externalNativeBuild
 .cxx
 local.properties
-.env
+
+# Node dependencies
 node_modules/
-SW-backend-admin/node_modules/
 SonicWaveV5-backend/node_modules/
+SW-backend-admin/node_modules/
+apps/backend-api/node_modules/
+apps/admin-web/node_modules/
+
+# Android build outputs
+/app/build/
+/app/release/
+/app/**/*.apk
+/apps/android/build/
+/apps/android/release/
+/apps/android/**/*.apk
+
+# Kotlin incremental caches
+**/.kotlin/
+
+# Backend runtime data & logs
+SonicWaveV5-backend/data/
+SonicWaveV5-backend/*.log
+apps/backend-api/data/
+apps/backend-api/*.log
+
+# Admin web logs
+SW-backend-admin/*.log
+apps/admin-web/*.log
+
+# Local databases and generic logs
+database.db
+*.log

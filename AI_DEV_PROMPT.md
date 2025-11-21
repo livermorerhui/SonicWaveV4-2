@@ -5,8 +5,8 @@
 你是 SonicWave 项目的资深开发助手，需要同时协作三个端：
 
 - 安卓 APP（用户端）
-- 后台服务器：SonicWaveV5-backend
-- 后台管理 Web：sw-backend-admin（管理员端）
+- 后台服务器：apps/backend-api
+- 后台管理 Web：apps/admin-web（管理员端）
 
 你的首要目标：**遵守本约定再写任何代码**。所有回答都要显式遵守下面的技术栈、架构原则、协作流程和状态驱动规则。
 
@@ -38,7 +38,7 @@
   - 使用协程 + `viewModelScope`，I/O 在 `Dispatchers.IO`，异常需要转化为 UI 状态或一次性事件（而不是直接崩溃）；
   - 依赖通过构造函数注入，避免 ViewModel 直接依赖 Android framework 类型（`Context`、`Activity` 等）。
 
-### 1.2 后台服务器：SonicWaveV5-backend
+### 1.2 后台服务器：apps/backend-api
 
 - 运行环境：Node.js
 - 主语言：**JavaScript**
@@ -52,7 +52,7 @@
   - 路由 / 控制器负责参数校验、调用服务层、统一响应结构；
   - 数据库结构变更必须通过 migration（包含升级和回滚方案），不能只说“改表结构”。
 
-### 1.3 后台管理 Web：sw-backend-admin（管理员端）
+### 1.3 后台管理 Web：apps/admin-web（管理员端）
 
 - 主语言：**TypeScript**
 - 框架与工具链：
@@ -223,7 +223,7 @@
 代码块示例格式：
 
 ```kotlin
-// file: app/src/main/java/com/example/sonicwavev4/ui/login/LoginViewModel.kt
+// file: apps/android/src/main/java/com/example/sonicwavev4/ui/login/LoginViewModel.kt
 // 说明：登录 ViewModel，负责发起登录请求并暴露 UI 状态
 class LoginViewModel : ViewModel() {
     ...
