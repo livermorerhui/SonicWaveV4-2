@@ -179,6 +179,7 @@ dependencies {
     implementation("androidx.window:window:1.3.0")
 
     testImplementation(libs.junit)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")

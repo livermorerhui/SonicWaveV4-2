@@ -1,5 +1,6 @@
 package com.example.sonicwavev4.data.home
 
+import com.example.sonicwavev4.core.vibration.VibrationSessionGateway
 import com.example.sonicwavev4.network.ApiService
 import com.example.sonicwavev4.network.Customer
 import com.example.sonicwavev4.network.OperationEventRequest
@@ -13,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong
 class HomeSessionRepository(
     private val sessionManager: SessionManager,
     private val apiService: ApiService
-) {
+) : VibrationSessionGateway {
 
     companion object {
         private val localIdCounter = AtomicLong(1_000_000_000_000L)
@@ -27,7 +28,7 @@ class HomeSessionRepository(
     private fun isOffline(): Boolean = sessionManager.isOfflineTestMode()
     private fun nextLocalId(): Long = localIdCounter.getAndIncrement()
 
-    suspend fun startOperation(
+    override suspend fun startOperation(
         selectedCustomer: Customer?,
         frequency: Int,
         intensity: Int,
@@ -50,12 +51,12 @@ class HomeSessionRepository(
         return response.operationId
     }
 
-    suspend fun logOperationEvent(operationId: Long, request: OperationEventRequest) {
+    override suspend fun logOperationEvent(operationId: Long, request: OperationEventRequest) {
         if (isOffline()) return
         apiService.logOperationEvent(operationId, request)
     }
 
-    suspend fun stopOperation(operationId: Long, reason: String, detail: String?) {
+    override suspend fun stopOperation(operationId: Long, reason: String, detail: String?) {
         if (isOffline()) return
         val request = StopOperationRequest(reason = reason, detail = detail)
         apiService.stopOperation(operationId, request)

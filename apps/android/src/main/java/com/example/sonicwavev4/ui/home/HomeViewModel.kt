@@ -7,9 +7,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.sonicwavev4.R
+import com.example.sonicwavev4.core.vibration.VibrationHardwareGateway
+import com.example.sonicwavev4.core.vibration.VibrationSessionGateway
+import com.example.sonicwavev4.core.vibration.VibrationSessionIntent
+import com.example.sonicwavev4.core.vibration.VibrationSessionUiState
 import com.example.sonicwavev4.data.home.HardwareEvent
-import com.example.sonicwavev4.data.home.HomeHardwareRepository
-import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.network.OperationEventRequest
 import com.example.sonicwavev4.network.Customer
 import com.example.sonicwavev4.ui.common.UiEvent
@@ -18,17 +21,20 @@ import com.example.sonicwavev4.utils.TestToneSettings
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlin.math.max
+import java.util.Locale
 
 class HomeViewModel(
     application: Application,
-    private val hardwareRepository: HomeHardwareRepository,
-    private val sessionRepository: HomeSessionRepository
+    private val hardwareRepository: VibrationHardwareGateway,
+    private val sessionRepository: VibrationSessionGateway
 ) : AndroidViewModel(application) {
 
     // --- 变量和状态 (无改动) ---
@@ -58,6 +64,9 @@ class HomeViewModel(
     private val _startButtonEnabled = MutableLiveData(false)
     val startButtonEnabled: LiveData<Boolean> = _startButtonEnabled
 
+    private val _uiState = MutableStateFlow(buildUiState())
+    val uiState: StateFlow<VibrationSessionUiState> = _uiState.asStateFlow()
+
     val hardwareState = hardwareRepository.state.asLiveData()
 
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 16)
@@ -81,6 +90,64 @@ class HomeViewModel(
         ADJUST_FREQUENCY("adjust_frequency"),
         ADJUST_INTENSITY("adjust_intensity"),
         ADJUST_TIME("adjust_time")
+    }
+
+    private fun resolveDisplayValue(
+        activeType: String?,
+        targetType: String,
+        buffer: String,
+        editing: Boolean,
+        committedValue: Int
+    ): Int {
+        return if (activeType == targetType && (editing || buffer.isNotEmpty())) {
+            buffer.toIntOrNull() ?: 0
+        } else {
+            committedValue
+        }
+    }
+
+    private fun formatCountdown(seconds: Int): String {
+        val minutesPart = seconds / 60
+        val secondsPart = seconds % 60
+        return String.format(Locale.ROOT, "%02d:%02d", minutesPart, secondsPart)
+    }
+
+    private fun buildUiState(): VibrationSessionUiState {
+        val activeType = _currentInputType.value
+        val buffer = _inputBuffer.value ?: ""
+        val editing = _isEditing.value == true
+        val running = _isStarted.value == true
+        val frequencyValue = resolveDisplayValue(activeType, "frequency", buffer, editing, _frequency.value ?: 0)
+        val intensityValue = resolveDisplayValue(activeType, "intensity", buffer, editing, _intensity.value ?: 0)
+        val timeValue = resolveDisplayValue(activeType, "time", buffer, editing, _timeInMinutes.value ?: 0)
+        val countdownValue = _countdownSeconds.value ?: 0
+
+        val timeDisplay = if (running) {
+            formatCountdown(countdownValue)
+        } else {
+            getApplication<Application>().getString(R.string.time_minutes_format, timeValue)
+        }
+
+        return VibrationSessionUiState(
+            frequencyValue = frequencyValue,
+            intensityValue = intensityValue,
+            timeInMinutes = _timeInMinutes.value ?: 0,
+            countdownSeconds = countdownValue,
+            frequencyDisplay = getApplication<Application>().getString(R.string.frequency_format, frequencyValue),
+            intensityDisplay = intensityValue.toString(),
+            timeDisplay = timeDisplay,
+            activeInputType = activeType ?: "",
+            isEditing = editing,
+            isRunning = running,
+            startButtonEnabled = _startButtonEnabled.value == true,
+            isHardwareReady = hardwareRepository.state.value.isHardwareReady,
+            isTestAccount = _isTestAccount.value == true,
+            playSineTone = _playSineTone.value == true
+        )
+    }
+
+    private fun emitUiState() {
+        _uiState.value = buildUiState()
     }
 
     init {
@@ -121,11 +188,13 @@ class HomeViewModel(
         }
         _isTestAccount.value = false
         recomputeStartButtonEnabled()
+        emitUiState()
     }
 
     fun setPlaySineTone(enabled: Boolean) {
         if (_playSineTone.value == enabled) return
         _playSineTone.value = enabled
+        emitUiState()
         if (_isStarted.value == true) {
             viewModelScope.launch {
                 val success = try {
@@ -153,6 +222,7 @@ class HomeViewModel(
                 }
                 if (!success) {
                     _playSineTone.value = !enabled
+                    emitUiState()
                 }
             }
         }
@@ -170,6 +240,7 @@ class HomeViewModel(
         }
         setPlaySineTone(desired)
         recomputeStartButtonEnabled()
+        emitUiState()
     }
 
     fun setSessionActive(active: Boolean) {
@@ -185,6 +256,7 @@ class HomeViewModel(
         } else {
             recomputeStartButtonEnabled()
         }
+        emitUiState()
     }
 
     private fun recomputeStartButtonEnabled() {
@@ -199,6 +271,7 @@ class HomeViewModel(
             } else {
                 hardwareReady || testAccount
             }
+        emitUiState()
     }
 
     // --- 缓冲区和参数控制 (无改动) ---
@@ -208,6 +281,7 @@ class HomeViewModel(
         val wasEditing = _isEditing.value ?: false
         if (inputType.isNullOrEmpty()) {
             _isEditing.value = false
+            emitUiState()
             return
         }
         if (wasEditing && bufferValue.isNullOrEmpty()) {
@@ -227,6 +301,7 @@ class HomeViewModel(
         }
         _inputBuffer.value = ""
         _isEditing.value = false
+        emitUiState()
     }
 
     fun setCurrentInputType(type: String) {
@@ -235,12 +310,14 @@ class HomeViewModel(
         _currentInputType.value = type
         _inputBuffer.value = ""
         _isEditing.value = false
+        emitUiState()
     }
 
     fun appendToInputBuffer(digit: String) {
         if ((_inputBuffer.value?.length ?: 0) < 9) {
             _inputBuffer.value = (_inputBuffer.value ?: "") + digit
             _isEditing.value = true
+            emitUiState()
         }
     }
 
@@ -264,6 +341,7 @@ class HomeViewModel(
                 }
             }
         }
+        emitUiState()
     }
 
     fun clearCurrentParameter() {
@@ -274,6 +352,7 @@ class HomeViewModel(
             "intensity" -> updateIntensity(0)
             "time"      -> updateTime(0)
         }
+        emitUiState()
     }
 
     fun commitAndCycleInputType() {
@@ -305,6 +384,21 @@ class HomeViewModel(
         }
     }
 
+    fun handleIntent(intent: VibrationSessionIntent) {
+        when (intent) {
+            is VibrationSessionIntent.SelectInput -> setCurrentInputType(intent.type)
+            is VibrationSessionIntent.AppendDigit -> appendToInputBuffer(intent.digit)
+            VibrationSessionIntent.DeleteDigit -> deleteLastFromInputBuffer()
+            VibrationSessionIntent.ClearCurrent -> clearCurrentParameter()
+            VibrationSessionIntent.CommitAndCycle -> commitAndCycleInputType()
+            is VibrationSessionIntent.AdjustFrequency -> adjustFrequency(intent.delta)
+            is VibrationSessionIntent.AdjustIntensity -> adjustIntensity(intent.delta)
+            is VibrationSessionIntent.AdjustTime -> applyDelta("time", intent.delta)
+            is VibrationSessionIntent.ToggleStartStop -> startStopPlayback(intent.customer)
+            VibrationSessionIntent.ClearAll -> clearAll()
+        }
+    }
+
     // --- 公开的增减接口 (无改动) ---
     fun incrementFrequency() = applyDelta("frequency", 1)
     fun decrementFrequency() = applyDelta("frequency", -1)
@@ -325,9 +419,11 @@ class HomeViewModel(
         countdownJob?.cancel()
         val totalSeconds = (_timeInMinutes.value ?: 0) * 60
         _countdownSeconds.value = totalSeconds
+        emitUiState()
         countdownJob = viewModelScope.launch {
             for (i in totalSeconds downTo 0) {
-                _countdownSeconds.postValue(i)
+                _countdownSeconds.value = i
+                emitUiState()
                 delay(1000)
             }
             if (_isStarted.value == true) {
@@ -360,6 +456,7 @@ class HomeViewModel(
                     _currentInputType.value = "frequency"
                     _inputBuffer.value = ""
                     _isEditing.value = false
+                    emitUiState()
                 }
                 val shouldPlayTone = _playSineTone.value == true
                 handleStartOperation(
@@ -416,6 +513,7 @@ class HomeViewModel(
         _currentInputType.value = ""
         _inputBuffer.value = ""
         _isEditing.value = false
+        emitUiState()
     }
 
     private fun handleStartOperation(selectedCustomer: Customer?, useHardware: Boolean, playTone: Boolean) {
@@ -503,6 +601,7 @@ class HomeViewModel(
         if (shouldLogOperationEvents()) {
             logOperationEvent(OperationEventType.ADJUST_FREQUENCY)
         }
+        emitUiState()
     }
 
     private fun updateIntensity(value: Int) {
@@ -515,6 +614,7 @@ class HomeViewModel(
         if (shouldLogOperationEvents()) {
             logOperationEvent(OperationEventType.ADJUST_INTENSITY)
         }
+        emitUiState()
     }
 
     private fun updateTime(value: Int) {
@@ -524,6 +624,7 @@ class HomeViewModel(
                 logOperationEvent(OperationEventType.ADJUST_TIME)
             }
         }
+        emitUiState()
     }
 
     private fun shouldLogOperationEvents(): Boolean {
