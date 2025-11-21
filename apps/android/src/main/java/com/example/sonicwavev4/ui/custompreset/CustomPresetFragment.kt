@@ -81,7 +81,7 @@ class CustomPresetFragment : Fragment() {
             navigateToEditor(null)
         }
         binding.btnStartStop.setOnClickListener {
-            val customer = userViewModel.selectedCustomer.value
+            val customer = customerViewModel.selectedCustomer.value
             presetViewModel.toggleStartStop(customer)
         }
         presetViewModel.enterCustomMode()

@@ -102,7 +102,7 @@ class PersetmodeFragment : Fragment() {
             button.setOnClickListener { viewModel.selectMode(index) }
         }
         binding.btnStartStop.setOnClickListener {
-            val customer = userViewModel.selectedCustomer.value
+            val customer = customerViewModel.selectedCustomer.value
             viewModel.toggleStartStop(customer)
         }
         binding.btnEditPreset.setOnClickListener {
@@ -190,7 +190,7 @@ class PersetmodeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 combine(
-                    userViewModel.selectedCustomer,
+                    customerViewModel.selectedCustomer,
                     viewModel.uiState
                 ) { selectedCustomer, state ->
                     val inCustomerDetail = selectedCustomer != null

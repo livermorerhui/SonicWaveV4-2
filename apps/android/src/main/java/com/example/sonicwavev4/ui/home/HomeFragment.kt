@@ -21,6 +21,7 @@ import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentHomeBinding
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.common.UiEvent
+import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.Job
@@ -34,6 +35,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val authViewModel: LoginViewModel by activityViewModels()
+    private val customerViewModel: CustomerViewModel by activityViewModels()
 
     private val viewModel: HomeViewModel by viewModels {
         val application = requireActivity().application
@@ -173,7 +175,7 @@ class HomeFragment : Fragment() {
         }
 
         binding.btnStartStop.setOnClickListener {
-            val selectedCustomer = userViewModel.selectedCustomer.value
+            val selectedCustomer = customerViewModel.selectedCustomer.value
             viewModel.handleIntent(VibrationSessionIntent.ToggleStartStop(selectedCustomer))
             viewModel.playTapSound()
         }
