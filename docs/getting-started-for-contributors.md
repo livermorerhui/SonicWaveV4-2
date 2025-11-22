@@ -23,6 +23,29 @@
   - `CustomerViewModel` 暴露 `CustomerListUiState` / `CustomerEvent`，统一客户列表加载、搜索、选中、在线新增/更新与离线新增，桥接 `CustomerRepository` 与 `OfflineCustomerRepository`。
   - UI Fragment/Dialog 只负责采集输入并订阅状态/事件，导航逻辑与提示保持原有行为。
 - **阅读顺序建议**：
-  1. 阅读 `docs/architecture/domain-overview.md`、`docs/architecture/domain-usecases.md` 了解用例 2-1/2-2/2-3。 
-  2. 参考 `docs/architecture/phase2-android-vibration-mvvm.md` 与 `docs/architecture/phase3-android-account-customer-mvvm.md` 了解跨域的 UiState/Intent 模板。 
+  1. 阅读 `docs/architecture/domain-overview.md`、`docs/architecture/domain-usecases.md` 了解用例 2-1/2-2/2-3。
+  2. 参考 `docs/architecture/phase2-android-vibration-mvvm.md` 与 `docs/architecture/phase3-android-account-customer-mvvm.md` 了解跨域的 UiState/Intent 模板。
   3. 进入 `LoginViewModel`、`CustomerViewModel` 对照 UI 文件查看状态渲染与事件分发路径，再根据需要下钻到对应仓库/数据源。
+
+## Backend API 快速上手（apps/backend-api）
+- **环境要求**：Node.js 18+、本地 MySQL 8（或 Docker 运行的 mysql 服务）、npm。可选：Docker Compose 以启动 `apps/backend-api/docker-compose.yml`。
+- **关键环境变量**（在 `apps/backend-api/.env` 中配置）：
+  - 数据库：`DB_HOST`（默认 `127.0.0.1`）、`DB_PORT`（默认 `3306`）、`DB_USER`（默认 `sonicwave`）、`DB_PASSWORD`（默认 `sonicwave_pwd`）、`DB_NAME`（默认 `sonicwave_db`）。注意 `DB_PORT` 仅在非默认端口时需要显式设置。
+  - 认证：`JWT_SECRET`（必填，没有的话登录会报 “secretOrPrivateKey must have a value”，示例已给出本地开发用密钥，生产请替换为更安全值）。
+  - 管理员种子：`ADMIN_SEED_EMAIL`、`ADMIN_SEED_PASSWORD`（可选 `ADMIN_SEED_USERNAME`，默认 `admin`），便于第一次跑起来就能在 admin-web 登录。
+- **初始化数据库与启动后端**：
+  ```bash
+  cd apps/backend-api
+  npm install        # 首次克隆仓库需要
+  npm run db:migrate # 使用 Knex 迁移创建/升级所有表
+  npm run dev        # 启动 backend HTTP + WebSocket 服务
+  ```
+- **管理员账号种子逻辑**：后端启动时，若 `.env` 提供了 `ADMIN_SEED_EMAIL` 和 `ADMIN_SEED_PASSWORD`，`AdminService` 会检查 `users` 表并自动创建/提升管理员账号（依赖迁移创建的 `users.role`、`users.account_type` 字段）。
+- **admin-web 登录提醒**：
+  ```bash
+  cd apps/admin-web
+  npm install
+  npm run dev
+  ```
+  浏览器访问 `http://localhost:5173`，使用上一步配置的管理员账号登录。
+  - 开发联调：Vite dev server 会把所有 `/api` 请求代理到 `http://localhost:3000`（后端默认端口），登录接口路径为 `POST /api/v1/users/login`。如需连接其他地址，可在 `apps/admin-web/.env` 中设置 `VITE_API_BASE_URL`。务必确保后台的 `JWT_SECRET` 已设置，否则登录会返回 500。
