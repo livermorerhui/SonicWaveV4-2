@@ -30,8 +30,9 @@
 ## Backend API 快速上手（apps/backend-api）
 - **环境要求**：Node.js 18+、本地 MySQL 8（或 Docker 运行的 mysql 服务）、npm。可选：Docker Compose 以启动 `apps/backend-api/docker-compose.yml`。
 - **关键环境变量**（在 `apps/backend-api/.env` 中配置）：
-  - 数据库：`DB_HOST`（默认 `127.0.0.1`）、`DB_PORT`（默认 `3306`）、`DB_USER`（默认 `sonicwave`）、`DB_PASSWORD`（默认 `sonicwave_pwd`）、`DB_NAME`（默认 `sonicwave_db`）。
-  - 管理员种子：`ADMIN_SEED_EMAIL`、`ADMIN_SEED_PASSWORD`（可选 `ADMIN_SEED_USERNAME`，默认 `admin`）。
+  - 数据库：`DB_HOST`（默认 `127.0.0.1`）、`DB_PORT`（默认 `3306`）、`DB_USER`（默认 `sonicwave`）、`DB_PASSWORD`（默认 `sonicwave_pwd`）、`DB_NAME`（默认 `sonicwave_db`）。注意 `DB_PORT` 仅在非默认端口时需要显式设置。
+  - 认证：`JWT_SECRET`（必填，没有的话登录会报 “secretOrPrivateKey must have a value”，示例已给出本地开发用密钥，生产请替换为更安全值）。
+  - 管理员种子：`ADMIN_SEED_EMAIL`、`ADMIN_SEED_PASSWORD`（可选 `ADMIN_SEED_USERNAME`，默认 `admin`），便于第一次跑起来就能在 admin-web 登录。
 - **初始化数据库与启动后端**：
   ```bash
   cd apps/backend-api
@@ -47,3 +48,4 @@
   npm run dev
   ```
   浏览器访问 `http://localhost:5173`，使用上一步配置的管理员账号登录。
+  - 开发联调：Vite dev server 会把所有 `/api` 请求代理到 `http://localhost:3000`（后端默认端口），登录接口路径为 `POST /api/v1/users/login`。如需连接其他地址，可在 `apps/admin-web/.env` 中设置 `VITE_API_BASE_URL`。务必确保后台的 `JWT_SECRET` 已设置，否则登录会返回 500。
