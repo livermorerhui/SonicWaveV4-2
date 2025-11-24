@@ -10,6 +10,7 @@ import com.example.sonicwavev4.network.Customer
 import com.example.sonicwavev4.repository.CustomerRepository
 import com.example.sonicwavev4.data.offlinecustomer.OfflineCustomerRepository
 import com.example.sonicwavev4.utils.OfflineTestModeManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CustomerViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -45,14 +47,16 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
                 )
             }
             try {
-                val customers = if (offlineMode) {
-                    offlineCustomerRepository.listCustomers()
-                } else {
-                    val response = customerRepository.getCustomers()
-                    if (response.isSuccessful) {
-                        response.body().orEmpty()
+                val customers = withContext(Dispatchers.IO) {
+                    if (offlineMode) {
+                        offlineCustomerRepository.listCustomers()
                     } else {
-                        throw Exception(response.errorBody()?.string() ?: "获取客户列表失败")
+                        val response = customerRepository.getCustomers()
+                        if (response.isSuccessful) {
+                            response.body().orEmpty()
+                        } else {
+                            throw Exception(response.errorBody()?.string() ?: "获取客户列表失败")
+                        }
                     }
                 }
                 updateCustomers(customers)
@@ -89,7 +93,9 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
         }
         viewModelScope.launch {
             try {
-                val response = customerRepository.addCustomer(customer)
+                val response = withContext(Dispatchers.IO) {
+                    customerRepository.addCustomer(customer)
+                }
                 if (response.isSuccessful) {
                     _events.emit(CustomerEvent.CustomerSaved("客户添加成功"))
                     loadCustomers()
@@ -109,7 +115,9 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
         }
         viewModelScope.launch {
             try {
-                val response = customerRepository.updateCustomer(customerId, customer)
+                val response = withContext(Dispatchers.IO) {
+                    customerRepository.updateCustomer(customerId, customer)
+                }
                 if (response.isSuccessful) {
                     _events.emit(CustomerEvent.CustomerSaved("客户更新成功"))
                     loadCustomers()
@@ -126,7 +134,9 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
         val trimmedName = name.trim()
         if (trimmedName.isEmpty()) return
         viewModelScope.launch {
-            offlineCustomerRepository.addCustomer(trimmedName)
+            withContext(Dispatchers.IO) {
+                offlineCustomerRepository.addCustomer(trimmedName)
+            }
             loadCustomers()
             _events.emit(CustomerEvent.CustomerSaved("已添加本地客户"))
         }

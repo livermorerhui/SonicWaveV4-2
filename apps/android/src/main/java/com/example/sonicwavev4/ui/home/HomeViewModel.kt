@@ -474,6 +474,17 @@ class HomeViewModel(
         }
     }
 
+    fun stopSession() {
+        viewModelScope.launch {
+            stopPlaybackIfRunning()
+            try {
+                hardwareRepository.stop()
+            } catch (e: Exception) {
+                Log.w("HomeViewModel", "Failed to stop hardware cleanly", e)
+            }
+        }
+    }
+
     fun prepareHardwareForEntry() {
         hardwareRepository.start()
         viewModelScope.launch {

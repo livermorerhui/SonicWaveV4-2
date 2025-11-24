@@ -180,6 +180,20 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         observeGlobalLogout()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (isPlaying) {
+            startProgressUpdates()
+            spinVinyl()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopProgressUpdates()
+        pauseVinyl()
+    }
+
     // 【修改点 2】修复了下载功能的线程问题，防止UI卡死
     override fun onDownloadSelected(files: List<DownloadableFile>) {
         lifecycleScope.launch {
@@ -941,6 +955,16 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         tonearmAnimator = null
         stopProgressUpdates()
         resetPlaybackUi()
+        musicAreaLayout = null
+        musicRecyclerView = null
+        downloadButton = null
+        playPauseButton = null
+        prevButton = null
+        nextButton = null
+        vinylDiscView = null
+        tonearmView = null
+        playbackSeekBar = null
+        playbackTimeText = null
     }
 
     override fun onSupportNavigateUp(): Boolean {

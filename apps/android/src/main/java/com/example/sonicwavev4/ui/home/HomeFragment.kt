@@ -72,7 +72,7 @@ class HomeFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        viewModel.stopPlaybackIfRunning()
+        viewModel.stopSession()
     }
 
     private fun observeUiState() {
