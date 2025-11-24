@@ -13,8 +13,9 @@ class OfflineCustomerRepository private constructor(
     private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun listCustomers(): List<Customer> = withContext(dispatcher) {
-        db.offlineCustomerDao().listAll().map { it.toNetworkModel() }
+    suspend fun listCustomers(searchQuery: String? = null): List<Customer> = withContext(dispatcher) {
+        val sanitizedQuery = searchQuery?.trim()?.takeIf { it.isNotEmpty() }
+        db.offlineCustomerDao().searchByName(sanitizedQuery).map { it.toNetworkModel() }
     }
 
     suspend fun addCustomer(name: String): Customer = withContext(dispatcher) {

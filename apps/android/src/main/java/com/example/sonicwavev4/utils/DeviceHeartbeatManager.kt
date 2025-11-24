@@ -29,12 +29,21 @@ object DeviceHeartbeatManager {
 
     fun start(context: Context) {
         initialize(context)
+        if (OfflineTestModeManager.isOfflineMode()) {
+            Log.d("DeviceHeartbeatManager", "Offline mode active, not starting device heartbeat.")
+            stop()
+            return
+        }
         if (heartbeatJob?.isActive == true) {
             return
         }
         heartbeatJob = scope.launch {
             while (isActive) {
                 try {
+                    if (OfflineTestModeManager.isOfflineMode()) {
+                        Log.d("DeviceHeartbeatManager", "Offline mode active, skipping device heartbeat.")
+                        break
+                    }
                     val hasUserSession = sessionManager.hasActiveSession() && sessionManager.fetchSessionId() != -1L
                     if (!hasUserSession && !OfflineTestModeManager.isOfflineMode()) {
                         sendHeartbeat()
@@ -45,6 +54,11 @@ object DeviceHeartbeatManager {
                 delay(INTERVAL_MS)
             }
         }
+    }
+
+    fun stop() {
+        heartbeatJob?.cancel()
+        heartbeatJob = null
     }
 
     private suspend fun sendHeartbeat() {

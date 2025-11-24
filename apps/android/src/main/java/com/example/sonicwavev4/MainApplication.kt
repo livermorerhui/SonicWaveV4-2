@@ -2,6 +2,7 @@ package com.example.sonicwavev4
 
 import android.app.Application
 import android.util.Log
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
@@ -14,6 +15,7 @@ import com.example.sonicwavev4.core.currentAppMode
 import com.example.sonicwavev4.utils.DeviceHeartbeatManager
 import com.example.sonicwavev4.utils.DeviceIdentityProvider
 import com.example.sonicwavev4.utils.HeartbeatManager
+import com.example.sonicwavev4.utils.HeartbeatLifecycleObserver
 import com.example.sonicwavev4.utils.OfflineCapabilityManager
 import com.example.sonicwavev4.utils.OfflineModeRemoteSync
 import com.example.sonicwavev4.utils.OfflineTestModeManager
@@ -49,6 +51,9 @@ class MainApplication : Application() {
         if (!isOffline && hasSession) {
             HeartbeatManager.start(this)
         }
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            HeartbeatLifecycleObserver(this, sessionManager)
+        )
         if (isOffline) {
             WorkManager.getInstance(this).cancelUniqueWork("logUploadWork")
         } else {

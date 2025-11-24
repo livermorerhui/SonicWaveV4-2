@@ -1,9 +1,17 @@
 package com.example.sonicwavev4.data.offlinecustomer.db
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "offline_customers")
+@Entity(
+    tableName = "offline_customers",
+    indices = [
+        Index(value = ["name"]),
+        Index(value = ["phone"]),
+        Index(value = ["email"])
+    ]
+)
 data class OfflineCustomerEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     val name: String,
