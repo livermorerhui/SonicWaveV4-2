@@ -8,40 +8,14 @@
     android:paddingStart="8dp"
     android:paddingEnd="8dp">
 
-    <LinearLayout
-        android:id="@+id/btnOpenMusic"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <ImageView
-            android:id="@+id/iconMusic"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_music_note_black_24dp" />
-
-        <TextView
-            android:id="@+id/tvMusic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:text="音乐"
-            android:textSize="16sp" />
-    </LinearLayout>
-
     <ImageButton
         android:id="@+id/btnPrev"
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:background="@android:color/transparent"
         android:src="@android:drawable/ic_media_previous"
-        app:layout_constraintStart_toEndOf="@id/btnOpenMusic"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 

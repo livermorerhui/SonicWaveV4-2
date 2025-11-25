@@ -69,8 +69,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="end"
-        app:constraint_referenced_ids="tv_label_frequency, tv_label_intensity, tv_label_time"
-        android:layout_marginEnd="8dp"/>
+        app:constraint_referenced_ids="tv_label_frequency, tv_label_intensity, tv_label_time" />
 
 
     <!-- 2. Intensity Control Group (follows the same pattern) -->
@@ -171,10 +170,10 @@
                                        btn_key_1, btn_key_2, btn_key_3,
                                        btn_key_clear, btn_key_0, btn_key_enter"
 
-        app:flow_maxElementsWrap="3"
-        app:flow_wrapMode="chain"
-        app:flow_verticalStyle="spread_inside"
         app:flow_horizontalStyle="spread_inside"
+        app:flow_maxElementsWrap="3"
+        app:flow_verticalStyle="spread_inside"
+        app:flow_wrapMode="chain"
 
         app:layout_constraintBottom_toBottomOf="@id/btn_clear"
         app:layout_constraintEnd_toEndOf="parent"
@@ -211,13 +210,14 @@
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/rounded_button"
+        android:minHeight="48dp"
         android:text="开始"
         android:textColor="#FFFFFF"
-        android:minHeight="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btn_clear"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_time_down"
         app:layout_constraintWidth_min="120dp" />
 
     <Button
@@ -225,13 +225,15 @@
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/rounded_button"
+        android:minHeight="48dp"
         android:text="清空"
         android:textColor="#FFFFFF"
-        android:minHeight="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline_vertical"
         app:layout_constraintStart_toEndOf="@+id/btn_start_stop"
+        app:layout_constraintTop_toBottomOf="@+id/btn_time_up"
         app:layout_constraintWidth_min="120dp" />
 
     <!-- ===================================================== -->

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Placeholder IDs for legacy music controls no longer present in the layout -->
+    <item name="music_list_recyclerview" type="id" />
+    <item name="download_music_button" type="id" />
+    <item name="vinyl_disc_view" type="id" />
+    <item name="tonearm_view" type="id" />
+</resources>

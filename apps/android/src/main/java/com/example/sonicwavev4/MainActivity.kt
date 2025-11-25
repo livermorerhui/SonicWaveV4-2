@@ -304,7 +304,6 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         tonearmView = area.findViewById(R.id.tonearm_view)
         playbackSeekBar = area.findViewById(R.id.seekBarMusic)
         playbackTimeText = area.findViewById(R.id.tvRemainingTime)
-        val openMusicButton: View? = area.findViewById(R.id.btnOpenMusic)
 
         tonearmView?.apply {
             rotation = tonearmRestRotation
@@ -357,10 +356,6 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         playPauseButton?.setOnClickListener { togglePlayPause() }
         prevButton?.setOnClickListener { playPreviousTrack() }
         nextButton?.setOnClickListener { playNextTrack() }
-        openMusicButton?.setOnClickListener {
-            val dialog = MusicDialogFragment()
-            dialog.show(supportFragmentManager, "MusicDialog")
-        }
 
         resetPlaybackUi()
         area.visibility = View.VISIBLE
@@ -616,9 +611,9 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         val isMusicItem = item.itemId == R.id.navigation_music
         val root = buttonView.findViewById<View>(R.id.nav_item_root)
         if (isMusicItem) {
-            root.isClickable = false
-            root.isFocusable = false
-            root.background = null
+            root.isClickable = true
+            root.isFocusable = true
+            root.setOnClickListener { showMusicDialog() }
             val accentColor = ContextCompat.getColor(this, R.color.nav_music)
             icon.imageTintList = ColorStateList.valueOf(accentColor)
             title.setTextColor(accentColor)
@@ -641,7 +636,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             R.id.navigation_home, R.id.navigation_persetmode, R.id.navigation_custom_preset -> {
                 navController.navigate(item.itemId)
             }
-            R.id.navigation_music -> Unit
+            R.id.navigation_music -> showMusicDialog()
         }
     }
 
@@ -975,5 +970,10 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    private fun showMusicDialog() {
+        val dialog = MusicDialogFragment()
+        dialog.show(supportFragmentManager, "MusicDialog")
     }
 }
