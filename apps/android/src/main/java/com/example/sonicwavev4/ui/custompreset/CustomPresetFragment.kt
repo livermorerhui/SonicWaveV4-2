@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sonicwavev4.R
+import com.example.sonicwavev4.core.vibration.VibrationSessionIntent
+import com.example.sonicwavev4.core.vibration.VibrationSessionUiState
 import com.example.sonicwavev4.data.custompreset.CustomPresetRepositoryImpl
 import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
@@ -29,6 +31,7 @@ import com.example.sonicwavev4.ui.persetmode.custom.CustomPresetAdapter
 import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.utils.SessionManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -82,7 +85,7 @@ class CustomPresetFragment : Fragment() {
         }
         binding.btnStartStop.setOnClickListener {
             val customer = customerViewModel.selectedCustomer.value
-            presetViewModel.toggleStartStop(customer)
+            presetViewModel.handleSessionIntent(VibrationSessionIntent.ToggleStartStop(customer))
         }
         presetViewModel.enterCustomMode()
     }
@@ -153,7 +156,9 @@ class CustomPresetFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 launch {
-                    presetViewModel.uiState.collect { renderPresetState(it) }
+                    combine(presetViewModel.uiState, presetViewModel.sessionUiState) { preset, session ->
+                        preset to session
+                    }.collect { (preset, session) -> renderPresetState(preset, session) }
                 }
                 launch {
                     presetViewModel.events.collect { handleEvent(it) }
@@ -223,7 +228,10 @@ class CustomPresetFragment : Fragment() {
         dialog.show(parentFragmentManager, CustomPresetEditorFragment.TAG)
     }
 
-    private fun renderPresetState(state: com.example.sonicwavev4.ui.persetmode.PresetModeUiState) {
+    private fun renderPresetState(
+        state: com.example.sonicwavev4.ui.persetmode.PresetModeUiState,
+        sessionState: VibrationSessionUiState
+    ) {
         if (state.category != PresetCategory.CUSTOM) {
             presetViewModel.enterCustomMode()
         }
@@ -235,11 +243,11 @@ class CustomPresetFragment : Fragment() {
         binding.tvSelectedSummary.text = selected?.summary ?: "请选择自设模式后再开始"
 
         binding.btnStartStop.text =
-            if (state.isRunning) getString(R.string.button_stop) else getString(R.string.button_start)
-        binding.btnStartStop.isEnabled = state.isStartEnabled
-        binding.tvFrequencyValue.text = state.frequencyHz?.toString() ?: "--"
-        binding.tvIntensityValue.text = state.intensity01V?.toString() ?: "--"
-        binding.tvRemainingValue.text = formatAsMMSS(state.remainingSeconds)
+            if (sessionState.isRunning) getString(R.string.button_stop) else getString(R.string.button_start)
+        binding.btnStartStop.isEnabled = sessionState.startButtonEnabled
+        binding.tvFrequencyValue.text = sessionState.frequencyDisplay
+        binding.tvIntensityValue.text = sessionState.intensityDisplay
+        binding.tvRemainingValue.text = sessionState.timeDisplay
     }
 
     private fun handleEvent(event: UiEvent) {
@@ -254,9 +262,4 @@ class CustomPresetFragment : Fragment() {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun formatAsMMSS(seconds: Int): String {
-        val m = seconds / 60
-        val s = seconds % 60
-        return String.format("%02d:%02d", m, s)
-    }
 }
