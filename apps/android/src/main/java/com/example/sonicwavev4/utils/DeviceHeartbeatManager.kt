@@ -14,22 +14,21 @@ import kotlinx.coroutines.launch
 
 object DeviceHeartbeatManager {
 
-    /**
-     * Device/App heartbeat is expected to continue even in offline mode so that backend
-     * can track foreground availability. User heartbeat remains governed by login/online
-     * state elsewhere.
-     */
+/**
+ * Device/App heartbeat only runs when there is no active user heartbeat. Once a
+ * user session is online and user heartbeat is running, it replaces device
+ * heartbeat. Device heartbeat can continue in offline mode to indicate the app
+ * is alive even without a user session.
+ */
 
     private const val INTERVAL_MS = 15_000L
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var heartbeatJob: Job? = null
     private lateinit var appContext: Context
-    private lateinit var sessionManager: SessionManager
 
     fun initialize(context: Context) {
         if (::appContext.isInitialized) return
         appContext = context.applicationContext
-        sessionManager = SessionManager(appContext)
         DeviceIdentityProvider.initialize(appContext)
     }
 

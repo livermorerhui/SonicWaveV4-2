@@ -7,9 +7,10 @@ import com.example.sonicwavev4.network.RetrofitClient
 import kotlinx.coroutines.*
 
 /**
- * Handles user/session heartbeat. This is separate from [DeviceHeartbeatManager], which
- * continues in offline mode to track app availability. User heartbeat still follows the
- * existing online + logged-in requirements.
+ * Handles user/session heartbeat. When this is running it replaces device heartbeat;
+ * device heartbeats only run when no user heartbeat is active (e.g., logged out or
+ * offline test mode). User heartbeat still follows the existing online + logged-in
+ * requirements.
  */
 object HeartbeatManager {
 
