@@ -12,6 +12,7 @@ import com.example.sonicwavev4.network.RegisterRequest
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.network.LogoutEventRequest
 import com.example.sonicwavev4.utils.HeartbeatManager
+import com.example.sonicwavev4.utils.HeartbeatOrchestrator
 import com.example.sonicwavev4.utils.LogoutReason
 import com.example.sonicwavev4.utils.OfflineTestModeManager
 import com.example.sonicwavev4.utils.SessionManager
@@ -27,7 +28,7 @@ class AuthRepository(application: Application) : AuthGateway {
         runCatching {
             val loginResponse = performLoginRequest(email, password)
             recordLoginEvent()
-            HeartbeatManager.start(appContext)
+            HeartbeatOrchestrator.onLogin(appContext)
             buildAuthResult(loginResponse, isOffline = false)
         }
     }
@@ -45,7 +46,7 @@ class AuthRepository(application: Application) : AuthGateway {
             }
             val loginResponse = performLoginRequest(email, password)
             recordLoginEvent()
-            HeartbeatManager.start(appContext)
+            HeartbeatOrchestrator.onLogin(appContext)
             buildAuthResult(loginResponse, isOffline = false)
         }
     }
@@ -58,6 +59,7 @@ class AuthRepository(application: Application) : AuthGateway {
             sessionManager.saveSessionId(-1L)
             RetrofitClient.updateToken(null)
             HeartbeatManager.stop()
+            HeartbeatOrchestrator.refreshHeartbeats()
             val offlineResponse = LoginResponse(
                 message = "Offline login success",
                 accessToken = "",
@@ -84,6 +86,7 @@ class AuthRepository(application: Application) : AuthGateway {
             sessionManager.initiateLogout(reason)
             OfflineTestModeManager.setOfflineTestMode(false)
             RetrofitClient.updateToken(null)
+            HeartbeatOrchestrator.onLogout(appContext)
         }
     }
 

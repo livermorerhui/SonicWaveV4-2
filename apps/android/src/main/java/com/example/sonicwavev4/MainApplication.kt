@@ -12,9 +12,8 @@ import com.example.sonicwavev4.logging.LogUploadWorker
 import com.example.sonicwavev4.network.OfflineControlWebSocket
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.core.currentAppMode
-import com.example.sonicwavev4.utils.DeviceHeartbeatManager
 import com.example.sonicwavev4.utils.DeviceIdentityProvider
-import com.example.sonicwavev4.utils.HeartbeatManager
+import com.example.sonicwavev4.utils.HeartbeatOrchestrator
 import com.example.sonicwavev4.utils.HeartbeatLifecycleObserver
 import com.example.sonicwavev4.utils.OfflineCapabilityManager
 import com.example.sonicwavev4.utils.OfflineModeRemoteSync
@@ -36,7 +35,6 @@ class MainApplication : Application() {
         CH341Manager.getInstance().init(this)
         RetrofitClient.initialize(this)
         DeviceIdentityProvider.initialize(this)
-        DeviceHeartbeatManager.start(this)
         val sessionManager = SessionManager(this)
         sessionManager.fetchAccessToken()?.let { token ->
             if (!token.isNullOrBlank()) {
@@ -47,12 +45,9 @@ class MainApplication : Application() {
         OfflineCapabilityManager.initialize(sessionManager.isOfflineModeAllowed())
         OfflineTestModeManager.initialize(isOffline)
         Log.d("MainApplication", "currentAppMode=${currentAppMode()}")
-        val hasSession = sessionManager.hasActiveSession() && sessionManager.fetchSessionId() != -1L
-        if (!isOffline && hasSession) {
-            HeartbeatManager.start(this)
-        }
+        HeartbeatOrchestrator.initialize(this)
         ProcessLifecycleOwner.get().lifecycle.addObserver(
-            HeartbeatLifecycleObserver(this, sessionManager)
+            HeartbeatLifecycleObserver(this)
         )
         if (isOffline) {
             WorkManager.getInstance(this).cancelUniqueWork("logUploadWork")

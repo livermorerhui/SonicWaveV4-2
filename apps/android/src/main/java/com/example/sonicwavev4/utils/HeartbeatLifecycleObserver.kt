@@ -5,22 +5,14 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 
 class HeartbeatLifecycleObserver(
-    private val appContext: Context,
-    private val sessionManager: SessionManager
+    private val appContext: Context
 ) : DefaultLifecycleObserver {
 
     override fun onStart(owner: LifecycleOwner) {
-        DeviceHeartbeatManager.start(appContext)
-        if (!OfflineTestModeManager.isOfflineMode() &&
-            sessionManager.hasActiveSession() &&
-            sessionManager.fetchSessionId() != -1L
-        ) {
-            HeartbeatManager.start(appContext)
-        }
+        HeartbeatOrchestrator.onAppForeground(appContext)
     }
 
     override fun onStop(owner: LifecycleOwner) {
-        HeartbeatManager.stop()
-        DeviceHeartbeatManager.stop()
+        HeartbeatOrchestrator.onAppBackground()
     }
 }
