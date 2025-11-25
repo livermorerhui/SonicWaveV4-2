@@ -4,6 +4,8 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sonicwavev4.core.vibration.VibrationSessionIntent
+import com.example.sonicwavev4.core.vibration.VibrationSessionUiState
 import com.example.sonicwavev4.data.custompreset.CustomPresetRepository
 import com.example.sonicwavev4.data.custompreset.model.CustomPreset
 import com.example.sonicwavev4.data.custompreset.model.CustomPresetStep
@@ -114,6 +116,9 @@ class PersetmodeViewModel(
     private val _uiState = MutableStateFlow(buildInitialUiState())
     val uiState: StateFlow<PresetModeUiState> = _uiState.asStateFlow()
 
+    private val _sessionUiState = MutableStateFlow(buildSessionUiState())
+    val sessionUiState: StateFlow<VibrationSessionUiState> = _sessionUiState.asStateFlow()
+
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 16)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
 
@@ -125,12 +130,67 @@ class PersetmodeViewModel(
     private var lastHardwareReady = false
     private var shouldPlayTone = false
 
+    private fun buildSessionUiState(state: PresetModeUiState = _uiState.value): VibrationSessionUiState {
+        val frequency = state.frequencyHz ?: 0
+        val intensity = state.intensity01V ?: 0
+        val remainingSeconds = state.remainingSeconds
+        val timeDisplay = formatAsMMSS(remainingSeconds)
+        val frequencyDisplay = state.frequencyHz?.toString() ?: "--"
+        val intensityDisplay = state.intensity01V?.toString() ?: "--"
+
+        return VibrationSessionUiState(
+            frequencyValue = frequency,
+            intensityValue = intensity,
+            timeInMinutes = remainingSeconds / 60,
+            countdownSeconds = remainingSeconds,
+            frequencyDisplay = frequencyDisplay,
+            intensityDisplay = intensityDisplay,
+            timeDisplay = timeDisplay,
+            activeInputType = "frequency",
+            isEditing = false,
+            isRunning = state.isRunning,
+            startButtonEnabled = state.isStartEnabled,
+            isHardwareReady = lastHardwareReady,
+            isTestAccount = isTestAccount,
+            playSineTone = shouldPlayTone
+        )
+    }
+
+    private fun emitSessionUiState(state: PresetModeUiState = _uiState.value) {
+        _sessionUiState.value = buildSessionUiState(state)
+    }
+
+    private fun updateUiState(transform: (PresetModeUiState) -> PresetModeUiState) {
+        _uiState.update { current ->
+            val updated = transform(current)
+            emitSessionUiState(updated)
+            updated
+        }
+    }
+
     private enum class StopReason(val apiValue: String) {
         MANUAL("manual"),
         LOGOUT("logout"),
         COUNTDOWN_COMPLETE("countdown_complete"),
         HARDWARE_ERROR("hardware_error"),
         UNKNOWN("unknown")
+    }
+
+    fun handleSessionIntent(intent: VibrationSessionIntent) {
+        when (intent) {
+            is VibrationSessionIntent.ToggleStartStop -> toggleStartStop(intent.customer)
+            else -> Unit
+        }
+    }
+
+    fun playTapSound() {
+        hardwareRepository.playTapSound()
+    }
+
+    private fun formatAsMMSS(seconds: Int): String {
+        val m = seconds / 60
+        val s = seconds % 60
+        return String.format("%02d:%02d", m, s)
     }
 
     init {
@@ -185,7 +245,7 @@ class PersetmodeViewModel(
                     val currentSelectedId = _uiState.value.selectedCustomPresetId
                     val hasCurrent = currentSelectedId != null && presets.any { it.id == currentSelectedId }
                     val normalizedSelectedId = if (hasCurrent) currentSelectedId else null
-                    _uiState.update { state ->
+                    updateUiState { state ->
                         val updated = state.copy(
                             customPresets = presets.map { it.toUiModel(normalizedSelectedId) },
                             selectedCustomPresetId = normalizedSelectedId
@@ -211,6 +271,8 @@ class PersetmodeViewModel(
                 }
             }
         }
+
+        emitSessionUiState()
     }
 
     fun selectMode(index: Int) {
@@ -219,7 +281,7 @@ class PersetmodeViewModel(
         val mode = presetModes[clamped]
         val steps = scaledSteps(mode)
         val first = steps.firstOrNull()
-        _uiState.update {
+        updateUiState {
             it.copy(
                 category = PresetCategory.BUILT_IN,
                 selectedModeIndex = clamped,
@@ -234,7 +296,7 @@ class PersetmodeViewModel(
 
     fun enterCustomMode() {
         if (_uiState.value.isRunning) return
-        _uiState.update { it.copy(category = PresetCategory.CUSTOM) }
+        updateUiState { it.copy(category = PresetCategory.CUSTOM) }
         recomputeStartButtonEnabled()
     }
 
@@ -258,7 +320,7 @@ class PersetmodeViewModel(
         if (_uiState.value.selectedCustomPresetId == null && _uiState.value.category == PresetCategory.CUSTOM) {
             return
         }
-        _uiState.update {
+        updateUiState {
             it.copy(
                 category = PresetCategory.CUSTOM,
                 selectedCustomPresetId = null,
@@ -276,7 +338,7 @@ class PersetmodeViewModel(
         val orderedSteps = preset.steps.sortedBy { it.order }
         val first = orderedSteps.firstOrNull()
         val totalDuration = orderedSteps.sumOf { it.durationSec }
-        _uiState.update {
+        updateUiState {
             it.copy(
                 category = PresetCategory.CUSTOM,
                 selectedCustomPresetId = preset.id,
@@ -295,7 +357,7 @@ class PersetmodeViewModel(
             customPresetRepository.delete(presetId)
         }
         if (_uiState.value.selectedCustomPresetId == presetId) {
-            _uiState.update {
+            updateUiState {
                 it.copy(
                     selectedCustomPresetId = null,
                     customPresets = it.customPresets.map { preset -> preset.copy(isSelected = false) }
@@ -318,7 +380,7 @@ class PersetmodeViewModel(
         if (_uiState.value.isRunning) return
         val mode = currentMode()
         val first = scaledSteps(mode).firstOrNull()
-        _uiState.update {
+        updateUiState {
             it.copy(
                 frequencyHz = first?.frequencyHz,
                 intensity01V = first?.intensity01V
@@ -349,6 +411,7 @@ class PersetmodeViewModel(
             setPlaySineTone(false)
         }
         recomputeStartButtonEnabled()
+        emitSessionUiState()
     }
 
     fun setPlaySineTone(enabled: Boolean) {
@@ -388,6 +451,7 @@ class PersetmodeViewModel(
                 }
             }
         }
+        emitSessionUiState()
     }
 
     fun toggleStartStop(selectedCustomer: Customer?) {
@@ -527,7 +591,7 @@ class PersetmodeViewModel(
         pendingCustomSelectionId = presetId
         val first = steps.firstOrNull()
         val totalDuration = steps.sumOf { it.durationSec }
-        _uiState.update {
+        updateUiState {
             it.copy(
                 category = PresetCategory.CUSTOM,
                 selectedCustomPresetId = presetId,
@@ -579,7 +643,7 @@ class PersetmodeViewModel(
         } else {
             isSessionActive && hasSelection && (lastHardwareReady || isTestAccount)
         }
-        _uiState.update { it.copy(isStartEnabled = enabled) }
+        updateUiState { it.copy(isStartEnabled = enabled) }
     }
 
     private fun startPreset(
@@ -631,7 +695,7 @@ class PersetmodeViewModel(
             }
             currentRunId = runId
             runningWithoutHardware = !useHardware
-            _uiState.update {
+            updateUiState {
                 it.copy(
                     isRunning = true,
                     modeButtonsEnabled = false,
@@ -697,7 +761,7 @@ class PersetmodeViewModel(
                 "PresetRun",
                 "stepState index=$index freq=${step.frequencyHz} intensity=${step.intensity01V} duration=${step.durationSec} remaining=$remaining hardwareReady=$lastHardwareReady runningWithoutHardware=$runningWithoutHardware"
             )
-            _uiState.update {
+            updateUiState {
                 it.copy(
                     currentStepIndex = index,
                     currentStep = step,
@@ -711,7 +775,7 @@ class PersetmodeViewModel(
                 if (!coroutineContext.isActive) return
                 delay(1000)
                 remaining = (remaining - 1).coerceAtLeast(0)
-                _uiState.update { state ->
+                updateUiState { state ->
                     if (!state.isRunning) state else state.copy(remainingSeconds = remaining)
                 }
             }
@@ -792,7 +856,7 @@ class PersetmodeViewModel(
             nextRemaining = mode.totalDurationSec
             nextTotal = mode.totalDurationSec
         }
-        _uiState.update {
+        updateUiState {
             it.copy(
                 isRunning = false,
                 modeButtonsEnabled = true,

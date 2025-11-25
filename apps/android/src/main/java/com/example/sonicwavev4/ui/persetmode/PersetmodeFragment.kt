@@ -14,6 +14,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.sonicwavev4.R
+import com.example.sonicwavev4.core.vibration.VibrationSessionIntent
+import com.example.sonicwavev4.core.vibration.VibrationSessionUiState
 import com.example.sonicwavev4.data.custompreset.CustomPresetRepositoryImpl
 import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
@@ -103,7 +105,7 @@ class PersetmodeFragment : Fragment() {
         }
         binding.btnStartStop.setOnClickListener {
             val customer = customerViewModel.selectedCustomer.value
-            viewModel.toggleStartStop(customer)
+            viewModel.handleSessionIntent(VibrationSessionIntent.ToggleStartStop(customer))
         }
         binding.btnEditPreset.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
@@ -119,7 +121,11 @@ class PersetmodeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.uiState.collect { renderState(it) }
+                    combine(viewModel.uiState, viewModel.sessionUiState) { preset, session ->
+                        preset to session
+                    }.collect { (preset, session) ->
+                        renderState(preset, session)
+                    }
                 }
                 launch {
                     viewModel.events.collect { handleEvent(it) }
@@ -150,10 +156,10 @@ class PersetmodeFragment : Fragment() {
         }
     }
 
-    private fun renderState(state: PresetModeUiState) {
+    private fun renderState(state: PresetModeUiState, sessionState: VibrationSessionUiState) {
         binding.btnStartStop.text =
-            if (state.isRunning) getString(R.string.button_stop) else getString(R.string.button_start)
-        binding.btnStartStop.isEnabled = state.isStartEnabled
+            if (sessionState.isRunning) getString(R.string.button_stop) else getString(R.string.button_start)
+        binding.btnStartStop.isEnabled = sessionState.startButtonEnabled
 
         val selectedTextColor = ContextCompat.getColor(requireContext(), android.R.color.white)
         val defaultTextColor = ContextCompat.getColor(requireContext(), R.color.preset_mode_button_text_default)
@@ -181,9 +187,9 @@ class PersetmodeFragment : Fragment() {
         binding.imgHighlightChestAbdomen.isVisible = state.selectedModeIndex == 3
         binding.imgHighlightLowerLimb.isVisible = state.selectedModeIndex == 4
 
-        binding.tvFrequencyValue.text = state.frequencyHz?.toString() ?: "--"
-        binding.tvIntensityValue.text = state.intensity01V?.toString() ?: "--"
-        binding.tvRemainingValue.text = formatAsMMSS(state.remainingSeconds)
+        binding.tvFrequencyValue.text = sessionState.frequencyDisplay
+        binding.tvIntensityValue.text = sessionState.intensityDisplay
+        binding.tvRemainingValue.text = sessionState.timeDisplay
     }
 
     private fun observeEditButtonVisibility() {
@@ -220,9 +226,4 @@ class PersetmodeFragment : Fragment() {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun formatAsMMSS(seconds: Int): String {
-        val m = seconds / 60
-        val s = seconds % 60
-        return String.format("%02d:%02d", m, s)
-    }
 }
