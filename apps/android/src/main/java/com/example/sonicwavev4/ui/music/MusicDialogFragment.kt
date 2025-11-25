@@ -70,11 +70,12 @@ class MusicDialogFragment : DialogFragment() {
         val displayMetrics = DisplayMetrics()
         @Suppress("DEPRECATION")
         dialogWindow.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
-        val width = (displayMetrics.widthPixels * 0.9).toInt()
-        val height = (displayMetrics.heightPixels * 0.9).toInt()
+        val width = (displayMetrics.widthPixels * 0.8).toInt()
+        val height = (displayMetrics.heightPixels * 0.8).toInt()
         dialogWindow.setLayout(width, height)
-        dialogWindow.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialogWindow.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        dialogWindow.setBackgroundDrawable(ColorDrawable(Color.WHITE))
+        dialogWindow.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        dialogWindow.setDimAmount(0.5f)
     }
 
     private fun updateSongs() {

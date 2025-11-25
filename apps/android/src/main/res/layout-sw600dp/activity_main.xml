@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -36,14 +35,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
+            app:layout_constraintGuide_begin="680dp" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/horizontal_divider_guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.55" />
+            app:layout_constraintGuide_percent="0.85" />
 
         <!-- === 左侧栏布局 === -->
         <androidx.constraintlayout.widget.Guideline
@@ -51,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_end="1220dp" />
+            app:layout_constraintGuide_percent="0.1" />
 
 
         <!-- === 左上角区域 === -->
@@ -128,6 +127,10 @@
             android:layout_width="2dp"
             android:layout_height="0dp"
             android:background="@android:color/darker_gray"
+            android:clickable="false"
+            android:focusable="false"
+            android:longClickable="false"
+            android:importantForAccessibility="no"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/vertical_divider_guideline"
@@ -139,28 +142,43 @@
             android:layout_width="0dp"
             android:layout_height="2dp"
             android:background="@android:color/darker_gray"
+            android:clickable="false"
+            android:focusable="false"
+            android:longClickable="false"
+            android:importantForAccessibility="no"
             app:layout_constraintStart_toEndOf="@id/inner_nav_guideline"
             app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline"
             app:layout_constraintTop_toTopOf="@id/horizontal_divider_guideline"
             app:layout_constraintBottom_toBottomOf="@id/horizontal_divider_guideline" />
 
         <!-- 左侧竖向分隔线 -->
+
+        <!-- 左侧水平分隔线 -->
         <View
             android:id="@+id/left_vertical_divider"
             android:layout_width="2dp"
             android:layout_height="0dp"
             android:background="@android:color/darker_gray"
-            app:layout_constraintTop_toTopOf="parent"
+            android:clickable="false"
+            android:focusable="false"
+            android:importantForAccessibility="no"
+            android:longClickable="false"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/inner_nav_guideline"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@id/inner_nav_guideline"
-            app:layout_constraintEnd_toEndOf="@id/inner_nav_guideline" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
 
-        <!-- 左侧水平分隔线 -->
         <View
             android:id="@+id/left_horizontal_divider"
             android:layout_width="0dp"
             android:layout_height="2dp"
             android:background="@android:color/darker_gray"
+            android:clickable="false"
+            android:focusable="false"
+            android:longClickable="false"
+            android:importantForAccessibility="no"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/inner_nav_guideline"
             app:layout_constraintTop_toTopOf="@id/horizontal_divider_guideline"
@@ -173,6 +191,10 @@
             android:layout_width="0dp"
             android:layout_height="2dp"
             android:background="@android:color/darker_gray"
+            android:clickable="false"
+            android:focusable="false"
+            android:longClickable="false"
+            android:importantForAccessibility="no"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline"
             app:layout_constraintBottom_toBottomOf="parent"

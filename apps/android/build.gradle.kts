@@ -160,6 +160,7 @@ dependencies {
     implementation(libs.androidx.gridlayout) // Added for GridLayout support
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation("androidx.lifecycle:lifecycle-process:2.8.6")
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     // 添加 ViewModel KTX 依赖，以便使用 by viewModels()
