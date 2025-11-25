@@ -57,6 +57,7 @@ import com.example.sonicwavev4.network.AppUsageRequest
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.ui.notifications.NotificationDialogFragment
+import com.example.sonicwavev4.ui.music.MusicDialogFragment
 import com.example.sonicwavev4.utils.DeviceIdentityProvider
 import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.utils.OfflineForceExitManager
@@ -146,7 +147,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         setupCustomNavigationRail()
         observeSelectedCustomerContext()
 
-        musicAreaLayout = binding.mainContentConstraintLayout?.findViewById(R.id.fragment_bottom_left)
+        musicAreaLayout = binding.root.findViewById(R.id.fragment_bottom_left)
         musicDownloader = MusicDownloader(this)
         downloadedMusicRepository = DownloadedMusicRepository(this)
         setupMusicArea()
@@ -296,13 +297,14 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         val area = musicAreaLayout ?: return
         musicRecyclerView = area.findViewById(R.id.music_list_recyclerview)
         downloadButton = area.findViewById(R.id.download_music_button)
-        playPauseButton = area.findViewById(R.id.play_pause_button)
-        prevButton = area.findViewById(R.id.prev_button)
-        nextButton = area.findViewById(R.id.next_button)
+        playPauseButton = area.findViewById(R.id.btnPlayPause)
+        prevButton = area.findViewById(R.id.btnPrev)
+        nextButton = area.findViewById(R.id.btnNext)
         vinylDiscView = area.findViewById(R.id.vinyl_disc_view)
         tonearmView = area.findViewById(R.id.tonearm_view)
-        playbackSeekBar = area.findViewById(R.id.playback_seekbar)
-        playbackTimeText = area.findViewById(R.id.playback_time_text)
+        playbackSeekBar = area.findViewById(R.id.seekBarMusic)
+        playbackTimeText = area.findViewById(R.id.tvRemainingTime)
+        val openMusicButton: View? = area.findViewById(R.id.btnOpenMusic)
 
         tonearmView?.apply {
             rotation = tonearmRestRotation
@@ -355,6 +357,10 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         playPauseButton?.setOnClickListener { togglePlayPause() }
         prevButton?.setOnClickListener { playPreviousTrack() }
         nextButton?.setOnClickListener { playNextTrack() }
+        openMusicButton?.setOnClickListener {
+            val dialog = MusicDialogFragment()
+            dialog.show(supportFragmentManager, "MusicDialog")
+        }
 
         resetPlaybackUi()
         area.visibility = View.VISIBLE
