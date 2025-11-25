@@ -4,10 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [OfflineCustomerEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class OfflineCustomerDatabase : RoomDatabase() {
@@ -28,7 +30,16 @@ abstract class OfflineCustomerDatabase : RoomDatabase() {
                 context,
                 OfflineCustomerDatabase::class.java,
                 "offline_customers.db"
-            ).build()
+            ).addMigrations(MIGRATION_1_2)
+                .build()
+        }
+
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_offline_customers_name ON offline_customers(name)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_offline_customers_phone ON offline_customers(phone)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_offline_customers_email ON offline_customers(email)")
+            }
         }
     }
 }

@@ -39,6 +39,7 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
     fun loadCustomers() {
         viewModelScope.launch {
             val offlineMode = OfflineTestModeManager.isOfflineMode()
+            val currentQuery = _uiState.value.searchQuery
             _uiState.update {
                 it.copy(
                     isLoading = true,
@@ -49,7 +50,7 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
             try {
                 val customers = withContext(Dispatchers.IO) {
                     if (offlineMode) {
-                        offlineCustomerRepository.listCustomers()
+                        offlineCustomerRepository.listCustomers(currentQuery)
                     } else {
                         val response = customerRepository.getCustomers()
                         if (response.isSuccessful) {
@@ -59,7 +60,7 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
                         }
                     }
                 }
-                updateCustomers(customers)
+                updateCustomers(customers, offlineMode, currentQuery)
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
                 _events.emit(CustomerEvent.Error(e.message ?: "获取客户列表失败"))
@@ -78,11 +79,20 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun setSearchQuery(query: String) {
-        _uiState.update {
-            it.copy(
-                searchQuery = query,
-                filteredCustomers = filterCustomers(it.customers, query)
-            )
+        _uiState.update { it.copy(searchQuery = query) }
+        if (OfflineTestModeManager.isOfflineMode()) {
+            viewModelScope.launch {
+                val filtered = withContext(Dispatchers.IO) {
+                    offlineCustomerRepository.listCustomers(query)
+                }
+                updateCustomers(filtered, offlineMode = true, searchQuery = query)
+            }
+        } else {
+            _uiState.update {
+                it.copy(
+                    filteredCustomers = filterCustomers(it.customers, query)
+                )
+            }
         }
     }
 
@@ -147,11 +157,12 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
         _uiState.value = CustomerListUiState()
     }
 
-    private fun updateCustomers(customers: List<Customer>) {
+    private fun updateCustomers(customers: List<Customer>, offlineMode: Boolean, searchQuery: String) {
+        val filtered = if (offlineMode) customers else filterCustomers(customers, searchQuery)
         _uiState.update {
             it.copy(
                 customers = customers,
-                filteredCustomers = filterCustomers(customers, it.searchQuery),
+                filteredCustomers = filtered,
                 selectedCustomer = _selectedCustomer.value,
                 isLoading = false,
                 errorMessage = null
