@@ -14,6 +14,12 @@ import kotlinx.coroutines.launch
 
 object DeviceHeartbeatManager {
 
+    /**
+     * Device/App heartbeat is expected to continue even in offline mode so that backend
+     * can track foreground availability. User heartbeat remains governed by login/online
+     * state elsewhere.
+     */
+
     private const val INTERVAL_MS = 15_000L
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var heartbeatJob: Job? = null
@@ -29,25 +35,13 @@ object DeviceHeartbeatManager {
 
     fun start(context: Context) {
         initialize(context)
-        if (OfflineTestModeManager.isOfflineMode()) {
-            Log.d("DeviceHeartbeatManager", "Offline mode active, not starting device heartbeat.")
-            stop()
-            return
-        }
         if (heartbeatJob?.isActive == true) {
             return
         }
         heartbeatJob = scope.launch {
             while (isActive) {
                 try {
-                    if (OfflineTestModeManager.isOfflineMode()) {
-                        Log.d("DeviceHeartbeatManager", "Offline mode active, skipping device heartbeat.")
-                        break
-                    }
-                    val hasUserSession = sessionManager.hasActiveSession() && sessionManager.fetchSessionId() != -1L
-                    if (!hasUserSession && !OfflineTestModeManager.isOfflineMode()) {
-                        sendHeartbeat()
-                    }
+                    sendHeartbeat()
                 } catch (e: Exception) {
                     Log.w("DeviceHeartbeatManager", "Failed to send device heartbeat", e)
                 }
