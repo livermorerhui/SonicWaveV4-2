@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,12 @@ class MusicDialogFragment : DialogFragment() {
     private lateinit var songAdapter: SongAdapter
 
     private val musicViewModel: MusicPlayerViewModel by activityViewModels()
+
+    override fun onCreateDialog(savedInstanceState: Bundle?) = super.onCreateDialog(savedInstanceState).apply {
+        setOnKeyListener { _, keyCode, _ ->
+            keyCode == KeyEvent.KEYCODE_BACK
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,12 +77,12 @@ class MusicDialogFragment : DialogFragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     musicViewModel.playlist.collect { songs ->
-                        songAdapter.submitList(songs)
+                        songAdapter.submitList(sortedSongs(songs))
                     }
                 }
                 launch {
-                    musicViewModel.currentIndex.collect { index ->
-                        songAdapter.setCurrentIndex(index)
+                    musicViewModel.currentTrack.collect { track ->
+                        songAdapter.setCurrentTrack(track)
                     }
                 }
             }
@@ -100,7 +107,11 @@ class MusicDialogFragment : DialogFragment() {
 
     private fun updateSongs() {
         // Categories are placeholders for now; all songs share the same playlist.
-        songAdapter.submitList(musicViewModel.playlist.value)
+        songAdapter.submitList(sortedSongs(musicViewModel.playlist.value))
+    }
+
+    private fun sortedSongs(songs: List<MusicItem>): List<MusicItem> {
+        return songs.sortedByDescending { it.isDownloaded }
     }
 
     private class CategoryAdapter(
@@ -148,7 +159,7 @@ class MusicDialogFragment : DialogFragment() {
         private val onSongClicked: (MusicItem) -> Unit
     ) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
         private val items = mutableListOf<MusicItem>()
-        private var playingIndex: Int = -1
+        private var playingTrack: MusicItem? = null
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
             val view = LayoutInflater.from(parent.context)
@@ -159,7 +170,7 @@ class MusicDialogFragment : DialogFragment() {
         override fun getItemCount(): Int = items.size
 
         override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
-            holder.bind(items[position], position == playingIndex)
+            holder.bind(items[position], items[position].uri == playingTrack?.uri)
         }
 
         fun submitList(data: List<MusicItem>) {
@@ -168,11 +179,16 @@ class MusicDialogFragment : DialogFragment() {
             notifyDataSetChanged()
         }
 
-        fun setCurrentIndex(index: Int) {
-            val previous = playingIndex
-            playingIndex = index
-            if (previous != -1) notifyItemChanged(previous)
-            if (index != -1) notifyItemChanged(index)
+        fun setCurrentTrack(track: MusicItem?) {
+            val previousIndex = playingTrack?.let { previous ->
+                items.indexOfFirst { it.uri == previous.uri }
+            } ?: -1
+            playingTrack = track
+            val newIndex = track?.let { current ->
+                items.indexOfFirst { it.uri == current.uri }
+            } ?: -1
+            if (previousIndex != -1) notifyItemChanged(previousIndex)
+            if (newIndex != -1 && newIndex != previousIndex) notifyItemChanged(newIndex)
         }
 
         class SongViewHolder(
@@ -180,13 +196,14 @@ class MusicDialogFragment : DialogFragment() {
             private val onSongClicked: (MusicItem) -> Unit
         ) : RecyclerView.ViewHolder(itemView) {
             private val title: android.widget.TextView = itemView.findViewById(R.id.tvSongTitle)
-            private val defaultColor: Int = title.currentTextColor
+            private val downloadedColor: Int = title.context.getColor(R.color.black)
+            private val pendingDownloadColor: Int = title.context.getColor(R.color.nav_item_inactive)
+            private val playingColor: Int = title.context.getColor(R.color.teal_200)
 
             fun bind(item: MusicItem, playing: Boolean) {
                 title.text = item.title
-                title.setTextColor(
-                    if (playing) title.context.getColor(R.color.teal_200) else defaultColor
-                )
+                val baseColor = if (item.isDownloaded) downloadedColor else pendingDownloadColor
+                title.setTextColor(if (playing) playingColor else baseColor)
                 itemView.setOnClickListener { onSongClicked(item) }
             }
         }

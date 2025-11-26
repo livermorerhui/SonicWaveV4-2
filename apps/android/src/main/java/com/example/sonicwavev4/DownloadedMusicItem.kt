@@ -12,6 +12,6 @@ data class DownloadedMusicItem(
     // Helper to convert to MusicItem for display
     fun toMusicItem(): MusicItem? =
         File(internalPath).takeIf { it.exists() }?.let { file ->
-            MusicItem(title, artist, Uri.fromFile(file))
+            MusicItem(title, artist, Uri.fromFile(file), isDownloaded = true)
         }
 }
