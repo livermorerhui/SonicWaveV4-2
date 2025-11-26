@@ -53,7 +53,9 @@ data class VibrationSessionUiState(
     val startButtonEnabled: Boolean = false,
     val isHardwareReady: Boolean = false,
     val isTestAccount: Boolean = false,
-    val playSineTone: Boolean = false
+    val playSineTone: Boolean = false,
+    val softReductionActive: Boolean = false,
+    val softPanelExpanded: Boolean = false
 )
 
 sealed class VibrationSessionIntent {
@@ -67,4 +69,9 @@ sealed class VibrationSessionIntent {
     data class AdjustTime(val delta: Int) : VibrationSessionIntent()
     data class ToggleStartStop(val customer: Customer?) : VibrationSessionIntent()
     object ClearAll : VibrationSessionIntent()
+
+    object SoftReduceFromTap : VibrationSessionIntent()
+    object SoftReductionStopClicked : VibrationSessionIntent()
+    object SoftReductionResumeClicked : VibrationSessionIntent()
+    object SoftReductionCollapsePanel : VibrationSessionIntent()
 }

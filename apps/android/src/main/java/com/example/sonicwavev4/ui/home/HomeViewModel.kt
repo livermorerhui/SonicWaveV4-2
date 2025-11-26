@@ -64,6 +64,12 @@ class HomeViewModel(
     private val _startButtonEnabled = MutableLiveData(false)
     val startButtonEnabled: LiveData<Boolean> = _startButtonEnabled
 
+    private var softOriginalIntensity: Int? = null
+    private var softReductionJob: Job? = null
+    private var softReductionActive: Boolean = false
+    private var softPanelExpanded: Boolean = false
+    private val softTargetIntensity: Int = 20
+
     private val _uiState = MutableStateFlow(buildUiState())
     val uiState: StateFlow<VibrationSessionUiState> = _uiState.asStateFlow()
 
@@ -142,12 +148,46 @@ class HomeViewModel(
             startButtonEnabled = _startButtonEnabled.value == true,
             isHardwareReady = hardwareRepository.state.value.isHardwareReady,
             isTestAccount = _isTestAccount.value == true,
-            playSineTone = _playSineTone.value == true
+            playSineTone = _playSineTone.value == true,
+            softReductionActive = softReductionActive,
+            softPanelExpanded = softPanelExpanded
         )
     }
 
     private fun emitUiState() {
         _uiState.value = buildUiState()
+    }
+
+    private fun clearSoftReductionState() {
+        softReductionJob?.cancel()
+        softReductionJob = null
+        softOriginalIntensity = null
+        softReductionActive = false
+        softPanelExpanded = false
+    }
+
+    private fun startSoftReductionRamp() {
+        softReductionJob?.cancel()
+
+        val target = softTargetIntensity
+
+        softReductionJob = viewModelScope.launch {
+            var current = _intensity.value ?: 0
+
+            if (current <= target) {
+                if (current != target) {
+                    updateIntensity(target)
+                }
+                return@launch
+            }
+
+            while (softReductionActive && _isStarted.value == true && current > target) {
+                val delta = max(1, (current - target) / 10)
+                current = max(target, current - delta)
+                updateIntensity(current)
+                delay(80)
+            }
+        }
     }
 
     init {
@@ -396,7 +436,53 @@ class HomeViewModel(
             is VibrationSessionIntent.AdjustTime -> applyDelta("time", intent.delta)
             is VibrationSessionIntent.ToggleStartStop -> startStopPlayback(intent.customer)
             VibrationSessionIntent.ClearAll -> clearAll()
+            VibrationSessionIntent.SoftReduceFromTap -> handleSoftReduceFromTap()
+            VibrationSessionIntent.SoftReductionStopClicked -> handleSoftReductionStopClicked()
+            VibrationSessionIntent.SoftReductionResumeClicked -> handleSoftReductionResumeClicked()
+            VibrationSessionIntent.SoftReductionCollapsePanel -> handleSoftReductionCollapsePanel()
         }
+    }
+
+    private fun handleSoftReduceFromTap() {
+        if (softReductionActive) return
+        if (_isStarted.value != true) return
+
+        val current = _intensity.value ?: 0
+        if (softOriginalIntensity == null) {
+            softOriginalIntensity = current
+        }
+
+        softReductionActive = true
+        softPanelExpanded = true
+
+        startSoftReductionRamp()
+        emitUiState()
+    }
+
+    private fun handleSoftReductionStopClicked() {
+        if (_isStarted.value == true) {
+            forceStop(StopReason.MANUAL)
+        }
+
+        clearSoftReductionState()
+    }
+
+    private fun handleSoftReductionResumeClicked() {
+        val original = softOriginalIntensity
+
+        if (_isStarted.value == true && original != null) {
+            softReductionJob?.cancel()
+            updateIntensity(original)
+        }
+
+        clearSoftReductionState()
+        emitUiState()
+    }
+
+    private fun handleSoftReductionCollapsePanel() {
+        if (!softReductionActive) return
+        softPanelExpanded = false
+        emitUiState()
     }
 
     // --- 公开的增减接口 (无改动) ---
@@ -511,6 +597,7 @@ class HomeViewModel(
             _isStarted.value = false
         }
         stopCountdown()
+        clearSoftReductionState()
         recomputeStartButtonEnabled()
     }
 
@@ -677,6 +764,7 @@ class HomeViewModel(
     }
 
     private suspend fun resetUiStateToDefaults() {
+        clearSoftReductionState()
         countdownJob?.cancel()
         _isStarted.value = false
         currentOperationId = null

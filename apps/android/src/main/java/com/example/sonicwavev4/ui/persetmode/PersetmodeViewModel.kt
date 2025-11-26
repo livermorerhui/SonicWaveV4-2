@@ -152,7 +152,9 @@ class PersetmodeViewModel(
             startButtonEnabled = state.isStartEnabled,
             isHardwareReady = lastHardwareReady,
             isTestAccount = isTestAccount,
-            playSineTone = shouldPlayTone
+            playSineTone = shouldPlayTone,
+            softReductionActive = false,
+            softPanelExpanded = false
         )
     }
 

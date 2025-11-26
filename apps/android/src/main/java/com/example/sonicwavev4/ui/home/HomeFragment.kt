@@ -1,6 +1,7 @@
 package com.example.sonicwavev4.ui.home
 
 import android.os.Bundle
+import android.graphics.Rect
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -25,7 +26,6 @@ import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -93,6 +93,19 @@ class HomeFragment : Fragment() {
         binding.tvTimeValue.text = state.timeDisplay
 
         updateHighlights(state.activeInputType)
+
+        if (state.softReductionActive) {
+            if (state.softPanelExpanded) {
+                binding.layoutSoftPanelExpanded.visibility = View.VISIBLE
+                binding.layoutSoftPanelCollapsed.visibility = View.GONE
+            } else {
+                binding.layoutSoftPanelExpanded.visibility = View.GONE
+                binding.layoutSoftPanelCollapsed.visibility = View.VISIBLE
+            }
+        } else {
+            binding.layoutSoftPanelExpanded.visibility = View.GONE
+            binding.layoutSoftPanelCollapsed.visibility = View.GONE
+        }
     }
 
     private fun observeEvents() {
@@ -206,6 +219,62 @@ class HomeFragment : Fragment() {
         binding.btnKeyEnter.setOnClickListener {
             viewModel.handleIntent(VibrationSessionIntent.CommitAndCycle)
             viewModel.playTapSound()
+        }
+
+        binding.btnSoftStopExpanded.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.SoftReductionStopClicked)
+            viewModel.playTapSound()
+        }
+        binding.btnSoftResumeExpanded.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.SoftReductionResumeClicked)
+            viewModel.playTapSound()
+        }
+        binding.btnSoftStopCollapsed.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.SoftReductionStopClicked)
+            viewModel.playTapSound()
+        }
+        binding.btnSoftResumeCollapsed.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.SoftReductionResumeClicked)
+            viewModel.playTapSound()
+        }
+
+        binding.root.setOnTouchListener { _, event ->
+            if (event.actionMasked != MotionEvent.ACTION_DOWN) {
+                return@setOnTouchListener false
+            }
+
+            val state = viewModel.uiState.value ?: return@setOnTouchListener false
+
+            if (!state.isRunning) {
+                return@setOnTouchListener false
+            }
+
+            val x = event.x.toInt()
+            val y = event.y.toInt()
+
+            fun isInside(view: View): Boolean {
+                if (view.visibility != View.VISIBLE) return false
+                val rect = Rect()
+                view.getHitRect(rect)
+                return rect.contains(x, y)
+            }
+
+            val expanded = binding.layoutSoftPanelExpanded
+            val collapsed = binding.layoutSoftPanelCollapsed
+
+            if (isInside(expanded) || isInside(collapsed)) {
+                return@setOnTouchListener false
+            }
+
+            if (!state.softReductionActive) {
+                viewModel.handleIntent(VibrationSessionIntent.SoftReduceFromTap)
+            } else {
+                if (state.softPanelExpanded) {
+                    viewModel.handleIntent(VibrationSessionIntent.SoftReductionCollapsePanel)
+                }
+            }
+
+            false
         }
 
     }
