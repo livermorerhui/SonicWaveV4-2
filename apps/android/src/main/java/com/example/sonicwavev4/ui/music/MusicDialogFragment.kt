@@ -9,23 +9,26 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.sonicwavev4.MusicItem
 import com.example.sonicwavev4.R
+import kotlinx.coroutines.launch
 
 class MusicDialogFragment : DialogFragment() {
 
     private val categories = listOf("放松", "专注", "睡眠")
-    private val songsByCategory = mapOf(
-        "放松" to listOf("轻柔海浪", "森林细语", "午后咖啡"),
-        "专注" to listOf("白噪音", "键盘雨", "专注脉冲"),
-        "睡眠" to listOf("舒眠摇篮曲", "夜空之下", "星光低语")
-    )
 
     private var selectedCategory = 0
 
     private lateinit var categoryAdapter: CategoryAdapter
     private lateinit var songAdapter: SongAdapter
+
+    private val musicViewModel: MusicPlayerViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,7 +47,9 @@ class MusicDialogFragment : DialogFragment() {
                 updateSongs()
             }
         }
-        songAdapter = SongAdapter()
+        songAdapter = SongAdapter { song ->
+            musicViewModel.playTrack(song)
+        }
 
         rvCategories.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -60,6 +65,21 @@ class MusicDialogFragment : DialogFragment() {
 
         btnClose.setOnClickListener { dismiss() }
         isCancelable = false
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    musicViewModel.playlist.collect { songs ->
+                        songAdapter.submitList(songs)
+                    }
+                }
+                launch {
+                    musicViewModel.currentIndex.collect { index ->
+                        songAdapter.setCurrentIndex(index)
+                    }
+                }
+            }
+        }
 
         return view
     }
@@ -79,9 +99,8 @@ class MusicDialogFragment : DialogFragment() {
     }
 
     private fun updateSongs() {
-        val category = categories.getOrNull(selectedCategory)
-        val songs = songsByCategory[category] ?: emptyList()
-        songAdapter.submitList(songs)
+        // Categories are placeholders for now; all songs share the same playlist.
+        songAdapter.submitList(musicViewModel.playlist.value)
     }
 
     private class CategoryAdapter(
@@ -125,31 +144,50 @@ class MusicDialogFragment : DialogFragment() {
         }
     }
 
-    private class SongAdapter : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
-        private val items = mutableListOf<String>()
+    private class SongAdapter(
+        private val onSongClicked: (MusicItem) -> Unit
+    ) : RecyclerView.Adapter<SongAdapter.SongViewHolder>() {
+        private val items = mutableListOf<MusicItem>()
+        private var playingIndex: Int = -1
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_song, parent, false)
-            return SongViewHolder(view)
+            return SongViewHolder(view, onSongClicked)
         }
 
         override fun getItemCount(): Int = items.size
 
         override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
-            holder.bind(items[position])
+            holder.bind(items[position], position == playingIndex)
         }
 
-        fun submitList(data: List<String>) {
+        fun submitList(data: List<MusicItem>) {
             items.clear()
             items.addAll(data)
             notifyDataSetChanged()
         }
 
-        class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        fun setCurrentIndex(index: Int) {
+            val previous = playingIndex
+            playingIndex = index
+            if (previous != -1) notifyItemChanged(previous)
+            if (index != -1) notifyItemChanged(index)
+        }
+
+        class SongViewHolder(
+            itemView: View,
+            private val onSongClicked: (MusicItem) -> Unit
+        ) : RecyclerView.ViewHolder(itemView) {
             private val title: android.widget.TextView = itemView.findViewById(R.id.tvSongTitle)
-            fun bind(name: String) {
-                title.text = name
+            private val defaultColor: Int = title.currentTextColor
+
+            fun bind(item: MusicItem, playing: Boolean) {
+                title.text = item.title
+                title.setTextColor(
+                    if (playing) title.context.getColor(R.color.teal_200) else defaultColor
+                )
+                itemView.setOnClickListener { onSongClicked(item) }
             }
         }
     }
