@@ -163,6 +163,7 @@
     <!-- Keypad Buttons (no layout constraints needed anymore) -->
 
     <androidx.constraintlayout.helper.widget.Flow
+        android:id="@+id/flow_keypad"
         android:layout_width="200dp"
         android:layout_height="270dp"
         android:layout_marginStart="8dp"
@@ -176,32 +177,43 @@
         app:flow_maxElementsWrap="3"
         app:flow_verticalStyle="spread_inside"
         app:flow_wrapMode="chain"
-        app:layout_constraintBottom_toBottomOf="@id/btn_clear"
+        app:layout_constraintBottom_toBottomOf="@id/btn_stop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.047"
         app:layout_constraintStart_toEndOf="@id/guideline_vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <Button android:id="@+id/btn_key_7" style="@style/KeypadButton" android:minHeight="48dp" android:text="7" />
-    <Button android:id="@+id/btn_key_8" style="@style/KeypadButton" android:minHeight="48dp" android:text="8" />
-    <Button android:id="@+id/btn_key_9" style="@style/KeypadButton" android:minHeight="48dp" android:text="9" />
-    <Button android:id="@+id/btn_key_4" style="@style/KeypadButton" android:minHeight="48dp" android:text="4" />
-    <Button android:id="@+id/btn_key_5" style="@style/KeypadButton" android:minHeight="48dp" android:text="5" />
-    <Button android:id="@+id/btn_key_6" style="@style/KeypadButton" android:minHeight="48dp" android:text="6" />
-    <Button android:id="@+id/btn_key_1" style="@style/KeypadButton" android:minHeight="48dp" android:text="1" />
-    <Button android:id="@+id/btn_key_2" style="@style/KeypadButton" android:minHeight="48dp" android:text="2" />
-    <Button android:id="@+id/btn_key_3" style="@style/KeypadButton" android:minHeight="48dp" android:text="3" />
-    <Button android:id="@+id/btn_key_0" style="@style/KeypadButton" android:minHeight="48dp" android:text="0" />
-    <Button android:id="@+id/btn_key_clear" style="@style/KeypadButton" android:minHeight="48dp" android:text="C" />
+    <Button android:id="@+id/btn_key_7" style="@style/KeypadButton" android:minHeight="48dp" android:text="7" android:textColor="@color/black" />
+    <Button android:id="@+id/btn_key_8" style="@style/KeypadButton" android:minHeight="48dp" android:text="8" android:textColor="@color/black" />
+    <Button android:id="@+id/btn_key_9" style="@style/KeypadButton" android:minHeight="48dp" android:text="9" android:textColor="@color/black" />
+    <Button android:id="@+id/btn_key_4" style="@style/KeypadButton" android:minHeight="48dp" android:text="4" android:textColor="@color/black" />
+    <Button android:id="@+id/btn_key_5" style="@style/KeypadButton" android:minHeight="48dp" android:text="5" android:textColor="@color/black" />
+    <Button android:id="@+id/btn_key_6" style="@style/KeypadButton" android:minHeight="48dp" android:text="6" android:textColor="@color/black" />
+    <Button android:id="@+id/btn_key_1" style="@style/KeypadButton" android:minHeight="48dp" android:text="1" android:textColor="@color/black" />
+    <Button android:id="@+id/btn_key_2" style="@style/KeypadButton" android:minHeight="48dp" android:text="2" android:textColor="@color/black" />
+    <Button android:id="@+id/btn_key_3" style="@style/KeypadButton" android:minHeight="48dp" android:text="3" android:textColor="@color/black" />
+    <Button android:id="@+id/btn_key_0" style="@style/KeypadButton" android:minHeight="48dp" android:text="0" android:textColor="@color/black" />
+    <Button android:id="@+id/btn_key_clear" style="@style/KeypadButton" android:minHeight="48dp" android:text="C" android:textColor="@color/black" />
     <ImageButton
         android:id="@+id/btn_key_enter"
         style="@style/KeypadButton"
         android:minHeight="48dp"
         android:src="@drawable/ic_return_key_white"
         android:contentDescription="输入"
-
         android:scaleType="fitCenter" />
+
+    <Button
+        android:id="@+id/btn_soft_resume_inline"
+        style="@style/KeypadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/soft_resume"
+        android:textColor="@color/black"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical"
+        app:layout_constraintTop_toBottomOf="@id/flow_keypad" />
 
     <!-- ===================================================== -->
     <!-- ===         Bottom: Functional Buttons            === -->
@@ -215,14 +227,14 @@
         android:minHeight="48dp"
         android:text="开始"
         android:textColor="@color/black"
-        android:textSize="22dp"
-        app:layout_constraintEnd_toStartOf="@+id/btn_clear"
+        android:textSize="30dp"
+        app:layout_constraintEnd_toStartOf="@+id/btn_stop"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_time_value"
         app:layout_constraintWidth_min="120dp" />
 
     <Button
-        android:id="@+id/btn_clear"
+        android:id="@+id/btn_stop"
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:layout_marginStart="8dp"
@@ -230,9 +242,9 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/bg_preset_mode_button"
         android:minHeight="48dp"
-        android:text="清空"
+        android:text="@string/button_stop"
         android:textColor="@color/black"
-        android:textSize="22dp"
+        android:textSize="30dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline_vertical"
         app:layout_constraintStart_toEndOf="@+id/btn_start_stop"
         app:layout_constraintTop_toBottomOf="@+id/tv_time_value"

@@ -14,6 +14,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.sonicwavev4.R
+import com.example.sonicwavev4.SoftReduceTouchHost
 import com.example.sonicwavev4.core.vibration.VibrationSessionIntent
 import com.example.sonicwavev4.core.vibration.VibrationSessionUiState
 import com.example.sonicwavev4.data.home.HomeHardwareRepository
@@ -24,8 +25,6 @@ import com.example.sonicwavev4.ui.common.UiEvent
 import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.utils.SessionManager
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -60,19 +59,30 @@ class HomeFragment : Fragment() {
         observeAccountPrivileges()
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.prepareHardwareForEntry()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
+        requireActivity().window?.decorView?.setOnTouchListener(null)
+        requireActivity().findViewById<View?>(android.R.id.content)?.setOnTouchListener(null)
+        (requireActivity() as? SoftReduceTouchHost)?.setSoftReduceTouchListener(null)
         _binding = null
     }
 
     override fun onStop() {
         super.onStop()
         viewModel.stopSession()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.prepareHardwareForEntry()
+        (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener { ev ->
+            handleSoftReduceTouch(ev)
+        }
+    }
+
+    override fun onPause() {
+        (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener(null)
+        super.onPause()
     }
 
     private fun observeUiState() {
@@ -84,8 +94,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun renderState(state: VibrationSessionUiState) {
-        binding.btnStartStop.text = if (state.isRunning) getString(R.string.button_stop) else getString(R.string.button_start)
-        binding.btnStartStop.isEnabled = state.startButtonEnabled
+        binding.btnStartStop?.text = if (state.isRunning) "暂停" else getString(R.string.button_start)
+        binding.btnStartStop?.isEnabled = state.startButtonEnabled || state.isRunning
+        binding.btnStop?.visibility = if (state.isRunning) View.VISIBLE else View.GONE
+        binding.btnStop?.isEnabled = state.isRunning
         binding.tvTimeValue.isEnabled = !state.isRunning
 
         binding.tvFrequencyValue.text = state.frequencyDisplay
@@ -93,6 +105,25 @@ class HomeFragment : Fragment() {
         binding.tvTimeValue.text = state.timeDisplay
 
         updateHighlights(state.activeInputType)
+
+        val expandedPanel = binding.layoutSoftPanelExpanded
+        val collapsedPanel = binding.layoutSoftPanelCollapsed
+
+        expandedPanel?.visibility = View.GONE
+        collapsedPanel?.visibility = View.GONE
+
+        binding.btnSoftResumeInline?.visibility =
+            if (state.softReductionActive || (state.isRunning && state.intensityValue <= 20)) View.VISIBLE else View.GONE
+
+        val startLabel = when {
+            state.isPaused -> "继续"
+            state.isRunning -> "暂停"
+            else -> getString(R.string.button_start)
+        }
+        binding.btnStartStop?.text = startLabel
+        binding.btnStop?.visibility = if (state.isRunning || state.isPaused) View.VISIBLE else View.GONE
+        binding.btnStop?.isEnabled = state.isRunning || state.isPaused
+        binding.btnStartStop?.isEnabled = if (state.isPaused) state.startButtonEnabled || true else state.startButtonEnabled || state.isRunning
     }
 
     private fun observeEvents() {
@@ -147,23 +178,19 @@ class HomeFragment : Fragment() {
 
         configureAdjustButton(
             button = binding.btnFrequencyUp,
-            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustFrequency(1)) },
-            onAutoRepeat = { viewModel.handleIntent(VibrationSessionIntent.AdjustFrequency(10)) }
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustFrequency(1)) }
         )
         configureAdjustButton(
             button = binding.btnFrequencyDown,
-            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustFrequency(-1)) },
-            onAutoRepeat = { viewModel.handleIntent(VibrationSessionIntent.AdjustFrequency(-10)) }
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustFrequency(-1)) }
         )
         configureAdjustButton(
             button = binding.btnIntensityUp,
-            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustIntensity(1)) },
-            onAutoRepeat = { viewModel.handleIntent(VibrationSessionIntent.AdjustIntensity(10)) }
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustIntensity(1)) }
         )
         configureAdjustButton(
             button = binding.btnIntensityDown,
-            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustIntensity(-1)) },
-            onAutoRepeat = { viewModel.handleIntent(VibrationSessionIntent.AdjustIntensity(-10)) }
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustIntensity(-1)) }
         )
         binding.btnTimeUp.setOnClickListener {
             viewModel.handleIntent(VibrationSessionIntent.AdjustTime(1))
@@ -174,13 +201,13 @@ class HomeFragment : Fragment() {
             viewModel.playTapSound()
         }
 
-        binding.btnStartStop.setOnClickListener {
+        binding.btnStartStop?.setOnClickListener {
             val selectedCustomer = customerViewModel.selectedCustomer.value
             viewModel.handleIntent(VibrationSessionIntent.ToggleStartStop(selectedCustomer))
             viewModel.playTapSound()
         }
-        binding.btnClear.setOnClickListener {
-            viewModel.handleIntent(VibrationSessionIntent.ClearAll)
+        binding.btnStop?.setOnClickListener {
+            viewModel.stopSession()
             viewModel.playTapSound()
         }
 
@@ -208,45 +235,56 @@ class HomeFragment : Fragment() {
             viewModel.playTapSound()
         }
 
+        binding.btnSoftResumeInline?.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.SoftReductionResumeClicked)
+            viewModel.playTapSound()
+        }
+
+        binding.btnSoftStopExpanded?.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.SoftReductionStopClicked)
+            viewModel.playTapSound()
+        }
+        binding.btnSoftResumeExpanded?.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.SoftReductionResumeClicked)
+            viewModel.playTapSound()
+        }
+        binding.btnSoftStopCollapsed?.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.SoftReductionStopClicked)
+            viewModel.playTapSound()
+        }
+        binding.btnSoftResumeCollapsed?.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.SoftReductionResumeClicked)
+            viewModel.playTapSound()
+        }
     }
 
     private fun configureAdjustButton(
         button: View,
-        onSingleTap: () -> Unit,
-        onAutoRepeat: () -> Unit
+        onSingleTap: () -> Unit
     ) {
-        var repeatJob: Job? = null
-        var autoModeStarted = false
-        button.setOnTouchListener { _, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    repeatJob?.cancel()
-                    autoModeStarted = false
-                    repeatJob = viewLifecycleOwner.lifecycleScope.launch {
-                        delay(3000)
-                        autoModeStarted = true
-                        while (true) {
-                            onAutoRepeat()
-                            viewModel.playTapSound()
-                            delay(1000)
-                        }
-                    }
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    repeatJob?.cancel()
-                    repeatJob = null
-                    if (!autoModeStarted) {
-                        onSingleTap()
-                        viewModel.playTapSound()
-                    }
-                    autoModeStarted = false
-                }
-            }
-            true
+        button.setOnClickListener {
+            onSingleTap()
+            viewModel.playTapSound()
         }
     }
 
     private fun showToast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun handleSoftReduceTouch(event: MotionEvent): Boolean {
+        if (event.actionMasked != MotionEvent.ACTION_DOWN) {
+            return false
+        }
+        val state = viewModel.uiState.value ?: return false
+        if (!state.isRunning) {
+            return false
+        }
+
+        if (!state.softReductionActive) {
+            viewModel.handleIntent(VibrationSessionIntent.SoftReduceFromTap)
+        }
+
+        return false
     }
 }

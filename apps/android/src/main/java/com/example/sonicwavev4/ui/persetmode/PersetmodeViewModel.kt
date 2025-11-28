@@ -25,7 +25,9 @@ import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.utils.TestToneSettings
 import java.util.UUID
 import kotlin.coroutines.coroutineContext
+import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlin.math.max
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
@@ -129,6 +131,14 @@ class PersetmodeViewModel(
     private var isTestAccount = false
     private var lastHardwareReady = false
     private var shouldPlayTone = false
+    private var isPaused = false
+    // 安全降强状态
+    private var softIntensityLimitedToTwenty: Boolean = false
+    private var softOriginalIntensity: Int? = null
+    private var softReductionJob: Job? = null
+    private var softReductionActive: Boolean = false
+    private var softPanelExpanded: Boolean = false
+    private val softTargetIntensity: Int = 20
 
     private fun buildSessionUiState(state: PresetModeUiState = _uiState.value): VibrationSessionUiState {
         val frequency = state.frequencyHz ?: 0
@@ -149,10 +159,13 @@ class PersetmodeViewModel(
             activeInputType = "frequency",
             isEditing = false,
             isRunning = state.isRunning,
+            isPaused = isPaused,
             startButtonEnabled = state.isStartEnabled,
             isHardwareReady = lastHardwareReady,
             isTestAccount = isTestAccount,
-            playSineTone = shouldPlayTone
+            playSineTone = shouldPlayTone,
+            softReductionActive = softReductionActive,
+            softPanelExpanded = softPanelExpanded
         )
     }
 
@@ -179,7 +192,91 @@ class PersetmodeViewModel(
     fun handleSessionIntent(intent: VibrationSessionIntent) {
         when (intent) {
             is VibrationSessionIntent.ToggleStartStop -> toggleStartStop(intent.customer)
+            VibrationSessionIntent.SoftReduceFromTap -> handleSoftReduceFromTap()
+            VibrationSessionIntent.SoftReductionStopClicked -> handleSoftReductionStopClicked()
+            VibrationSessionIntent.SoftReductionResumeClicked -> handleSoftReductionResumeClicked()
+            VibrationSessionIntent.SoftReductionCollapsePanel -> handleSoftReductionCollapsePanel()
             else -> Unit
+        }
+    }
+
+    private fun handleSoftReduceFromTap() {
+        val currentState = _uiState.value
+        if (softReductionActive) return
+        if (!currentState.isRunning) return
+
+        val currentIntensity = currentState.intensity01V ?: return
+        if (softOriginalIntensity == null) {
+            softOriginalIntensity = currentIntensity
+        }
+
+        softReductionActive = true
+        softPanelExpanded = true
+        softIntensityLimitedToTwenty = true
+
+        startSoftReductionRamp()
+        emitSessionUiState()
+    }
+
+    private fun handleSoftReductionStopClicked() {
+        if (_uiState.value.isRunning) {
+            forceStop(StopReason.MANUAL)
+        }
+        clearSoftReductionState()
+        emitSessionUiState()
+    }
+
+    private fun handleSoftReductionResumeClicked() {
+        val original = softOriginalIntensity
+        if (_uiState.value.isRunning && original != null) {
+            softReductionJob?.cancel()
+            viewModelScope.launch { applyIntensityAndUpdateState(original, clamp = false) }
+        }
+        clearSoftReductionState()
+        emitSessionUiState()
+    }
+
+    private fun handleSoftReductionCollapsePanel() {
+        if (!softReductionActive) return
+        softPanelExpanded = false
+        emitSessionUiState()
+    }
+
+    private fun pauseSession() {
+        if (!_uiState.value.isRunning || isPaused) return
+        isPaused = true
+        viewModelScope.launch {
+            try {
+                if (runningWithoutHardware) {
+                    hardwareRepository.stopStandaloneTone()
+                } else {
+                    hardwareRepository.stopOutput()
+                }
+            } catch (e: Exception) {
+                Log.w("PersetmodeViewModel", "Failed to pause output", e)
+            }
+        }
+        emitSessionUiState()
+    }
+
+    private fun resumeSession() {
+        if (!isPaused) return
+        val currentStep = _uiState.value.currentStep ?: return
+        val limitedStep = applySoftLimitToStep(currentStep)
+        val useHardware = !runningWithoutHardware
+        viewModelScope.launch {
+            val resumed = try {
+                applyStep(limitedStep, useHardware)
+                true
+            } catch (e: Exception) {
+                Log.e("PersetmodeViewModel", "Failed to resume output", e)
+                _events.emit(UiEvent.ShowError(e))
+                false
+            }
+            if (resumed) {
+                isPaused = false
+                emitSessionUiState()
+            }
         }
     }
 
@@ -455,8 +552,11 @@ class PersetmodeViewModel(
     }
 
     fun toggleStartStop(selectedCustomer: Customer?) {
-        if (_uiState.value.isRunning) {
-            forceStop(StopReason.MANUAL)
+        if (_uiState.value.isRunning && !isPaused) {
+            pauseSession()
+            return
+        } else if (isPaused) {
+            resumeSession()
             return
         }
         if (!isSessionActive) {
@@ -537,6 +637,72 @@ class PersetmodeViewModel(
         val factor = intensityScalePct.value / 100.0
         return mode.steps.map { step ->
             step.copy(intensity01V = scaleIntensity(step.intensity01V, factor))
+        }
+    }
+
+    private fun applySoftLimitToIntensity(raw: Int): Int {
+        return if (softIntensityLimitedToTwenty) min(raw, 20) else raw
+    }
+
+    private fun applySoftLimitToStep(step: Step): Step {
+        if (!softIntensityLimitedToTwenty) return step
+        return step.copy(intensity01V = applySoftLimitToIntensity(step.intensity01V))
+    }
+
+    private fun clearSoftReductionState() {
+        softReductionJob?.cancel()
+        softReductionJob = null
+        softOriginalIntensity = null
+        softReductionActive = false
+        softPanelExpanded = false
+        softIntensityLimitedToTwenty = false
+    }
+
+    private suspend fun applyIntensityAndUpdateState(newIntensity: Int, clamp: Boolean = true) {
+        val effective = if (clamp) applySoftLimitToIntensity(newIntensity) else newIntensity
+        updateUiState { state ->
+            if (!state.isRunning) return@updateUiState state
+            val limitedStep = state.currentStep?.let { step ->
+                val stepIntensity = if (clamp) applySoftLimitToIntensity(step.intensity01V) else step.intensity01V
+                step.copy(intensity01V = stepIntensity)
+            }
+            state.copy(
+                intensity01V = effective,
+                currentStep = limitedStep
+            )
+        }
+        try {
+            val scaled = scaleIntensity(effective)
+            if (runningWithoutHardware) {
+                if (shouldPlayTone) {
+                    hardwareRepository.applyIntensity(scaled)
+                }
+            } else {
+                hardwareRepository.applyIntensity(scaled)
+            }
+        } catch (e: Exception) {
+            Log.e("PersetmodeViewModel", "Failed to apply intensity", e)
+            _events.emit(UiEvent.ShowError(e))
+        }
+    }
+
+    private fun startSoftReductionRamp() {
+        softReductionJob?.cancel()
+        val target = softTargetIntensity
+        softReductionJob = viewModelScope.launch {
+            var current = _uiState.value.intensity01V ?: target
+            if (current <= target) {
+                if (current != target) {
+                    applyIntensityAndUpdateState(target, clamp = false)
+                }
+                return@launch
+            }
+            while (softReductionActive && _uiState.value.isRunning && current > target) {
+                val delta = max(5, (current - target) / 10)
+                current = max(target, current - delta)
+                applyIntensityAndUpdateState(current, clamp = false)
+                delay(80)
+            }
         }
     }
 
@@ -653,6 +819,8 @@ class PersetmodeViewModel(
         steps: List<Step>,
         useHardware: Boolean
     ) {
+        clearSoftReductionState()
+        isPaused = false
         val first = steps.first()
         val totalDuration = steps.sumOf { it.durationSec }
         val scalePct = intensityScalePct.value
@@ -695,14 +863,15 @@ class PersetmodeViewModel(
             }
             currentRunId = runId
             runningWithoutHardware = !useHardware
+            val initialStep = applySoftLimitToStep(first)
             updateUiState {
                 it.copy(
                     isRunning = true,
                     modeButtonsEnabled = false,
                     currentStepIndex = 0,
-                    currentStep = first,
-                    frequencyHz = first.frequencyHz,
-                    intensity01V = first.intensity01V,
+                    currentStep = initialStep,
+                    frequencyHz = initialStep.frequencyHz,
+                    intensity01V = initialStep.intensity01V,
                     remainingSeconds = totalDuration,
                     totalDurationSeconds = totalDuration
                 )
@@ -713,17 +882,18 @@ class PersetmodeViewModel(
     }
 
     private suspend fun tryStartOutput(first: Step, useHardware: Boolean): Boolean {
-        val intensity = scaleIntensity(first.intensity01V)
+        val limitedStep = applySoftLimitToStep(first)
+        val intensity = scaleIntensity(limitedStep.intensity01V)
         return try {
             if (useHardware) {
                 hardwareRepository.startOutput(
-                    targetFrequency = first.frequencyHz,
+                    targetFrequency = limitedStep.frequencyHz,
                     targetIntensity = intensity,
                     playTone = shouldPlayTone
                 )
             } else {
                 if (shouldPlayTone) {
-                    hardwareRepository.playStandaloneTone(first.frequencyHz, intensity)
+                    hardwareRepository.playStandaloneTone(limitedStep.frequencyHz, intensity)
                 } else {
                     true
                 }
@@ -736,13 +906,14 @@ class PersetmodeViewModel(
     }
 
     private suspend fun applyStep(step: Step, useHardware: Boolean) {
-        val intensity = scaleIntensity(step.intensity01V)
+        val limitedStep = applySoftLimitToStep(step)
+        val intensity = scaleIntensity(limitedStep.intensity01V)
         try {
             if (useHardware) {
-                hardwareRepository.applyFrequency(step.frequencyHz)
+                hardwareRepository.applyFrequency(limitedStep.frequencyHz)
                 hardwareRepository.applyIntensity(intensity)
             } else if (shouldPlayTone) {
-                hardwareRepository.applyFrequency(step.frequencyHz)
+                hardwareRepository.applyFrequency(limitedStep.frequencyHz)
                 hardwareRepository.applyIntensity(intensity)
             }
         } catch (e: Exception) {
@@ -756,7 +927,7 @@ class PersetmodeViewModel(
         var remaining = steps.sumOf { it.durationSec }
         var index = 0
         while (index < steps.size && coroutineContext.isActive) {
-            val step = steps[index]
+            val step = applySoftLimitToStep(steps[index])
             Log.d(
                 "PresetRun",
                 "stepState index=$index freq=${step.frequencyHz} intensity=${step.intensity01V} duration=${step.durationSec} remaining=$remaining hardwareReady=$lastHardwareReady runningWithoutHardware=$runningWithoutHardware"
@@ -772,6 +943,9 @@ class PersetmodeViewModel(
             }
             val duration = step.durationSec
             repeat(duration) {
+                while (isPaused && coroutineContext.isActive) {
+                    delay(200)
+                }
                 if (!coroutineContext.isActive) return
                 delay(1000)
                 remaining = (remaining - 1).coerceAtLeast(0)
@@ -781,7 +955,7 @@ class PersetmodeViewModel(
             }
             val nextIndex = index + 1
             if (nextIndex < steps.size && coroutineContext.isActive) {
-                val nextStep = steps[nextIndex]
+                val nextStep = applySoftLimitToStep(steps[nextIndex])
                 Log.d(
                     "PresetRun",
                     "applyStep index=$nextIndex freq=${nextStep.frequencyHz} intensity=${nextStep.intensity01V} scaled=${scaleIntensity(nextStep.intensity01V)} useHardware=$useHardware shouldPlayTone=$shouldPlayTone"
@@ -811,6 +985,8 @@ class PersetmodeViewModel(
             recomputeStartButtonEnabled()
             return
         }
+        clearSoftReductionState()
+        isPaused = false
         val runId = currentRunId
         val wasSoftwareOnly = runningWithoutHardware
         runningWithoutHardware = false
