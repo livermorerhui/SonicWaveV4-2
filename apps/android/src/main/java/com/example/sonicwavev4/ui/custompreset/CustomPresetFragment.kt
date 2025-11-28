@@ -1,7 +1,9 @@
 package com.example.sonicwavev4.ui.custompreset
 
 import android.os.Bundle
+import android.graphics.Rect
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -21,6 +23,7 @@ import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentCustomPresetBinding
 import com.example.sonicwavev4.network.RetrofitClient
+import com.example.sonicwavev4.SoftReduceTouchHost
 import com.example.sonicwavev4.ui.common.UiEvent
 import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.ui.persetmode.CustomPresetUiModel
@@ -86,6 +89,20 @@ class CustomPresetFragment : Fragment() {
         binding.btnStartStop.setOnClickListener {
             val customer = customerViewModel.selectedCustomer.value
             presetViewModel.handleSessionIntent(VibrationSessionIntent.ToggleStartStop(customer))
+            presetViewModel.playTapSound()
+        }
+        binding.btnPause.setOnClickListener {
+            val customer = customerViewModel.selectedCustomer.value
+            presetViewModel.handleSessionIntent(VibrationSessionIntent.ToggleStartStop(customer))
+            presetViewModel.playTapSound()
+        }
+        binding.btnStop.setOnClickListener {
+            presetViewModel.stopIfRunning()
+            presetViewModel.playTapSound()
+        }
+        binding.btnSoftResumeInline.setOnClickListener {
+            presetViewModel.handleSessionIntent(VibrationSessionIntent.SoftReductionResumeClicked)
+            presetViewModel.playTapSound()
         }
         presetViewModel.enterCustomMode()
     }
@@ -94,6 +111,15 @@ class CustomPresetFragment : Fragment() {
         super.onResume()
         presetViewModel.enterCustomMode()
         presetViewModel.prepareHardwareForEntry()
+        (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener { ev ->
+            if (ev.actionMasked != MotionEvent.ACTION_DOWN) return@setSoftReduceTouchListener false
+            val state = presetViewModel.sessionUiState.value
+            if (!state.isRunning) return@setSoftReduceTouchListener false
+            if (!state.softReductionActive) {
+                presetViewModel.handleSessionIntent(VibrationSessionIntent.SoftReduceFromTap)
+            }
+            false
+        }
     }
 
     override fun onStop() {
@@ -104,6 +130,11 @@ class CustomPresetFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onPause() {
+        (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener(null)
+        super.onPause()
     }
 
     private fun setupPresetList() {
@@ -242,12 +273,32 @@ class CustomPresetFragment : Fragment() {
         binding.tvSelectedPresetName.text = selected?.name ?: "未选择自设模式"
         binding.tvSelectedSummary.text = selected?.summary ?: "请选择自设模式后再开始"
 
-        binding.btnStartStop.text =
-            if (sessionState.isRunning) getString(R.string.button_stop) else getString(R.string.button_start)
-        binding.btnStartStop.isEnabled = sessionState.startButtonEnabled
+        val startLabel = when {
+            sessionState.isPaused -> "继续"
+            sessionState.isRunning -> "暂停"
+            else -> getString(R.string.button_start)
+        }
+        binding.btnStartStop.text = startLabel
+        binding.btnStartStop.isEnabled = sessionState.startButtonEnabled || sessionState.isRunning || sessionState.isPaused
         binding.tvFrequencyValue.text = sessionState.frequencyDisplay
         binding.tvIntensityValue.text = sessionState.intensityDisplay
         binding.tvRemainingValue.text = sessionState.timeDisplay
+
+        binding.btnStartStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.GONE else View.VISIBLE
+        binding.btnPause.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
+        binding.btnPause.text = if (sessionState.isPaused) "继续" else "暂停"
+        binding.btnStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
+        binding.btnStop.isEnabled = sessionState.isRunning || sessionState.isPaused
+        binding.btnSoftResumeInline.visibility =
+            if (sessionState.softReductionActive || (sessionState.isRunning && sessionState.intensityValue <= 20)) View.VISIBLE else View.GONE
+
+        binding.btnStartStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.GONE else View.VISIBLE
+        binding.btnPause.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
+        binding.btnPause.text = if (sessionState.isPaused) "继续" else "暂停"
+        binding.btnStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
+        binding.btnStop.isEnabled = sessionState.isRunning || sessionState.isPaused
+        binding.btnSoftResumeInline.visibility =
+            if (sessionState.softReductionActive || (sessionState.isRunning && sessionState.intensityValue <= 20)) View.VISIBLE else View.GONE
     }
 
     private fun handleEvent(event: UiEvent) {

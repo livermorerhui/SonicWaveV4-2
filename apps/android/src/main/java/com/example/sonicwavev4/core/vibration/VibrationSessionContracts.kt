@@ -50,6 +50,7 @@ data class VibrationSessionUiState(
     val activeInputType: String = "frequency",
     val isEditing: Boolean = false,
     val isRunning: Boolean = false,
+    val isPaused: Boolean = false,
     val startButtonEnabled: Boolean = false,
     val isHardwareReady: Boolean = false,
     val isTestAccount: Boolean = false,

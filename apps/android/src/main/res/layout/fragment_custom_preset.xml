@@ -183,6 +183,33 @@
                     android:layout_marginTop="12dp"
                     android:background="@drawable/bg_preset_mode_button"
                     android:text="@string/button_start" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_pause"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="暂停"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_stop"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/button_stop"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_soft_resume_inline"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/soft_resume"
+                    android:visibility="gone" />
             </LinearLayout>
 
 

@@ -79,6 +79,7 @@ class HomeViewModel(
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
     private var runningWithoutHardware = false
     private var isSessionActive = false
+    private var isPaused = false
     companion object {
         private const val LOGIN_REQUIRED_MESSAGE = "请先登录账号"
         private const val HARDWARE_NOT_READY_MESSAGE = "硬件初始化中，请稍候"
@@ -128,10 +129,10 @@ class HomeViewModel(
         val timeValue = resolveDisplayValue(activeType, "time", buffer, editing, _timeInMinutes.value ?: 0)
         val countdownValue = _countdownSeconds.value ?: 0
 
-        val timeDisplay = if (running) {
-            formatCountdown(countdownValue)
-        } else {
-            getApplication<Application>().getString(R.string.time_minutes_format, timeValue)
+        val timeDisplay = when {
+            running -> formatCountdown(countdownValue)
+            isPaused -> formatCountdown(countdownValue)
+            else -> getApplication<Application>().getString(R.string.time_minutes_format, timeValue)
         }
 
         return VibrationSessionUiState(
@@ -145,6 +146,7 @@ class HomeViewModel(
             activeInputType = activeType ?: "",
             isEditing = editing,
             isRunning = running,
+            isPaused = isPaused,
             startButtonEnabled = _startButtonEnabled.value == true,
             isHardwareReady = hardwareRepository.state.value.isHardwareReady,
             isTestAccount = _isTestAccount.value == true,
@@ -182,7 +184,7 @@ class HomeViewModel(
             }
 
             while (softReductionActive && _isStarted.value == true && current > target) {
-                val delta = max(1, (current - target) / 10)
+                val delta = max(5, (current - target) / 10)
                 current = max(target, current - delta)
                 updateIntensity(current)
                 delay(80)
@@ -501,13 +503,14 @@ class HomeViewModel(
         countdownJob?.cancel()
     }
 
-    private fun startCountdown() {
+    private fun startCountdown(resume: Boolean = false) {
         countdownJob?.cancel()
         val totalSeconds = (_timeInMinutes.value ?: 0) * 60
-        _countdownSeconds.value = totalSeconds
+        val startSeconds = if (resume) _countdownSeconds.value ?: totalSeconds else totalSeconds
+        _countdownSeconds.value = startSeconds
         emitUiState()
         countdownJob = viewModelScope.launch {
-            for (i in totalSeconds downTo 0) {
+            for (i in startSeconds downTo 0) {
                 _countdownSeconds.value = i
                 emitUiState()
                 delay(1000)
@@ -528,7 +531,9 @@ class HomeViewModel(
         }
         val hardwareReady = hardwareRepository.state.value.isHardwareReady
         if (_isStarted.value == true) {
-            forceStop(StopReason.MANUAL)
+            pausePlayback()
+        } else if (isPaused) {
+            resumePlayback(hardwareReady)
         } else {
             val isTestAccount = _isTestAccount.value == true
             if (!hardwareReady && !isTestAccount) {
@@ -545,18 +550,79 @@ class HomeViewModel(
                     emitUiState()
                 }
                 val shouldPlayTone = _playSineTone.value == true
-                handleStartOperation(
-                    selectedCustomer = selectedCustomer,
-                    useHardware = hardwareReady,
-                    playTone = shouldPlayTone
-                )
-            }
+                    isPaused = false
+                    handleStartOperation(
+                        selectedCustomer = selectedCustomer,
+                        useHardware = hardwareReady,
+                        playTone = shouldPlayTone
+                    )
+                }
         }
     }
 
     fun stopPlaybackIfRunning() {
         if (_isStarted.value == true || currentOperationId != null) {
             forceStop(StopReason.MANUAL)
+        }
+    }
+
+    private fun pausePlayback() {
+        if (_isStarted.value != true) return
+        isPaused = true
+        _isStarted.value = false
+        stopCountdown()
+        viewModelScope.launch {
+            try {
+                if (runningWithoutHardware) {
+                    hardwareRepository.stopStandaloneTone()
+                } else {
+                    hardwareRepository.stopOutput()
+                }
+            } catch (e: Exception) {
+                Log.w("HomeViewModel", "Failed to pause output cleanly", e)
+            }
+        }
+        recomputeStartButtonEnabled()
+        emitUiState()
+    }
+
+    private fun resumePlayback(hardwareReady: Boolean) {
+        if (!isPaused) return
+        val isTestAccount = _isTestAccount.value == true
+        if (!hardwareReady && !isTestAccount) {
+            viewModelScope.launch { _events.emit(UiEvent.ShowToast(HARDWARE_NOT_READY_MESSAGE)) }
+            return
+        }
+        val targetFrequency = frequency.value ?: 0
+        val targetIntensity = intensity.value ?: 0
+        val playTone = _playSineTone.value == true
+        viewModelScope.launch {
+            val outputStarted = try {
+                if (runningWithoutHardware) {
+                    if (playTone) {
+                        hardwareRepository.playStandaloneTone(targetFrequency, targetIntensity)
+                    } else {
+                        true
+                    }
+                } else {
+                    hardwareRepository.startOutput(
+                        targetFrequency = targetFrequency,
+                        targetIntensity = targetIntensity,
+                        playTone = playTone
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Failed to resume output", e)
+                _events.emit(UiEvent.ShowError(e))
+                false
+            }
+            if (outputStarted) {
+                _isStarted.value = true
+                isPaused = false
+                recomputeStartButtonEnabled()
+                startCountdown(resume = true)
+            }
+            emitUiState()
         }
     }
 
@@ -596,6 +662,7 @@ class HomeViewModel(
         if (wasRunning) {
             _isStarted.value = false
         }
+        isPaused = false
         stopCountdown()
         clearSoftReductionState()
         recomputeStartButtonEnabled()
@@ -605,6 +672,7 @@ class HomeViewModel(
         if (_isStarted.value == true) {
             forceStop(StopReason.MANUAL)
         }
+        isPaused = false
         updateFrequency(0)
         updateIntensity(0)
         updateTime(0)
@@ -645,6 +713,7 @@ class HomeViewModel(
                     runningWithoutHardware = !useHardware
                     currentOperationId = operationId
                     _isStarted.value = true
+                    isPaused = false
                     recomputeStartButtonEnabled()
                     startCountdown()
                 } else {

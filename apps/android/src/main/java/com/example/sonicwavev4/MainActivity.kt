@@ -14,6 +14,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -65,7 +66,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
 
-class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadListener {
+interface SoftReduceTouchHost {
+    fun setSoftReduceTouchListener(listener: ((MotionEvent) -> Boolean)?)
+}
+
+class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadListener, SoftReduceTouchHost {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -99,6 +104,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private val navButtonViews = mutableMapOf<Int, Pair<ImageButton, TextView>>()
     private var customPresetItemView: View? = null
     private var currentNavItemId: Int = R.id.navigation_home
+    private var softReduceTouchListener: ((MotionEvent) -> Boolean)? = null
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -180,6 +186,15 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     override fun onPause() {
         super.onPause()
         pauseVinyl()
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        softReduceTouchListener?.invoke(ev)
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun setSoftReduceTouchListener(listener: ((MotionEvent) -> Boolean)?) {
+        softReduceTouchListener = listener
     }
 
     // 【修改点 2】修复了下载功能的线程问题，防止UI卡死

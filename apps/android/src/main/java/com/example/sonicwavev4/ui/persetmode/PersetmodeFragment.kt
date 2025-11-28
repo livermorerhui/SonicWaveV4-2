@@ -2,6 +2,7 @@ package com.example.sonicwavev4.ui.persetmode
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -15,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.sonicwavev4.R
 import com.example.sonicwavev4.core.vibration.VibrationSessionIntent
+import com.example.sonicwavev4.SoftReduceTouchHost
 import com.example.sonicwavev4.core.vibration.VibrationSessionUiState
 import com.example.sonicwavev4.data.custompreset.CustomPresetRepositoryImpl
 import com.example.sonicwavev4.data.home.HomeHardwareRepository
@@ -84,13 +86,10 @@ class PersetmodeFragment : Fragment() {
         viewModel.selectMode(0)
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.prepareHardwareForEntry()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
+        requireActivity().findViewById<View?>(android.R.id.content)?.setOnTouchListener(null)
+        (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener(null)
         _binding = null
     }
 
@@ -106,6 +105,15 @@ class PersetmodeFragment : Fragment() {
         binding.btnStartStop.setOnClickListener {
             val customer = customerViewModel.selectedCustomer.value
             viewModel.handleSessionIntent(VibrationSessionIntent.ToggleStartStop(customer))
+            viewModel.playTapSound()
+        }
+        binding.btnStop?.setOnClickListener {
+            viewModel.stopIfRunning()
+            viewModel.playTapSound()
+        }
+        binding.btnSoftResumeInline?.setOnClickListener {
+            viewModel.handleSessionIntent(VibrationSessionIntent.SoftReductionResumeClicked)
+            viewModel.playTapSound()
         }
         binding.btnEditPreset.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
@@ -115,6 +123,21 @@ class PersetmodeFragment : Fragment() {
                 }
             }
         }
+
+        // touch listener registration moved to lifecycle callbacks
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.prepareHardwareForEntry()
+        (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener { ev ->
+            handleSoftReduceTouch(ev)
+        }
+    }
+
+    override fun onPause() {
+        (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener(null)
+        super.onPause()
     }
 
     private fun observeViewModel() {
@@ -157,9 +180,13 @@ class PersetmodeFragment : Fragment() {
     }
 
     private fun renderState(state: PresetModeUiState, sessionState: VibrationSessionUiState) {
-        binding.btnStartStop.text =
-            if (sessionState.isRunning) getString(R.string.button_stop) else getString(R.string.button_start)
-        binding.btnStartStop.isEnabled = sessionState.startButtonEnabled
+        val startLabel = when {
+            sessionState.isPaused -> "继续"
+            sessionState.isRunning -> "暂停"
+            else -> getString(R.string.button_start)
+        }
+        binding.btnStartStop.text = startLabel
+        binding.btnStartStop.isEnabled = sessionState.startButtonEnabled || sessionState.isRunning || sessionState.isPaused
 
         val selectedTextColor = ContextCompat.getColor(requireContext(), android.R.color.white)
         val defaultTextColor = ContextCompat.getColor(requireContext(), R.color.preset_mode_button_text_default)
@@ -190,6 +217,11 @@ class PersetmodeFragment : Fragment() {
         binding.tvFrequencyValue.text = sessionState.frequencyDisplay
         binding.tvIntensityValue.text = sessionState.intensityDisplay
         binding.tvRemainingValue.text = sessionState.timeDisplay
+
+        binding.btnStop?.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
+        binding.btnStop?.isEnabled = sessionState.isRunning || sessionState.isPaused
+        binding.btnSoftResumeInline?.visibility =
+            if (sessionState.softReductionActive || (sessionState.isRunning && sessionState.intensityValue <= 20)) View.VISIBLE else View.GONE
     }
 
     private fun observeEditButtonVisibility() {
@@ -224,6 +256,17 @@ class PersetmodeFragment : Fragment() {
     private fun showToast(message: String) {
         if (!isAdded) return
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun handleSoftReduceTouch(event: MotionEvent): Boolean {
+        if (event.actionMasked != MotionEvent.ACTION_DOWN) return false
+        val state = viewModel.sessionUiState.value
+        if (!state.isRunning) return false
+
+        if (!state.softReductionActive) {
+            viewModel.handleSessionIntent(VibrationSessionIntent.SoftReduceFromTap)
+        }
+        return false
     }
 
 }
