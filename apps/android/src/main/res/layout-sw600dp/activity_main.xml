@@ -35,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_begin="700dp" />
+            app:layout_constraintGuide_begin="720dp" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/horizontal_divider_guideline"
@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.1" />
+            app:layout_constraintGuide_begin="120dp" />
 
 
         <!-- === 左上角区域 === -->

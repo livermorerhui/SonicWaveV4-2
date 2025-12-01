@@ -15,8 +15,8 @@
 
     <ImageButton
         android:id="@+id/nav_item_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:background="@android:color/transparent"
         android:scaleType="fitCenter"
         tools:src="@drawable/ic_home_black_24dp"
@@ -29,7 +29,7 @@
         android:id="@+id/nav_item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
+        android:textSize="20sp"
         android:layout_marginTop="4dp"
         tools:text="标题" />
 </LinearLayout>

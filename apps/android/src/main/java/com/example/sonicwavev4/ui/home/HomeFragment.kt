@@ -94,10 +94,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun renderState(state: VibrationSessionUiState) {
-        binding.btnStartStop?.text = if (state.isRunning) "暂停" else getString(R.string.button_start)
-        binding.btnStartStop?.isEnabled = state.startButtonEnabled || state.isRunning
-        binding.btnStop?.visibility = if (state.isRunning) View.VISIBLE else View.GONE
-        binding.btnStop?.isEnabled = state.isRunning
+        val startButton = binding.btnStartStop
+        val stopButton = binding.btnStop
+        val recoverButton = binding.btnSoftResumeInline
+
         binding.tvTimeValue.isEnabled = !state.isRunning
 
         binding.tvFrequencyValue.text = state.frequencyDisplay
@@ -112,7 +112,7 @@ class HomeFragment : Fragment() {
         expandedPanel?.visibility = View.GONE
         collapsedPanel?.visibility = View.GONE
 
-        binding.btnSoftResumeInline?.visibility =
+        recoverButton?.visibility =
             if (state.softReductionActive || (state.isRunning && state.intensityValue <= 20)) View.VISIBLE else View.GONE
 
         val startLabel = when {
@@ -120,10 +120,22 @@ class HomeFragment : Fragment() {
             state.isRunning -> "暂停"
             else -> getString(R.string.button_start)
         }
-        binding.btnStartStop?.text = startLabel
-        binding.btnStop?.visibility = if (state.isRunning || state.isPaused) View.VISIBLE else View.GONE
-        binding.btnStop?.isEnabled = state.isRunning || state.isPaused
-        binding.btnStartStop?.isEnabled = if (state.isPaused) state.startButtonEnabled || true else state.startButtonEnabled || state.isRunning
+        startButton?.text = startLabel
+
+        val startBgRes = when {
+            state.isPaused -> R.drawable.bg_jixu_green // “继续”状态：绿色
+            state.isRunning -> R.drawable.bg_button_yellow // “暂停”状态：黄色
+            else -> R.drawable.bg_home_start_button // 未运行：绿色
+        }
+        startButton?.backgroundTintList = null
+        startButton?.setBackgroundResource(startBgRes)
+        startButton?.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+
+        val stopVisible = state.isRunning || state.isPaused
+        stopButton?.visibility = if (stopVisible) View.VISIBLE else View.GONE
+        stopButton?.isEnabled = stopVisible
+
+        startButton?.isEnabled = if (state.isPaused) true else state.startButtonEnabled || state.isRunning
     }
 
     private fun observeEvents() {

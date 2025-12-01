@@ -184,46 +184,132 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <Button android:id="@+id/btn_key_7" style="@style/KeypadButton" android:minHeight="48dp" android:text="7" android:textColor="@color/black" />
-    <Button android:id="@+id/btn_key_8" style="@style/KeypadButton" android:minHeight="48dp" android:text="8" android:textColor="@color/black" />
-    <Button android:id="@+id/btn_key_9" style="@style/KeypadButton" android:minHeight="48dp" android:text="9" android:textColor="@color/black" />
-    <Button android:id="@+id/btn_key_4" style="@style/KeypadButton" android:minHeight="48dp" android:text="4" android:textColor="@color/black" />
-    <Button android:id="@+id/btn_key_5" style="@style/KeypadButton" android:minHeight="48dp" android:text="5" android:textColor="@color/black" />
-    <Button android:id="@+id/btn_key_6" style="@style/KeypadButton" android:minHeight="48dp" android:text="6" android:textColor="@color/black" />
-    <Button android:id="@+id/btn_key_1" style="@style/KeypadButton" android:minHeight="48dp" android:text="1" android:textColor="@color/black" />
-    <Button android:id="@+id/btn_key_2" style="@style/KeypadButton" android:minHeight="48dp" android:text="2" android:textColor="@color/black" />
-    <Button android:id="@+id/btn_key_3" style="@style/KeypadButton" android:minHeight="48dp" android:text="3" android:textColor="@color/black" />
-    <Button android:id="@+id/btn_key_0" style="@style/KeypadButton" android:minHeight="48dp" android:text="0" android:textColor="@color/black" />
-    <Button android:id="@+id/btn_key_clear" style="@style/KeypadButton" android:minHeight="48dp" android:text="C" android:textColor="@color/black" />
+    <Button
+        android:id="@+id/btn_key_7"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:background="@drawable/bg_keypad_yellow"
+        android:backgroundTint="@null"
+        android:text="7"
+        android:textColor="#000000" />
+    <Button
+        android:id="@+id/btn_key_8"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:background="@drawable/bg_keypad_yellow"
+        android:backgroundTint="@null"
+        android:text="8"
+        android:textColor="#000000" />
+    <Button
+        android:id="@+id/btn_key_9"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:background="@drawable/bg_keypad_yellow"
+        android:backgroundTint="@null"
+        android:text="9"
+        android:textColor="#000000" />
+    <Button
+        android:id="@+id/btn_key_4"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:background="@drawable/bg_keypad_yellow"
+        android:backgroundTint="@null"
+        android:text="4"
+        android:textColor="#000000" />
+    <Button
+        android:id="@+id/btn_key_5"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:background="@drawable/bg_keypad_yellow"
+        android:backgroundTint="@null"
+        android:text="5"
+        android:textColor="#000000" />
+    <Button
+        android:id="@+id/btn_key_6"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:background="@drawable/bg_keypad_yellow"
+        android:backgroundTint="@null"
+        android:text="6"
+        android:textColor="#000000" />
+    <Button
+        android:id="@+id/btn_key_1"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:background="@drawable/bg_keypad_yellow"
+        android:backgroundTint="@null"
+        android:text="1"
+        android:textColor="#000000" />
+    <Button
+        android:id="@+id/btn_key_2"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:background="@drawable/bg_keypad_yellow"
+        android:backgroundTint="@null"
+        android:text="2"
+        android:textColor="#000000" />
+    <Button
+        android:id="@+id/btn_key_3"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:background="@drawable/bg_keypad_yellow"
+        android:backgroundTint="@null"
+        android:text="3"
+        android:textColor="#000000" />
+    <Button
+        android:id="@+id/btn_key_0"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:background="@drawable/bg_keypad_yellow"
+        android:backgroundTint="@null"
+        android:text="0"
+        android:textColor="#000000" />
+    <Button
+        android:id="@+id/btn_key_clear"
+        style="@style/KeypadButton"
+        android:minHeight="48dp"
+        android:text="C"
+        android:background="@drawable/bg_keypad_red"
+        android:backgroundTint="@null"
+        android:textColor="#FFFFFF" />
     <ImageButton
         android:id="@+id/btn_key_enter"
         style="@style/KeypadButton"
         android:minHeight="48dp"
         android:src="@drawable/ic_return_key_white"
         android:contentDescription="输入"
-        android:scaleType="fitCenter" />
-
-    <Button
-        android:id="@+id/btn_soft_resume_inline"
-        style="@style/KeypadButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/soft_resume"
-        android:textColor="@color/black"
-        android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/guideline_vertical"
-        app:layout_constraintTop_toBottomOf="@id/flow_keypad" />
+        android:scaleType="fitCenter"
+        android:background="@drawable/bg_keypad_green"
+        android:backgroundTint="@null"
+        app:tint="#FFFFFF" />
 
     <!-- ===================================================== -->
     <!-- ===         Bottom: Functional Buttons            === -->
     <!-- ===================================================== -->
     <Button
+        android:id="@+id/btn_soft_resume_inline"
+        style="@style/KeypadButton"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="@string/soft_resume"
+        android:background="@drawable/bg_keypad_green"
+        android:backgroundTint="@null"
+        android:textColor="@color/black"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/flow_keypad"
+        app:layout_constraintStart_toStartOf="@+id/flow_keypad"
+        app:layout_constraintTop_toBottomOf="@id/flow_keypad" />
+
+    <Button
         android:id="@+id/btn_start_stop"
+        style="@style/NoTintButton"
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:layout_marginTop="16dp"
-        android:background="@drawable/bg_preset_mode_button"
+        android:background="@drawable/bg_home_start_button"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null"
         android:minHeight="48dp"
         android:text="开始"
         android:textColor="@color/black"
@@ -235,12 +321,15 @@
 
     <Button
         android:id="@+id/btn_stop"
+        style="@style/NoTintButton"
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="16dp"
-        android:background="@drawable/bg_preset_mode_button"
+        android:background="@drawable/bg_button_red"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null"
         android:minHeight="48dp"
         android:text="@string/button_stop"
         android:textColor="@color/black"
