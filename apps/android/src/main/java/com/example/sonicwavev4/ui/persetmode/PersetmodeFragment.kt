@@ -187,6 +187,15 @@ class PersetmodeFragment : Fragment() {
         }
         binding.btnStartStop.text = startLabel
         binding.btnStartStop.isEnabled = sessionState.startButtonEnabled || sessionState.isRunning || sessionState.isPaused
+        val startBg = when {
+            sessionState.isPaused -> R.drawable.bg_jixu_green  // 继续：绿色
+            sessionState.isRunning -> R.drawable.bg_button_yellow // 暂停：黄色
+            else -> R.drawable.bg_home_start_button             // 未运行：绿色
+        }
+        ViewCompat.setBackgroundTintList(binding.btnStartStop, null)
+        binding.btnStartStop.backgroundTintList = null
+        binding.btnStartStop.setBackgroundResource(startBg)
+        binding.btnStartStop.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
 
         val selectedTextColor = ContextCompat.getColor(requireContext(), android.R.color.white)
         val defaultTextColor = ContextCompat.getColor(requireContext(), R.color.preset_mode_button_text_default)

@@ -14,6 +14,7 @@
         android:layout_height="32dp"
         android:background="@android:color/transparent"
         android:src="@android:drawable/ic_media_previous"
+        app:tint="@android:color/black"
         android:layout_marginStart="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -25,6 +26,7 @@
         android:layout_height="40dp"
         android:background="@android:color/transparent"
         android:src="@android:drawable/ic_media_play"
+        app:tint="@android:color/black"
         app:layout_constraintStart_toEndOf="@id/btnPrev"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
@@ -35,6 +37,7 @@
         android:layout_height="32dp"
         android:background="@android:color/transparent"
         android:src="@android:drawable/ic_media_next"
+        app:tint="@android:color/black"
         app:layout_constraintStart_toEndOf="@id/btnPlayPause"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
@@ -42,7 +45,11 @@
     <SeekBar
         android:id="@+id/seekBarMusic"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="32dp"
+        android:progressTint="@android:color/black"
+        android:thumbTint="@android:color/black"
+        android:progressBackgroundTint="@android:color/darker_gray"
+        android:secondaryProgressTint="@android:color/darker_gray"
         app:layout_constraintStart_toEndOf="@id/btnNext"
         app:layout_constraintEnd_toStartOf="@id/tvRemainingTime"
         app:layout_constraintTop_toTopOf="parent"
@@ -64,6 +71,7 @@
         android:layout_height="24dp"
         android:layout_marginEnd="8dp"
         android:src="@drawable/ic_music_note_black_24dp"
+        app:tint="@android:color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />

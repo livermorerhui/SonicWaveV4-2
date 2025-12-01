@@ -45,7 +45,8 @@
                 android:layout_height="match_parent"
                 app:icon="@drawable/ic_add_customer"
                 app:iconGravity="textStart"
-                app:iconPadding="0dp" />
+                app:iconPadding="0dp"
+                app:iconTint="@null" />
         </LinearLayout>
 
         <TextView
@@ -101,7 +102,7 @@
                 <TextView
                     android:id="@+id/tv_selected_preset_name"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:text="未选择自设模式"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -126,18 +127,21 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="频率(Hz):"
+                        android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_frequency_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="--" />
+                        android:text="--"
+                        android:textSize="18sp"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -146,18 +150,22 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="强度:"
+                        android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_intensity_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="--" />
+                        android:text="--"
+                        android:textSize="18sp" />
+
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -166,13 +174,15 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="剩余时间:"
+                        android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_remaining_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="00:00" />
+                        android:text="00:00"
+                        android:textSize="18sp" />
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
@@ -180,36 +190,55 @@
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_preset_mode_button"
-                    android:text="@string/button_start" />
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_home_start_button"
+                    android:text="@string/button_start"
+                    android:textColor="@color/black"
+                    android:textSize="22dp"
+                    android:backgroundTint="@null"
+                    app:backgroundTint="@null" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_pause"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_button_yellow"
                     android:text="暂停"
-                    android:visibility="gone" />
+                    android:textColor="@color/black"
+                    android:textSize="22dp"
+                    android:visibility="gone"
+                    android:backgroundTint="@null"
+                    app:backgroundTint="@null" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_stop"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_button_red"
                     android:text="@string/button_stop"
-                    android:visibility="gone" />
+                    android:textColor="@color/black"
+                    android:textSize="22dp"
+                    android:visibility="gone"
+                    android:backgroundTint="@null"
+                    app:backgroundTint="@null" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_soft_resume_inline"
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_keypad_green"
                     android:text="@string/soft_resume"
-                    android:visibility="gone" />
+                    android:textColor="@color/black"
+                    android:textSize="22dp"
+                    android:visibility="gone"
+                    android:backgroundTint="@null"
+                    app:backgroundTint="@null" />
             </LinearLayout>
 
 

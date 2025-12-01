@@ -169,7 +169,9 @@
             android:layout_marginStart="16dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="播放/停止"
-            android:src="@android:drawable/ic_media_play" />
+            android:src="@android:drawable/ic_media_play"
+            android:tint="@android:color/black"
+            app:tint="@android:color/black" />
 
         <ImageButton
             android:id="@+id/btn_move_up"

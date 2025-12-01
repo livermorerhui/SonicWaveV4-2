@@ -284,6 +284,12 @@ class CustomPresetFragment : Fragment() {
         binding.tvIntensityValue.text = sessionState.intensityDisplay
         binding.tvRemainingValue.text = sessionState.timeDisplay
 
+        // 暂停/继续按钮：暂停时显示黄色，继续时绿色
+        val pauseBg = if (sessionState.isPaused) R.drawable.bg_jixu_green else R.drawable.bg_button_yellow
+        binding.btnPause.backgroundTintList = null
+        binding.btnPause.setBackgroundResource(pauseBg)
+        binding.btnPause.setTextColor(resources.getColor(android.R.color.black, null))
+
         binding.btnStartStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.GONE else View.VISIBLE
         binding.btnPause.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
         binding.btnPause.text = if (sessionState.isPaused) "继续" else "暂停"
