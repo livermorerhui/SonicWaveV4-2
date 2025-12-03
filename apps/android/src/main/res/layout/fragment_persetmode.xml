@@ -210,12 +210,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="0dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="0dp"
             android:background="?android:attr/selectableItemBackground">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="频率(Hz)"
+                android:text="频率"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/tv_frequency_value"
@@ -231,12 +231,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="0dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="0dp"
             android:background="?android:attr/selectableItemBackground">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="强度(0.01V)"
+                android:text="强度"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/tv_intensity_value"
@@ -265,12 +265,73 @@
                 android:textSize="24sp"
                 tools:text="09:42"/>
 
+            <LinearLayout
+                android:id="@+id/layout_intensity_scale"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="强度调整"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/btn_intensity_scale_plus"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="增加百分比"
+                        android:padding="10dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_triangle_up" />
+
+                    <EditText
+                        android:id="@+id/input_intensity_scale"
+                        android:layout_width="80dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="4dp"
+                        android:digits="0123456789"
+                        android:gravity="center"
+                        android:hint="100"
+                        android:inputType="number"
+                        android:maxLength="3"
+                        android:padding="0dp"
+                        android:text="100"
+                        android:textSize="18sp" />
+
+                    <ImageButton
+                        android:id="@+id/btn_intensity_scale_minus"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="4dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="减少百分比"
+                        android:padding="10dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_triangle_down" />
+                </LinearLayout>
+
+
+            </LinearLayout>
+
             <Button
                 android:id="@+id/btn_edit_preset"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 style="@style/ButtonNoTint"
+                android:visibility="gone"
+                android:contentDescription="专家模式编辑入口已隐藏，仅保留功能调用"
                 android:text="编辑"
                 android:textSize="22dp"
                 android:textColor="@color/black"
@@ -293,7 +354,7 @@
         app:layout_constraintStart_toStartOf="@id/guide_right"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="260dp">
+        android:layout_marginTop="335dp">
 
         <Button
             android:id="@+id/btn_start_stop"

@@ -25,9 +25,9 @@ import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.utils.TestToneSettings
 import java.util.UUID
 import kotlin.coroutines.coroutineContext
-import kotlin.math.min
-import kotlin.math.roundToInt
+import kotlin.math.floor
 import kotlin.math.max
+import kotlin.math.min
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
@@ -88,6 +88,7 @@ data class PresetModeUiState(
     val currentStep: Step? = null,
     val frequencyHz: Int? = null,
     val intensity01V: Int? = null,
+    val intensityScalePct: Int = 100,
     val remainingSeconds: Int = 0,
     val totalDurationSeconds: Int = 0,
     val customPresets: List<CustomPresetUiModel> = emptyList(),
@@ -471,17 +472,21 @@ class PersetmodeViewModel(
     }
 
     fun setIntensityScalePct(value: Int) {
-        val clamped = value.coerceIn(10, 200)
+        val clamped = value.coerceIn(1, 100)
         if (intensityScalePct.value == clamped) return
         intensityScalePct.value = clamped
-        if (_uiState.value.isRunning) return
         val mode = currentMode()
         val first = scaledSteps(mode).firstOrNull()
         updateUiState {
-            it.copy(
-                frequencyHz = first?.frequencyHz,
-                intensity01V = first?.intensity01V
-            )
+            val withScale = it.copy(intensityScalePct = clamped)
+            if (it.isRunning) {
+                withScale
+            } else {
+                withScale.copy(
+                    frequencyHz = first?.frequencyHz,
+                    intensity01V = first?.intensity01V
+                )
+            }
         }
     }
 
@@ -524,7 +529,7 @@ class PersetmodeViewModel(
                         if (shouldPlayTone) {
                             val current = _uiState.value.currentStep
                             if (current != null) {
-                                val intensity = scaleIntensity(current.intensity01V)
+                                val intensity = current.intensity01V.coerceIn(0, 255)
                                 hardwareRepository.playStandaloneTone(current.frequencyHz, intensity)
                             }
                         } else {
@@ -533,7 +538,7 @@ class PersetmodeViewModel(
                     } else {
                         val current = _uiState.value.currentStep
                         if (current != null) {
-                            val intensity = scaleIntensity(current.intensity01V)
+                            val intensity = current.intensity01V.coerceIn(0, 255)
                             hardwareRepository.startOutput(
                                 targetFrequency = current.frequencyHz,
                                 targetIntensity = intensity,
@@ -625,6 +630,7 @@ class PersetmodeViewModel(
             selectedModeIndex = 0,
             frequencyHz = first?.frequencyHz,
             intensity01V = first?.intensity01V,
+            intensityScalePct = intensityScalePct.value,
             remainingSeconds = mode.totalDurationSec,
             totalDurationSeconds = mode.totalDurationSec,
             isStartEnabled = false
@@ -672,7 +678,7 @@ class PersetmodeViewModel(
             )
         }
         try {
-            val scaled = scaleIntensity(effective)
+            val scaled = effective.coerceIn(0, 255)
             if (runningWithoutHardware) {
                 if (shouldPlayTone) {
                     hardwareRepository.applyIntensity(scaled)
@@ -794,7 +800,7 @@ class PersetmodeViewModel(
     }
 
     private fun scaleIntensity(raw: Int, factor: Double = intensityScalePct.value / 100.0): Int {
-        return (raw * factor).roundToInt().coerceIn(0, 255)
+        return floor(raw * factor).toInt().coerceIn(0, 255)
     }
 
     private fun recomputeStartButtonEnabled() {
@@ -883,7 +889,7 @@ class PersetmodeViewModel(
 
     private suspend fun tryStartOutput(first: Step, useHardware: Boolean): Boolean {
         val limitedStep = applySoftLimitToStep(first)
-        val intensity = scaleIntensity(limitedStep.intensity01V)
+        val intensity = limitedStep.intensity01V.coerceIn(0, 255)
         return try {
             if (useHardware) {
                 hardwareRepository.startOutput(
@@ -907,7 +913,7 @@ class PersetmodeViewModel(
 
     private suspend fun applyStep(step: Step, useHardware: Boolean) {
         val limitedStep = applySoftLimitToStep(step)
-        val intensity = scaleIntensity(limitedStep.intensity01V)
+        val intensity = limitedStep.intensity01V.coerceIn(0, 255)
         try {
             if (useHardware) {
                 hardwareRepository.applyFrequency(limitedStep.frequencyHz)
@@ -958,7 +964,7 @@ class PersetmodeViewModel(
                 val nextStep = applySoftLimitToStep(steps[nextIndex])
                 Log.d(
                     "PresetRun",
-                    "applyStep index=$nextIndex freq=${nextStep.frequencyHz} intensity=${nextStep.intensity01V} scaled=${scaleIntensity(nextStep.intensity01V)} useHardware=$useHardware shouldPlayTone=$shouldPlayTone"
+                    "applyStep index=$nextIndex freq=${nextStep.frequencyHz} intensity=${nextStep.intensity01V} scalePct=${intensityScalePct.value} useHardware=$useHardware shouldPlayTone=$shouldPlayTone"
                 )
                 applyStep(nextStep, useHardware)
             }
