@@ -29,9 +29,12 @@ import com.example.sonicwavev4.ui.persetmode.PresetCategory.BUILT_IN
 import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.utils.SessionManager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import androidx.core.widget.doAfterTextChanged
 
 class PersetmodeFragment : Fragment() {
 
@@ -67,6 +70,9 @@ class PersetmodeFragment : Fragment() {
         )
     }
 
+    private var updatingScaleFromState: Boolean = false
+    private var intensityScaleRepeatJob: Job? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -90,6 +96,7 @@ class PersetmodeFragment : Fragment() {
         super.onDestroyView()
         requireActivity().findViewById<View?>(android.R.id.content)?.setOnTouchListener(null)
         (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener(null)
+        stopScaleRepeat()
         _binding = null
     }
 
@@ -124,7 +131,67 @@ class PersetmodeFragment : Fragment() {
             }
         }
 
+        setupIntensityScaleControls()
+
         // touch listener registration moved to lifecycle callbacks
+    }
+
+    private fun setupIntensityScaleControls() {
+        binding.inputIntensityScale.doAfterTextChanged { text ->
+            if (updatingScaleFromState) return@doAfterTextChanged
+            val value = text?.toString()?.toIntOrNull()
+            if (value == null) {
+                val current = viewModel.uiState.value.intensityScalePct.toString()
+                updatingScaleFromState = true
+                binding.inputIntensityScale.setText(current)
+                binding.inputIntensityScale.setSelection(current.length)
+                updatingScaleFromState = false
+                return@doAfterTextChanged
+            }
+            viewModel.setIntensityScalePct(value)
+        }
+        setupRepeatingScaleButton(binding.btnIntensityScaleMinus, -1)
+        setupRepeatingScaleButton(binding.btnIntensityScalePlus, 1)
+    }
+
+    private fun setupRepeatingScaleButton(button: View, delta: Int) {
+        button.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    adjustIntensityScale(delta)
+                    startScaleRepeat(delta)
+                    true
+                }
+
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    stopScaleRepeat()
+                    true
+                }
+
+                else -> false
+            }
+        }
+    }
+
+    private fun adjustIntensityScale(delta: Int) {
+        val current = viewModel.uiState.value.intensityScalePct
+        viewModel.setIntensityScalePct(current + delta)
+    }
+
+    private fun startScaleRepeat(delta: Int) {
+        intensityScaleRepeatJob?.cancel()
+        intensityScaleRepeatJob = viewLifecycleOwner.lifecycleScope.launch {
+            delay(2000)
+            while (isActive) {
+                adjustIntensityScale(delta)
+                delay(120)
+            }
+        }
+    }
+
+    private fun stopScaleRepeat() {
+        intensityScaleRepeatJob?.cancel()
+        intensityScaleRepeatJob = null
     }
 
     override fun onResume() {
@@ -226,6 +293,14 @@ class PersetmodeFragment : Fragment() {
         binding.tvFrequencyValue.text = sessionState.frequencyDisplay
         binding.tvIntensityValue.text = sessionState.intensityDisplay
         binding.tvRemainingValue.text = sessionState.timeDisplay
+        binding.layoutIntensityScale.isVisible = state.category == BUILT_IN
+        val scaleText = state.intensityScalePct.toString()
+        if (binding.inputIntensityScale.text?.toString() != scaleText) {
+            updatingScaleFromState = true
+            binding.inputIntensityScale.setText(scaleText)
+            binding.inputIntensityScale.setSelection(scaleText.length)
+            updatingScaleFromState = false
+        }
 
         binding.btnStop?.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
         binding.btnStop?.isEnabled = sessionState.isRunning || sessionState.isPaused
@@ -243,8 +318,8 @@ class PersetmodeFragment : Fragment() {
                     val inCustomerDetail = selectedCustomer != null
                     val isExpertMode = state.category == BUILT_IN
                     inCustomerDetail && isExpertMode
-                }.collect { shouldShow ->
-                    binding.btnEditPreset.isVisible = shouldShow
+                }.collect { _ ->
+                    binding.btnEditPreset.isVisible = false
                 }
             }
         }
