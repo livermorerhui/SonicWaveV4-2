@@ -88,6 +88,7 @@ class HomeHardwareRepository(
     private var usbDevice: UsbDevice? = null
     private var lastAppliedFrequency = Double.NaN
     private var lastAppliedIntensity = -1
+    private var lastAppliedHardwareIntensity = -1
     private var lastMode = Ad9833Controller.MODE_BITS_OFF
 
     private var audioManager: AudioManager? = null
@@ -319,6 +320,7 @@ class HomeHardwareRepository(
             mcp41010Controller.setCsChannel(1)
             mcp41010Controller.writeValue(0)
             lastAppliedIntensity = 0
+            lastAppliedHardwareIntensity = 0
             var becameReady = false
             _state.update { current ->
                 val newMcpReady = true
@@ -363,6 +365,7 @@ class HomeHardwareRepository(
         }
         lastAppliedFrequency = Double.NaN
         lastAppliedIntensity = -1
+        lastAppliedHardwareIntensity = -1
         lastMode = Ad9833Controller.MODE_BITS_OFF
         stopTonePlayback()
         _state.update { HardwareState() }
@@ -484,18 +487,23 @@ class HomeHardwareRepository(
 
     private suspend fun applyIntensityInternal(value: Int, force: Boolean) {
         val hardwareReady = state.value.isHardwareReady
+        val hardwareValue = (value / 1).coerceIn(0, 255) // UI 显示值为发送值的 1 倍
         val shouldRefreshTone = desiredState.playTone && (!hardwareReady || force || value != lastAppliedIntensity)
 
         if (hardwareReady) {
-            if (force || value != lastAppliedIntensity) {
+            if (force || hardwareValue != lastAppliedHardwareIntensity) {
                 try {
-                    mcp41010Controller.writeValue(value)
-                    lastAppliedIntensity = value
+                    mcp41010Controller.writeValue(hardwareValue)
+                    lastAppliedHardwareIntensity = hardwareValue
                 } catch (e: CH341LibException) {
                     emitToast("设置幅度失败: ${e.message}")
                     emitError(e)
                 }
             }
+        }
+
+        if (force || value != lastAppliedIntensity) {
+            lastAppliedIntensity = value
         }
 
         if (!desiredState.playTone) {
