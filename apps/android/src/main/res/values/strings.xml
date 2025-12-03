@@ -7,6 +7,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="open_epcg_app">打开 EPCG 应用</string>
     <!-- 其他你的字符串 -->
     <string name="frequency_format">%1$d 赫兹</string>
     <string name="time_minutes_format">%1$d 分钟</string>

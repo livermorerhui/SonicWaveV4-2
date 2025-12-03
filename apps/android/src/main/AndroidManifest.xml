@@ -9,6 +9,10 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-feature android:name="android.hardware.usb.host" android:required="true" />
 
+    <queries>
+        <package android:name="com.humeds.epcg" />
+    </queries>
+
     <application
         android:name=".MainApplication"
         android:usesCleartextTraffic="true"
