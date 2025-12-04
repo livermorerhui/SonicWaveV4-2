@@ -125,6 +125,9 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         sessionManager = SessionManager(this)
 
         setSupportActionBar(binding.toolbar)
+        // Use custom toolbar view instead of NavigationUI-provided titles
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+        binding.toolbarTitle?.text = ""
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         navController = navHostFragment.navController
