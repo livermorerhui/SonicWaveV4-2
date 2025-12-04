@@ -5,12 +5,16 @@
         <item name="android:windowExitAnimation">@anim/shrink_to_top_right</item>
     </style>
 
-    <style name="SpinnerDatePickerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
-        <item name="android:datePickerStyle">@style/SpinnerDatePicker</item>
+    <!-- 轮子式 DatePickerDialog 专用主题 -->
+    <style name="SpinnerDatePickerDialogTheme" parent="Theme.MaterialComponents.Light.Dialog">
+        <!-- 强制 DatePicker 使用 spinner 模式，而不是日历 -->
+        <item name="android:datePickerStyle">@style/SpinnerDatePickerStyle</item>
     </style>
 
-    <style name="SpinnerDatePicker" parent="android:Widget.Material.Light.DatePicker">
+    <!-- 轮子式 DatePicker 样式 -->
+    <style name="SpinnerDatePickerStyle" parent="@android:style/Widget.Material.DatePicker">
         <item name="android:datePickerMode">spinner</item>
+        <item name="android:calendarViewShown">false</item>
     </style>
 
     <style name="Widget.SonicWave.PresetModeButton" parent="@android:style/Widget.Button">

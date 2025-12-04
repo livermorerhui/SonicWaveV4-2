@@ -24,6 +24,12 @@ class RegisterViewModel(
 
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
+    private val _birthday = MutableStateFlow<String?>(null)
+    val birthday: StateFlow<String?> = _birthday.asStateFlow()
+
+    fun onBirthdaySelected(birthday: String) {
+        _birthday.value = birthday
+    }
 
     fun sendCode(mobile: String, accountType: String) {
         if (mobile.isBlank()) {
@@ -59,9 +65,9 @@ class RegisterViewModel(
         code: String,
         password: String,
         accountType: String,
-        birthday: String?,
         orgName: String?
     ) {
+        val birthday = _birthday.value
         if (mobile.isBlank()) {
             _uiState.value = RegisterUiState(errorMessage = "手机号不能为空")
             return

@@ -24,7 +24,6 @@ class RegisterFragment : Fragment() {
     private val registerViewModel: RegisterViewModel by viewModels()
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
-    private var selectedBirthday: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,19 +60,41 @@ class RegisterFragment : Fragment() {
 
     private fun setupDatePicker() {
         binding.tvBirthday.setOnClickListener {
-            val calendar = Calendar.getInstance()
-            DatePickerDialog(
-                requireContext(),
-                { _, year, month, dayOfMonth ->
-                    val formatted = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth)
-                    selectedBirthday = formatted
-                    binding.tvBirthday.text = formatted
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            ).show()
+            showBirthdayPicker()
         }
+
+        registerViewModel.birthday.value?.let { savedBirthday ->
+            binding.tvBirthday.text = savedBirthday
+        }
+    }
+
+    private fun showBirthdayPicker() {
+        val calendar = Calendar.getInstance()
+        registerViewModel.birthday.value?.let { savedBirthday ->
+            val parts = savedBirthday.split("-")
+            if (parts.size == 3) {
+                val yearPart = parts[0].toIntOrNull()
+                val monthPart = parts[1].toIntOrNull()?.minus(1)
+                val dayPart = parts[2].toIntOrNull()
+                if (yearPart != null && monthPart != null && dayPart != null) {
+                    calendar.set(yearPart, monthPart, dayPart)
+                }
+            }
+        }
+
+        val dialog = DatePickerDialog(
+            requireContext(),
+            R.style.SpinnerDatePickerDialogTheme,
+            { _, year, month, dayOfMonth ->
+                val formatted = String.format(Locale.US, "%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                binding.tvBirthday.text = formatted
+                registerViewModel.onBirthdaySelected(formatted)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        dialog.show()
     }
 
     private fun setupSendCode() {
@@ -90,7 +111,7 @@ class RegisterFragment : Fragment() {
             val code = binding.etCode.text.toString()
             val password = binding.etPassword.text.toString()
             val accountType = if (binding.rbPersonal.isChecked) "personal" else "org"
-            val birthday = if (accountType == "personal") selectedBirthday else null
+            val birthday = if (accountType == "personal") registerViewModel.birthday.value else null
             val orgName = if (accountType == "org") binding.etOrgName.text.toString() else null
 
             registerViewModel.register(
@@ -98,7 +119,6 @@ class RegisterFragment : Fragment() {
                 code = code,
                 password = password,
                 accountType = accountType,
-                birthday = birthday,
                 orgName = orgName
             )
         }
