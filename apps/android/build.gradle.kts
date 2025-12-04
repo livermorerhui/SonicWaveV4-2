@@ -130,12 +130,16 @@ android {
             buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://8.148.182.90:3000\"")
             buildConfigField("String", "SERVER_BASE_URL_LAN", "\"http://8.148.182.90:3000\"")
             buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"http://8.148.182.90:3000\"")
+            buildConfigField("String", "BACKEND_BASE_URL", "\"https://api.myserver.com\"")
+            buildConfigField("String", "ENVIRONMENT", "\"prod\"")
         }
         debug {
             val serverUrls = resolveDebugServerUrls(localProperties)
             buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://8.148.182.90:3000\"")
             buildConfigField("String", "SERVER_BASE_URL_LAN", "\"${serverUrls.lan}\"")
             buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"${serverUrls.emulator}\"")
+            buildConfigField("String", "BACKEND_BASE_URL", "\"http://10.0.2.2:8080\"")
+            buildConfigField("String", "ENVIRONMENT", "\"local\"")
         }
     }
     compileOptions {

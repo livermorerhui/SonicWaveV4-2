@@ -1,32 +1,30 @@
 package com.example.sonicwavev4.ui.register
 
+import android.app.DatePickerDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.sonicwavev4.R
-import com.example.sonicwavev4.core.account.AuthEvent
-import com.example.sonicwavev4.core.account.AuthIntent
 import com.example.sonicwavev4.databinding.FragmentRegisterBinding
 import com.example.sonicwavev4.ui.login.LoginFragment
-import com.example.sonicwavev4.ui.login.LoginViewModel
-import com.example.sonicwavev4.ui.user.UserFragment
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.util.Calendar
+import java.util.Locale
 
 class RegisterFragment : Fragment() {
 
-    private val loginViewModel: LoginViewModel by activityViewModels()
+    private val registerViewModel: RegisterViewModel by viewModels()
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
+    private var selectedBirthday: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,47 +36,71 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupRegisterButton()
-        collectUiState()
-        collectEvents()
+        setupAccountTypeSwitch()
+        setupDatePicker()
+        setupSendCode()
+        setupRegister()
         setupLoginLink()
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            navigateBackToLogin()
-        }
+        collectUiState()
     }
 
-    private fun setupRegisterButton() {
-        binding.registerButton.setOnClickListener {
-            val username = binding.usernameEditText.text.toString().trim()
-            val email = binding.emailEditText.text.toString().trim()
-            val password = binding.passwordEditText.text.toString()
-            val confirmPassword = binding.confirmPasswordEditText.text.toString()
-            loginViewModel.handleIntent(AuthIntent.Register(username, email, password, confirmPassword))
-        }
-    }
-
-    private fun collectUiState() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                loginViewModel.uiState.collectLatest { state ->
-                    binding.registerButton.isEnabled = !state.isLoading
+    private fun setupAccountTypeSwitch() {
+        binding.rgAccountType.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.rb_personal -> {
+                    binding.layoutPersonal.visibility = View.VISIBLE
+                    binding.layoutOrg.visibility = View.GONE
+                }
+                R.id.rb_org -> {
+                    binding.layoutPersonal.visibility = View.GONE
+                    binding.layoutOrg.visibility = View.VISIBLE
                 }
             }
         }
     }
 
-    private fun collectEvents() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                loginViewModel.events.collectLatest { event ->
-                    when (event) {
-                        is AuthEvent.ShowToast -> Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
-                        is AuthEvent.ShowError -> handleLoginFailure(event.message)
-                        AuthEvent.NavigateToUser -> navigateToUserFragment()
-                        AuthEvent.NavigateToLogin -> Unit
-                    }
-                }
-            }
+    private fun setupDatePicker() {
+        binding.tvBirthday.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            DatePickerDialog(
+                requireContext(),
+                { _, year, month, dayOfMonth ->
+                    val formatted = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                    selectedBirthday = formatted
+                    binding.tvBirthday.text = formatted
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+    }
+
+    private fun setupSendCode() {
+        binding.btnSendCode.setOnClickListener {
+            val accountType = if (binding.rbPersonal.isChecked) "personal" else "org"
+            val mobile = binding.etMobile.text.toString()
+            registerViewModel.sendCode(mobile, accountType)
+        }
+    }
+
+    private fun setupRegister() {
+        binding.btnRegister.setOnClickListener {
+            val mobile = binding.etMobile.text.toString()
+            val code = binding.etCode.text.toString()
+            val password = binding.etPassword.text.toString()
+            val accountType = if (binding.rbPersonal.isChecked) "personal" else "org"
+            val birthday = if (accountType == "personal") selectedBirthday else null
+            val orgName = if (accountType == "org") binding.etOrgName.text.toString() else null
+
+            registerViewModel.register(
+                mobile = mobile,
+                code = code,
+                password = password,
+                accountType = accountType,
+                birthday = birthday,
+                orgName = orgName
+            )
         }
     }
 
@@ -88,22 +110,33 @@ class RegisterFragment : Fragment() {
         }
     }
 
-    private fun navigateToUserFragment() {
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_right_main, UserFragment())
-            .commit()
+    private fun collectUiState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                registerViewModel.uiState.collectLatest { state ->
+                    binding.btnSendCode.isEnabled = !state.isLoading
+                    binding.btnRegister.isEnabled = !state.isLoading
+
+                    state.statusMessage?.let {
+                        Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                    }
+
+                    state.errorMessage?.let {
+                        Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                    }
+
+                    if (state.success) {
+                        navigateBackToLogin()
+                    }
+                }
+            }
+        }
     }
 
     private fun navigateBackToLogin() {
         parentFragmentManager.beginTransaction()
             .replace(R.id.fragment_right_main, LoginFragment())
             .commit()
-    }
-
-    private fun handleLoginFailure(errorMessage: String) {
-        Log.e("RegisterFragment", "Auto-login after registration failed: $errorMessage")
-        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
-        loginViewModel.handleIntent(AuthIntent.ClearError)
     }
 
     override fun onDestroyView() {
