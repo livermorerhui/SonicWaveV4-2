@@ -192,167 +192,97 @@
     </LinearLayout>
 
     <!-- 右侧：状态窗口（频率/强度/剩余时间） -->
-
-    <!-- 固定位置的开始/停止/恢复按钮 -->
     <LinearLayout
         android:id="@+id/panel_status"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:gravity="top"
         android:orientation="vertical"
+        android:gravity="top"
         android:padding="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@id/guide_right"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <!-- 频率 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="0dp"
-            android:background="?android:attr/selectableItemBackground"
             android:orientation="vertical"
-            android:padding="0dp">
-
+            android:padding="0dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/selectableItemBackground">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="频率(Hz)"
-                android:textStyle="bold" />
-
+                android:textStyle="bold"/>
             <TextView
                 android:id="@+id/tv_frequency_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="24sp"
-                tools:text="110" />
+                tools:text="110"/>
         </LinearLayout>
 
         <!-- 强度 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="0dp"
-            android:background="?android:attr/selectableItemBackground"
             android:orientation="vertical"
-            android:padding="0dp">
-
+            android:padding="0dp"
+            android:layout_marginBottom="8dp"
+            android:background="?android:attr/selectableItemBackground">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="强度(0.01V)"
-                android:textStyle="bold" />
-
+                android:textStyle="bold"/>
             <TextView
                 android:id="@+id/tv_intensity_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="24sp"
-                tools:text="120" />
+                tools:text="120"/>
         </LinearLayout>
 
         <!-- 剩余时间 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
             android:orientation="vertical"
-            android:padding="0dp">
-
+            android:padding="0dp"
+            android:background="?android:attr/selectableItemBackground">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="剩余时间"
-                android:textStyle="bold" />
-
+                android:textStyle="bold"/>
             <TextView
                 android:id="@+id/tv_remaining_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="24sp"
-                tools:text="09:42" />
-
-            <LinearLayout
-                android:id="@+id/layout_intensity_scale"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="强度调整"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
-
-                    <ImageButton
-                        android:id="@+id/btn_intensity_scale_plus"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="增加百分比"
-                        android:padding="10dp"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_triangle_up" />
-
-                    <EditText
-                        android:id="@+id/input_intensity_scale"
-                        android:layout_width="80dp"
-                        android:layout_height="44dp"
-                        android:layout_marginTop="4dp"
-                        android:digits="0123456789"
-                        android:gravity="center"
-                        android:hint="100"
-                        android:inputType="number"
-                        android:maxLength="3"
-                        android:padding="8dp"
-                        android:text="100"
-                        android:textSize="18sp" />
-
-                    <ImageButton
-                        android:id="@+id/btn_intensity_scale_minus"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="4dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="减少百分比"
-                        android:padding="10dp"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_triangle_down" />
-                </LinearLayout>
-
-
-            </LinearLayout>
+                tools:text="09:42"/>
 
             <Button
                 android:id="@+id/btn_edit_preset"
-                style="@style/ButtonNoTint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
+                style="@style/ButtonNoTint"
+                android:text="编辑"
+                android:textSize="22dp"
+                android:textColor="@color/black"
                 android:background="@drawable/bg_button_blue"
                 android:backgroundTint="@null"
-                android:contentDescription="专家模式编辑入口已隐藏，仅保留功能调用"
-                android:text="编辑"
-                android:textColor="@color/black"
-                android:textSize="22dp"
-                android:visibility="gone"
-                app:backgroundTint="@null" />
+                app:backgroundTint="@null"/>
 
 
         </LinearLayout>
     </LinearLayout>
 
+    <!-- 固定位置的开始/停止/恢复按钮 -->
     <LinearLayout
         android:id="@+id/layout_run_controls"
         android:layout_width="0dp"
@@ -363,7 +293,7 @@
         app:layout_constraintStart_toStartOf="@id/guide_right"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="330dp">
+        android:layout_marginTop="260dp">
 
         <Button
             android:id="@+id/btn_start_stop"

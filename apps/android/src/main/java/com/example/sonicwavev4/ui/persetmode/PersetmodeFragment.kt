@@ -31,7 +31,6 @@ import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -319,8 +318,8 @@ class PersetmodeFragment : Fragment() {
                     val inCustomerDetail = selectedCustomer != null
                     val isExpertMode = state.category == BUILT_IN
                     inCustomerDetail && isExpertMode
-                }.collect { shouldShow ->
-                    binding.btnEditPreset.isVisible = shouldShow
+                }.collect { _ ->
+                    binding.btnEditPreset.isVisible = false
                 }
             }
         }
