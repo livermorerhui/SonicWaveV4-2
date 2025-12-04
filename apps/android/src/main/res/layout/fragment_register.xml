@@ -85,14 +85,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="个人"
-                android:checked="true" />
+                android:checked="true"
+                android:buttonTint="@color/radio_button_tint" />
 
             <RadioButton
                 android:id="@+id/rb_org"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="机构"
-                android:layout_marginStart="16dp" />
+                android:layout_marginStart="16dp"
+                android:buttonTint="@color/radio_button_tint" />
         </RadioGroup>
 
         <LinearLayout

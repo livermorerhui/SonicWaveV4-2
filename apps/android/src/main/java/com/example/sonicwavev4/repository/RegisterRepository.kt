@@ -1,7 +1,7 @@
 package com.example.sonicwavev4.repository
 
 import com.example.sonicwavev4.network.MyBackendApiService
-import com.example.sonicwavev4.network.RegisterRequest
+import com.example.sonicwavev4.network.RegisterSubmitRequest
 import com.example.sonicwavev4.network.SendCodeRequest
 
 class RegisterRepository(
@@ -31,7 +31,7 @@ class RegisterRepository(
     ): Result<Unit> {
         return try {
             val resp = api.submitRegister(
-                RegisterRequest(
+                RegisterSubmitRequest(
                     mobile = mobile,
                     code = code,
                     password = password,

@@ -17,7 +17,7 @@ interface MyBackendApiService {
 
     @POST("/api/register/submit")
     suspend fun submitRegister(
-        @Body body: RegisterRequest
+        @Body body: RegisterSubmitRequest
     ): ApiResponse<RegisterResult>
 
     companion object {
@@ -53,7 +53,7 @@ data class SendCodeRequest(
     val accountType: String
 )
 
-data class RegisterRequest(
+data class RegisterSubmitRequest(
     val mobile: String,
     val code: String,
     val password: String,
