@@ -6,8 +6,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    android:paddingTop="0dp"
-    android:paddingBottom="12dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
@@ -15,8 +15,8 @@
 
     <ImageButton
         android:id="@+id/nav_item_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:background="@android:color/transparent"
         android:scaleType="fitCenter"
         tools:src="@drawable/ic_home_black_24dp"
@@ -30,6 +30,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
-        android:textSize="20sp"
+        android:textSize="16sp"
         tools:text="标题" />
 </LinearLayout>

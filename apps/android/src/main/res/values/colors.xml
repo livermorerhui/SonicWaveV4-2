@@ -24,4 +24,5 @@
     <color name="login_secondary_button_text">#FF4A2700</color>
     <!-- 温和的粉绿色，用于 DatePicker 确定按钮背景 -->
     <color name="date_picker_positive_bg">#FF8BF1C1</color>
+    <color name="background_light_gray">#FFF2F2F2</color>
 </resources>

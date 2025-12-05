@@ -4,7 +4,7 @@ set -e
 
 # --- 在这里配置您的服务器信息 ---
 REMOTE_USER="root"
-REMOTE_HOST="8.148.182.90"
+REMOTE_HOST="47.107.66.156"
 REMOTE_PROJECT_PATH="/root/apps/backend-api"
 LOCAL_PROJECT_PATH="./apps/backend-api"
 # ---------------------------------

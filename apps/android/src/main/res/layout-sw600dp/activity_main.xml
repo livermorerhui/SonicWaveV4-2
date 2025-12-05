@@ -5,6 +5,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_light_gray"
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
@@ -13,7 +14,7 @@
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:background="#01E4BA"
+        android:background="@drawable/toolbar_background_tablet"
         app:contentInsetStartWithNavigation="0dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,52 +46,62 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- === 区域分割线 Guidelines === -->
+        <!-- === 用户区域分割线  === -->
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/vertical_divider_guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_begin="720dp" />
+            app:layout_constraintGuide_begin="750dp" />
 
+        <!-- === 音乐迷你栏区域分割线  === -->
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/horizontal_divider_guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.85" />
+            app:layout_constraintGuide_end="100dp" />
 
-        <!-- === 左侧栏布局 === -->
+        <!-- === 左侧栏布局 分割线 === -->
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/inner_nav_guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_begin="120dp" />
+            app:layout_constraintGuide_begin="125dp" />
 
 
-        <!-- === 左上角区域 === -->
-            <!-- === 左侧栏上部分 === -->
+        <!-- === 左侧栏上部分（自选/专家/自设），代码填充 custom_nav_rail_item === -->
         <LinearLayout
             android:id="@+id/nav_rail_top_section"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:gravity="center_horizontal"
             android:orientation="vertical"
+            android:gravity="center_horizontal"
             android:paddingTop="12dp"
-            android:background="?attr/colorSurface"
+            android:paddingBottom="12dp"
+            android:background="@drawable/nav_rail_background"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/horizontal_divider_guideline"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline">
-        </LinearLayout>
+            app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline" />
 
-            <!-- === 左上角区域：自选、预定设置 === -->
+
+            <!-- === 左上角区域：自选、专家、自设模式页面区域 === -->
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/nav_host_fragment_activity_main"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/panel_background"
             app:defaultNavHost="true"
             app:layout_constraintBottom_toTopOf="@id/horizontal_divider_guideline"
             app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline"
@@ -98,20 +109,25 @@
             app:layout_constraintTop_toTopOf="parent"
             app:navGraph="@navigation/mobile_navigation" />
 
-        <!-- === 左下角区域 === -->
-            <!-- === 左侧栏下部分 === -->
+        <!-- === 音乐按钮 === -->
         <LinearLayout
             android:id="@+id/nav_rail_bottom_section"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:gravity="center_horizontal"
             android:orientation="vertical"
+            android:background="@drawable/nav_rail_background"
             android:paddingTop="12dp"
-            android:background="?attr/colorSurface"
+            android:paddingBottom="12dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
             app:layout_constraintTop_toBottomOf="@+id/horizontal_divider_guideline"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline">
+            <!-- 由代码填充音乐 custom_nav_rail_item -->
         </LinearLayout>
 
             <!-- === 左下角区域：音乐 === -->
@@ -119,7 +135,11 @@
             android:id="@+id/fragment_bottom_left"
             layout="@layout/layout_mini_music_bar"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
             app:layout_constraintTop_toBottomOf="@id/horizontal_divider_guideline"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/inner_nav_guideline"
@@ -132,15 +152,20 @@
             android:name="com.example.sonicwavev4.ui.login.LoginFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/panel_background"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/vertical_divider_guideline"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- 固定分隔线：垂直灰线 -->
+        <!-- 固定分隔线：垂直线 -->
         <View
             android:id="@+id/vertical_divider"
-            android:layout_width="2dp"
+            android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@android:color/darker_gray"
             android:clickable="false"
@@ -152,69 +177,23 @@
             app:layout_constraintStart_toStartOf="@id/vertical_divider_guideline"
             app:layout_constraintEnd_toEndOf="@id/vertical_divider_guideline" />
 
-        <!-- 固定分隔线：水平灰线 -->
+        <!-- 固定分隔线：水平线 -->
         <View
             android:id="@+id/horizontal_divider"
             android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:background="@android:color/darker_gray"
-            android:clickable="false"
-            android:focusable="false"
-            android:longClickable="false"
-            android:importantForAccessibility="no"
-            app:layout_constraintStart_toEndOf="@id/inner_nav_guideline"
-            app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline"
-            app:layout_constraintTop_toTopOf="@id/horizontal_divider_guideline"
-            app:layout_constraintBottom_toBottomOf="@id/horizontal_divider_guideline" />
-
-        <!-- 左侧竖向分隔线 -->
-
-        <!-- 左侧水平分隔线 -->
-        <View
-            android:id="@+id/left_vertical_divider"
-            android:layout_width="2dp"
             android:layout_height="0dp"
             android:background="@android:color/darker_gray"
             android:clickable="false"
             android:focusable="false"
-            android:importantForAccessibility="no"
             android:longClickable="false"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/inner_nav_guideline"
-            app:layout_constraintHorizontal_bias="0.0"
+            android:importantForAccessibility="no"
             app:layout_constraintStart_toStartOf="@id/inner_nav_guideline"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
-
-        <View
-            android:id="@+id/left_horizontal_divider"
-            android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:background="@android:color/darker_gray"
-            android:clickable="false"
-            android:focusable="false"
-            android:longClickable="false"
-            android:importantForAccessibility="no"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/inner_nav_guideline"
+            app:layout_constraintEnd_toStartOf="@id/vertical_divider_guideline"
             app:layout_constraintTop_toTopOf="@id/horizontal_divider_guideline"
             app:layout_constraintBottom_toBottomOf="@id/horizontal_divider_guideline" />
 
         <!-- 左侧顶部水平线 -->
         <!-- 左侧底部水平线 -->
-        <View
-            android:id="@+id/left_bottom_horizontal_divider"
-            android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:background="@android:color/darker_gray"
-            android:clickable="false"
-            android:focusable="false"
-            android:longClickable="false"
-            android:importantForAccessibility="no"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/inner_nav_guideline"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/nav_rail_bottom_section" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

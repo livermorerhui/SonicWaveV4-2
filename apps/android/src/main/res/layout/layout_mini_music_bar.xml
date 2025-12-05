@@ -5,8 +5,11 @@
     android:id="@+id/miniMusicBar"
     android:layout_width="match_parent"
     android:layout_height="56dp"
-    android:paddingStart="8dp"
-    android:paddingEnd="8dp">
+    android:background="@drawable/music_bar_background"
+    android:paddingStart="12dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="8dp">
 
     <ImageButton
         android:id="@+id/btnPrev"
@@ -22,8 +25,8 @@
 
     <ImageButton
         android:id="@+id/btnPlayPause"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:background="@android:color/transparent"
         android:src="@android:drawable/ic_media_play"
         app:tint="@android:color/black"

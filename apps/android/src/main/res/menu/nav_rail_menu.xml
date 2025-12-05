@@ -19,11 +19,4 @@
             android:title="自设模式" />
     </group>
 
-    <group android:id="@+id/group_other">
-        <item
-            android:id="@+id/navigation_music"
-            android:icon="@drawable/ic_music_note_black_24dp"
-            android:title="音乐" />
-    </group>
-
 </menu>
