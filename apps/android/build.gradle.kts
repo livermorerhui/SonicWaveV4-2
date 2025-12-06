@@ -130,16 +130,22 @@ android {
             buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://8.148.182.90:3000\"")
             buildConfigField("String", "SERVER_BASE_URL_LAN", "\"http://8.148.182.90:3000\"")
             buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"http://8.148.182.90:3000\"")
-            buildConfigField("String", "BACKEND_BASE_URL", "\"https://api.myserver.com\"")
+            // 注册/登录后端：正式包当前也指向阿里云测试环境，后续再切换为正式域名
+            buildConfigField("String", "BACKEND_BASE_URL", "\"http://47.107.66.156:3000\"")
+            // 环境标签：prod（正式包）
             buildConfigField("String", "ENVIRONMENT", "\"prod\"")
         }
         debug {
             val serverUrls = resolveDebugServerUrls(localProperties)
+            // 旧的音频 / 其他接口仍然使用 SERVER_BASE_URL_* 逻辑，暂不动
             buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://8.148.182.90:3000\"")
             buildConfigField("String", "SERVER_BASE_URL_LAN", "\"${serverUrls.lan}\"")
             buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"${serverUrls.emulator}\"")
-            buildConfigField("String", "BACKEND_BASE_URL", "\"http://10.0.2.2:8080\"")
-            buildConfigField("String", "ENVIRONMENT", "\"local\"")
+            // 注册/登录后端：debug 构建直接连阿里云测试环境
+            buildConfigField("String", "BACKEND_BASE_URL", "\"http://47.107.66.156:3000\"")
+
+            // 环境标签：test（调试包指向“测试环境”）
+            buildConfigField("String", "ENVIRONMENT", "\"test\"")
         }
     }
     compileOptions {
