@@ -33,6 +33,7 @@ const { ensureSeedAdmin } = require('./services/admin.service');
 const customerRouter = require('./routes/customer.routes.js');
 const presetModesRouter = require('./routes/presetModes.routes.js');
 const registrationRouter = require('./routes/registration.routes.js');
+const humedsRouter = require('./routes/humeds.routes.js');
 
 // 初始化
 const app = express();
@@ -127,6 +128,7 @@ app.use('/api/v1/preset-modes', presetModesRouter);
 app.use('/api/v1/device', deviceRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/register', registrationRouter);
+app.use('/api/humeds', humedsRouter);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // 启动应用
