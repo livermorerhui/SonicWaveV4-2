@@ -1,6 +1,14 @@
 const bcrypt = require('bcrypt');
 const { dbPool } = require('../config/db');
-const smsCodeService = require('./smsCode.local.service');
+const smsCodeService = require('./smsCode.service');
+const HumedsAccountService = require('./humedsAccount.service');
+const logger = require('../logger');
+
+const HUMEDS_BIND_ON_REGISTER =
+  (process.env.HUMEDS_BIND_ON_REGISTER || '').toLowerCase() === 'true';
+
+const HUMEDS_STRICT_REGISTER =
+  (process.env.HUMEDS_STRICT_REGISTER || '').toLowerCase() === 'true';
 
 const SALT_ROUNDS = 10;
 const ACCOUNT_TYPES = ['personal', 'org'];
@@ -112,7 +120,40 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
   ];
 
   const [result] = await dbPool.execute(insertSql, values);
-  return { userId: result.insertId };
+  const userId = result.insertId;
+
+  if (HUMEDS_BIND_ON_REGISTER) {
+    logger.info('Humeds bind on register start', {
+      userId,
+      mobile: normalizedMobile,
+    });
+
+    try {
+      await HumedsAccountService.ensureTokenForUser({
+        userId,
+        mobile: normalizedMobile,
+       smscode: code,
+      });
+      logger.info('Humeds bind on register success', {
+        userId,
+        mobile: normalizedMobile,
+      });
+    } catch (err) {
+      logger.error('Humeds bind on register failed', {
+        userId,
+        mobile: normalizedMobile,
+        error: err.message,
+        code: err.code,
+      });
+
+      if (HUMEDS_STRICT_REGISTER) {
+        throw err;
+      }
+    }
+  }
+
+
+  return { userId };
 }
 
 module.exports = {

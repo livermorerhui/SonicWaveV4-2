@@ -5,6 +5,7 @@ const humedsConfig = require('../config/humeds.config');
 
 class HumedsAccountService {
   static async ensureTokenForUser(params) {
+    // Used after successful local registration or when explicitly requested via /api/humeds/token
     const {
       userId,
       mobile,
