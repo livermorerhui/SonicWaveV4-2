@@ -44,6 +44,17 @@ async function sendRegisterCode({ mobile, accountType }) {
     throw error;
   }
 
+  const [existing] = await dbPool.execute('SELECT id FROM users WHERE mobile = ? LIMIT 1', [normalizedMobile]);
+  if (existing.length > 0) {
+    logger.info('sendRegisterCode: mobile already exists, skip sms', {
+      mobile: normalizedMobile,
+    });
+
+    const error = new Error('手机号已注册');
+    error.code = 'MOBILE_EXISTS';
+    throw error;
+  }
+
   await smsCodeService.sendCode(normalizedMobile, 'register');
 }
 

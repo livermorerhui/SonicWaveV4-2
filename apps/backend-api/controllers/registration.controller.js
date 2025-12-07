@@ -22,6 +22,10 @@ async function sendRegisterCode(req, res) {
       return res.status(400).json(buildApiResponse(4001, err.message || '参数错误', null));
     }
 
+    if (err.code === 'MOBILE_EXISTS') {
+      return res.status(409).json(buildApiResponse(4091, err.message || '手机号已注册', null));
+    }
+
     return res.status(500).json(buildApiResponse(5000, '服务器内部错误', null));
   }
 }
