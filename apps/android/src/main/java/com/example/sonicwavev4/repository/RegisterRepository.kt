@@ -1,23 +1,41 @@
 package com.example.sonicwavev4.repository
 
 import com.example.sonicwavev4.network.MyBackendApiService
+import com.example.sonicwavev4.network.NetworkErrorParser
 import com.example.sonicwavev4.network.RegisterSubmitRequest
 import com.example.sonicwavev4.network.SendCodeRequest
+import java.io.IOException
+import retrofit2.HttpException
+
+sealed class RegisterResult {
+    object Success : RegisterResult()
+    data class BusinessError(val code: Int?, val message: String) : RegisterResult()
+    data class NetworkError(val message: String) : RegisterResult()
+}
 
 class RegisterRepository(
-    private val api: MyBackendApiService = MyBackendApiService.create()
+    private val api: MyBackendApiService = MyBackendApiService.create(),
 ) {
 
-    suspend fun sendCode(mobile: String, accountType: String): Result<Unit> {
+    suspend fun sendCode(mobile: String, accountType: String): RegisterResult {
         return try {
             val resp = api.sendRegisterCode(SendCodeRequest(mobile, accountType))
             if (resp.code == 200) {
-                Result.success(Unit)
+                RegisterResult.Success
             } else {
-                Result.failure(Throwable(resp.msg ?: "发送验证码失败"))
+                RegisterResult.BusinessError(resp.code, resp.msg ?: "发送验证码失败")
             }
-        } catch (e: Exception) {
-            Result.failure(e)
+        } catch (e: HttpException) {
+            val apiError = NetworkErrorParser.parseApiError(e)
+            if (apiError != null && !apiError.msg.isNullOrBlank()) {
+                RegisterResult.BusinessError(apiError.code, apiError.msg!!)
+            } else {
+                RegisterResult.NetworkError("发送验证码失败，请稍后重试")
+            }
+        } catch (e: IOException) {
+            RegisterResult.NetworkError("网络连接异常，请检查网络后重试")
+        } catch (_: Exception) {
+            RegisterResult.NetworkError("发送验证码失败，请稍后重试")
         }
     }
 
@@ -27,8 +45,8 @@ class RegisterRepository(
         password: String,
         accountType: String,
         birthday: String?,
-        orgName: String?
-    ): Result<Unit> {
+        orgName: String?,
+    ): RegisterResult {
         return try {
             val resp = api.submitRegister(
                 RegisterSubmitRequest(
@@ -37,16 +55,25 @@ class RegisterRepository(
                     password = password,
                     accountType = accountType,
                     birthday = birthday,
-                    orgName = orgName
-                )
+                    orgName = orgName,
+                ),
             )
             if (resp.code == 200) {
-                Result.success(Unit)
+                RegisterResult.Success
             } else {
-                Result.failure(Throwable(resp.msg ?: "注册失败"))
+                RegisterResult.BusinessError(resp.code, resp.msg ?: "注册失败")
             }
-        } catch (e: Exception) {
-            Result.failure(e)
+        } catch (e: HttpException) {
+            val apiError = NetworkErrorParser.parseApiError(e)
+            if (apiError != null && !apiError.msg.isNullOrBlank()) {
+                RegisterResult.BusinessError(apiError.code, apiError.msg!!)
+            } else {
+                RegisterResult.NetworkError("注册失败，请稍后重试")
+            }
+        } catch (e: IOException) {
+            RegisterResult.NetworkError("网络连接异常，请检查网络后重试")
+        } catch (_: Exception) {
+            RegisterResult.NetworkError("注册失败，请稍后重试")
         }
     }
 }

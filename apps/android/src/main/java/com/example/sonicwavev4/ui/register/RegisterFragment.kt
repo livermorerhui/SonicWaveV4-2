@@ -207,6 +207,10 @@ class RegisterFragment : Fragment() {
                         Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
                     }
 
+                    if (state.statusMessage != null || state.errorMessage != null) {
+                        registerViewModel.clearMessages()
+                    }
+
                     if (state.success) {
                         navigateBackToLogin()
                     }
