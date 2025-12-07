@@ -123,11 +123,20 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
   const userId = result.insertId;
 
   if (HUMEDS_BIND_ON_REGISTER) {
+    logger.info('Humeds bind on register start', {
+      userId,
+      mobile: normalizedMobile,
+    });
+
     try {
       await HumedsAccountService.ensureTokenForUser({
         userId,
         mobile: normalizedMobile,
-        smscode: code,
+       smscode: code,
+      });
+      logger.info('Humeds bind on register success', {
+        userId,
+        mobile: normalizedMobile,
       });
     } catch (err) {
       logger.error('Humeds bind on register failed', {
@@ -142,6 +151,7 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
       }
     }
   }
+
 
   return { userId };
 }
