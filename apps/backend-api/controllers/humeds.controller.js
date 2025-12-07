@@ -75,18 +75,33 @@ async function testPasswordLogin(req, res) {
       error: err.message,
       stack: err.stack,
       body: req.body,
-      status: err.status,
-      response: err.originalError?.response?.data || err.response?.data,
+      status: err.status || err.response?.status,
+      response:
+        err.originalError?.humedsResponse ||
+        err.originalError?.response?.data ||
+        err.response?.data ||
+        null,
     });
 
     if (err.code === 'HUMEDS_LOGIN_FAILED') {
-      const httpStatus = err.status && err.status < 500 ? err.status : 422;
+      const raw =
+        err.originalError?.humedsResponse ||
+        err.originalError?.response?.data ||
+        err.response?.data ||
+        null;
 
-      return res.status(httpStatus).json(
-        buildApiResponse(4200, err.message || '对方登录失败', {
-          raw: err.originalError?.response?.data || err.response?.data || null,
-        })
-      );
+      const httpStatus =
+        err.status && err.status < 500 ? err.status : 422;
+
+      return res
+        .status(httpStatus)
+        .json(
+          buildApiResponse(
+            4200,
+            err.message || '对方登录失败',
+            { raw }
+          )
+        );
     }
 
     return res

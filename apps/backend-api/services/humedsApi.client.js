@@ -29,10 +29,28 @@ async function login({ mobile, password, smscode, regionCode }) {
 
     const res = await client.post('/api/login', payload);
     const data = res.data || {};
-    const tokenJwt = data?.data?.token_jwt || data?.data?.tokenJwt;
+    const humedsCode = data.code;
+    const humedsMsg = data.msg || data.desc || '';
+    const humedsData = data.data || {};
+
+    if (humedsCode !== 200) {
+      const baseMessage = humedsMsg || `Humeds login failed with code ${humedsCode}`;
+      const message = humedsMsg && humedsCode
+        ? `Humeds login failed: ${humedsMsg} (code=${humedsCode})`
+        : baseMessage;
+
+      throw buildHumedsError(message, 'HUMEDS_LOGIN_FAILED', {
+        humedsResponse: data,
+      });
+    }
+
+    const tokenJwt = humedsData?.token_jwt || humedsData?.tokenJwt;
 
     if (!tokenJwt) {
-      throw buildHumedsError('Humeds login success but token_jwt missing', 'HUMEDS_LOGIN_FAILED');
+      const message = 'Humeds login success but token_jwt missing (code=200)';
+      throw buildHumedsError(message, 'HUMEDS_LOGIN_FAILED', {
+        humedsResponse: data,
+      });
     }
 
     return {
@@ -43,15 +61,26 @@ async function login({ mobile, password, smscode, regionCode }) {
     logger.error('Humeds login error', {
       error: err.message,
       stack: err.stack,
-      response: err.response?.data,
-      status: err.response?.status,
+      status: err.status || err.response?.status,
+      response:
+        err.originalError?.humedsResponse ||
+        err.originalError?.response?.data ||
+        err.response?.data ||
+        null,
     });
 
     if (err.code === 'HUMEDS_LOGIN_FAILED') {
       throw err;
     }
 
-    const message = err.response?.data?.msg || err.message || 'Humeds login failed';
+    const fallbackData =
+      err.response?.data ||
+      err.originalError?.humedsResponse ||
+      null;
+    const message =
+      fallbackData?.msg ||
+      err.message ||
+      'Humeds login failed';
     throw buildHumedsError(message, 'HUMEDS_LOGIN_FAILED', err);
   }
 }
