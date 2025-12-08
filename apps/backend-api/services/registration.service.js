@@ -3,6 +3,9 @@ const { dbPool } = require('../config/db');
 const smsCodeService = require('./smsCode.service');
 const HumedsAccountService = require('./humedsAccount.service');
 const logger = require('../logger');
+const humedsAccountRepo = require('../repositories/humedsAccount.repository');
+const humedsApi = require('./humedsApi.client');
+const humedsConfig = require('../config/humeds.config');
 
 const HUMEDS_BIND_ON_REGISTER =
   (process.env.HUMEDS_BIND_ON_REGISTER || '').toLowerCase() === 'true';
@@ -24,7 +27,150 @@ function isValidBirthday(value) {
   );
 }
 
-async function sendRegisterCode({ mobile, accountType }) {
+function normalizeRegionCode(regionCode) {
+  if (typeof regionCode !== 'string') {
+    return humedsConfig.defaultRegionCode;
+  }
+
+  const trimmed = regionCode.trim();
+  if (!trimmed) {
+    return humedsConfig.defaultRegionCode;
+  }
+
+  return trimmed;
+}
+
+async function resolveJointState({ mobile, regionCode }) {
+  const normalizedRegionCode = normalizeRegionCode(regionCode);
+
+  const [userRows] = await dbPool.execute(
+    'SELECT id FROM users WHERE mobile = ? LIMIT 1',
+    [mobile]
+  );
+  const selfUser = userRows[0] || null;
+  const selfRegistered = !!selfUser;
+
+  const binding = await humedsAccountRepo.findByMobile(mobile, normalizedRegionCode);
+  const selfBound = !!binding;
+
+  let partnerRegistered = false;
+
+  if (selfBound) {
+    partnerRegistered = true;
+  } else {
+    try {
+      const { exists } = await humedsApi.userExistNormalized({
+        mobile,
+        regionCode: normalizedRegionCode,
+      });
+      if (exists === true) partnerRegistered = true;
+      if (exists === false) partnerRegistered = false;
+    } catch (err) {
+      logger.error('resolveJointState humeds userExist failed', {
+        error: err.message,
+        stack: err.stack,
+        mobile,
+        regionCode: normalizedRegionCode,
+      });
+      const error = new Error('查询对方账号状态失败');
+      error.code = 'HUMEDS_USER_EXIST_FAILED';
+      throw error;
+    }
+  }
+
+  let registrationMode = 'bothNew';
+
+  if (!selfRegistered && !partnerRegistered) {
+    registrationMode = 'bothNew';
+  } else if (!selfRegistered && partnerRegistered) {
+    registrationMode = 'partnerOnly';
+  } else if (selfRegistered && !partnerRegistered) {
+    registrationMode = 'selfExistsPartnerNew';
+  } else if (selfRegistered && selfBound && partnerRegistered) {
+    registrationMode = 'alreadyRegistered';
+  } else {
+    registrationMode = 'selfExistsPartnerNew';
+    logger.warn('resolveJointState: unexpected combination', {
+      mobile,
+      regionCode: normalizedRegionCode,
+      selfRegistered,
+      selfBound,
+      partnerRegistered,
+    });
+  }
+
+  return {
+    selfRegistered,
+    selfBound,
+    partnerRegistered,
+    registrationMode,
+    userId: selfUser ? selfUser.id : null,
+    regionCode: normalizedRegionCode,
+  };
+}
+
+async function insertLocalUser({ mobile, password, accountType, birthday, orgName }) {
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+  const insertSql = `
+    INSERT INTO users
+      (username, email, mobile, mobile_verified, password, account_type, birthday, org_name)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  const values = [
+    mobile,
+    null,
+    mobile,
+    true,
+    passwordHash,
+    accountType,
+    birthday || null,
+    accountType === 'org' ? orgName : null,
+  ];
+
+  const [result] = await dbPool.execute(insertSql, values);
+  return result.insertId;
+}
+
+async function maybeBindHumeds({ userId, mobile, smscode, regionCode, registrationMode }) {
+  if (!HUMEDS_BIND_ON_REGISTER) {
+    return;
+  }
+
+  logger.info('Humeds bind on register start', {
+    userId,
+    mobile,
+    registrationMode,
+  });
+
+  try {
+    await HumedsAccountService.ensureTokenForUser({
+      userId,
+      mobile,
+      smscode,
+      regionCode,
+    });
+    logger.info('Humeds bind on register success', {
+      userId,
+      mobile,
+      registrationMode,
+    });
+  } catch (err) {
+    logger.error('Humeds bind on register failed', {
+      userId,
+      mobile,
+      registrationMode,
+      error: err.message,
+      code: err.code,
+    });
+
+    if (HUMEDS_STRICT_REGISTER) {
+      throw err;
+    }
+  }
+}
+
+async function sendRegisterCode({ mobile, accountType, regionCode }) {
   const normalizedMobile = typeof mobile === 'string' ? mobile.trim() : '';
   if (!normalizedMobile) {
     const error = new Error('手机号不能为空');
@@ -44,23 +190,58 @@ async function sendRegisterCode({ mobile, accountType }) {
     throw error;
   }
 
-  const [existing] = await dbPool.execute('SELECT id FROM users WHERE mobile = ? LIMIT 1', [normalizedMobile]);
-  if (existing.length > 0) {
-    logger.info('sendRegisterCode: mobile already exists, skip sms', {
-      mobile: normalizedMobile,
-    });
+  const jointState = await resolveJointState({
+    mobile: normalizedMobile,
+    regionCode,
+  });
 
-    const error = new Error('手机号已注册');
-    error.code = 'MOBILE_EXISTS';
-    throw error;
+  const {
+    selfRegistered,
+    selfBound,
+    partnerRegistered,
+    registrationMode,
+    regionCode: finalRegionCode,
+  } = jointState;
+
+  let needSmsInput = true;
+  if (registrationMode === 'alreadyRegistered') {
+    needSmsInput = false;
+  } else {
+    needSmsInput = true;
   }
 
-  await smsCodeService.sendCode(normalizedMobile, 'register');
+  logger.info('sendRegisterCode: joint state resolved', {
+    mobile: normalizedMobile,
+    regionCode: finalRegionCode,
+    selfRegistered,
+    selfBound,
+    partnerRegistered,
+    registrationMode,
+    needSmsInput,
+  });
+
+  return {
+    selfRegistered,
+    selfBound,
+    partnerRegistered,
+    registrationMode,
+    needSmsInput,
+    regionCode: finalRegionCode,
+  };
 }
 
-async function submitRegister({ mobile, code, password, accountType, birthday, orgName }) {
+async function submitRegister({
+  mobile,
+  code,
+  password,
+  accountType,
+  birthday,
+  orgName,
+  regionCode,
+}) {
   const normalizedMobile = typeof mobile === 'string' ? mobile.trim() : '';
-  if (!normalizedMobile || !code || !password || !accountType) {
+  const normalizedCode = typeof code === 'string' ? code.trim() : code;
+  if (!normalizedMobile || !normalizedCode || !password || !accountType) {
     const error = new Error('参数错误');
     error.code = 'INVALID_INPUT';
     throw error;
@@ -98,73 +279,116 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
     orgName = normalizedOrgName;
   }
 
-  const verifyResult = await smsCodeService.verifyCode(normalizedMobile, 'register', code);
-  if (!verifyResult.ok) {
-    const error = new Error(verifyResult.reason === 'EXPIRED' ? '验证码已过期' : '验证码错误');
-    error.code = verifyResult.reason === 'EXPIRED' ? 'CODE_EXPIRED' : 'CODE_MISMATCH';
+  const jointState = await resolveJointState({
+    mobile: normalizedMobile,
+    regionCode,
+  });
+
+  const {
+    selfRegistered,
+    selfBound,
+    partnerRegistered,
+    registrationMode,
+    userId: existingUserId,
+    regionCode: finalRegionCode,
+  } = jointState;
+
+  if (registrationMode === 'alreadyRegistered') {
+    const error = new Error('账号已注册，请直接登录');
+    error.code = 'ACCOUNT_ALREADY_REGISTERED';
     throw error;
   }
 
-  const [existing] = await dbPool.execute('SELECT id FROM users WHERE mobile = ? LIMIT 1', [normalizedMobile]);
-  if (existing.length > 0) {
-    const error = new Error('手机号已注册');
-    error.code = 'MOBILE_EXISTS';
-    throw error;
-  }
+  let finalUserId = existingUserId;
 
-  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+  if (registrationMode === 'bothNew') {
+    const [existing] = await dbPool.execute(
+      'SELECT id FROM users WHERE mobile = ? LIMIT 1',
+      [normalizedMobile]
+    );
+    if (existing.length > 0) {
+      const error = new Error('手机号已注册');
+      error.code = 'MOBILE_EXISTS';
+      throw error;
+    }
 
-  const insertSql = `
-    INSERT INTO users
-      (username, email, mobile, mobile_verified, password, account_type, birthday, org_name)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-  const values = [
-    normalizedMobile,
-    null,
-    normalizedMobile,
-    true,
-    passwordHash,
-    accountType,
-    birthday || null,
-    accountType === 'org' ? orgName : null,
-  ];
-
-  const [result] = await dbPool.execute(insertSql, values);
-  const userId = result.insertId;
-
-  if (HUMEDS_BIND_ON_REGISTER) {
-    logger.info('Humeds bind on register start', {
-      userId,
+    await humedsApi.signup({
       mobile: normalizedMobile,
+      smscode: normalizedCode,
+      password,
+      birthday: accountType === 'personal' ? birthday : undefined,
+      regionCode: finalRegionCode,
     });
 
-    try {
-      await HumedsAccountService.ensureTokenForUser({
-        userId,
-        mobile: normalizedMobile,
-       smscode: code,
-      });
-      logger.info('Humeds bind on register success', {
-        userId,
-        mobile: normalizedMobile,
-      });
-    } catch (err) {
-      logger.error('Humeds bind on register failed', {
-        userId,
-        mobile: normalizedMobile,
-        error: err.message,
-        code: err.code,
-      });
+    finalUserId = await insertLocalUser({
+      mobile: normalizedMobile,
+      password,
+      accountType,
+      birthday,
+      orgName,
+    });
 
-      if (HUMEDS_STRICT_REGISTER) {
-        throw err;
-      }
+    await maybeBindHumeds({
+      userId: finalUserId,
+      mobile: normalizedMobile,
+      smscode: normalizedCode,
+      regionCode: finalRegionCode,
+      registrationMode,
+    });
+  } else if (registrationMode === 'partnerOnly') {
+    const [existing] = await dbPool.execute(
+      'SELECT id FROM users WHERE mobile = ? LIMIT 1',
+      [normalizedMobile]
+    );
+    if (existing.length > 0) {
+      const error = new Error('手机号已注册');
+      error.code = 'MOBILE_EXISTS';
+      throw error;
     }
+
+    finalUserId = await insertLocalUser({
+      mobile: normalizedMobile,
+      password,
+      accountType,
+      birthday,
+      orgName,
+    });
+
+    await maybeBindHumeds({
+      userId: finalUserId,
+      mobile: normalizedMobile,
+      smscode: normalizedCode,
+      regionCode: finalRegionCode,
+      registrationMode,
+    });
+  } else if (registrationMode === 'selfExistsPartnerNew') {
+    if (!selfRegistered || !finalUserId) {
+      const error = new Error('参数错误');
+      error.code = 'INVALID_INPUT';
+      throw error;
+    }
+
+    await humedsApi.signup({
+      mobile: normalizedMobile,
+      smscode: normalizedCode,
+      password,
+      birthday: accountType === 'personal' ? birthday : undefined,
+      regionCode: finalRegionCode,
+    });
+
+    await maybeBindHumeds({
+      userId: finalUserId,
+      mobile: normalizedMobile,
+      smscode: normalizedCode,
+      regionCode: finalRegionCode,
+      registrationMode,
+    });
   }
 
-
-  return { userId };
+  return {
+    userId: finalUserId,
+    mode: registrationMode,
+  };
 }
 
 module.exports = {
