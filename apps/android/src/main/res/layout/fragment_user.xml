@@ -46,6 +46,18 @@
         app:layout_constraintTop_toTopOf="@+id/user_name_textview" />
 
 
+    <Button
+        android:id="@+id/btn_humeds_test"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:text="Humeds 接口测试（内部调试）"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_name_textview" />
+
     <FrameLayout
         android:id="@+id/customer_list_container"
         android:layout_width="0dp"
@@ -55,7 +67,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name_textview"
+        app:layout_constraintTop_toBottomOf="@+id/btn_humeds_test"
         app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
