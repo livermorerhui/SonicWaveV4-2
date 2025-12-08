@@ -19,15 +19,35 @@ function buildHumedsError(message, code, originalError) {
 
 async function login({ mobile, password, smscode, regionCode }) {
   try {
-    const payload = {
-      mobile,
-      regionCode: regionCode || humedsConfig.defaultRegionCode,
-    };
+    if (!mobile) {
+      throw buildHumedsError(
+        'mobile is required for Humeds login',
+        'HUMEDS_LOGIN_FAILED'
+      );
+    }
 
-    if (password) payload.password = password;
-    if (smscode) payload.smscode = smscode;
+    const form = new URLSearchParams();
+    form.append('mobile', mobile);
 
-    const res = await client.post('/api/login', payload);
+    const region = regionCode || process.env.HUMEDS_REGION_CODE || '86';
+    form.append('regionCode', region);
+
+    if (smscode) {
+      form.append('smscode', smscode);
+    } else if (password) {
+      form.append('password', password);
+    } else {
+      throw buildHumedsError(
+        'Either password or smscode is required for Humeds login',
+        'HUMEDS_LOGIN_FAILED'
+      );
+    }
+
+    const res = await client.post('/api/login', form.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
     const data = res.data || {};
     const humedsCode = data.code;
     const humedsMsg = data.msg || data.desc || '';
@@ -58,30 +78,44 @@ async function login({ mobile, password, smscode, regionCode }) {
       raw: data,
     };
   } catch (err) {
+    if (err.code === 'HUMEDS_LOGIN_FAILED') {
+      logger.error('Humeds login error', {
+        error: err.message,
+        stack: err.stack,
+        status: err.status || err.response?.status,
+        response:
+          err.originalError?.humedsResponse ||
+          err.originalError?.response?.data ||
+          err.response?.data ||
+          null,
+      });
+      throw err;
+    }
+
     logger.error('Humeds login error', {
       error: err.message,
       stack: err.stack,
       status: err.status || err.response?.status,
       response:
-        err.originalError?.humedsResponse ||
-        err.originalError?.response?.data ||
         err.response?.data ||
+        err.originalError?.humedsResponse ||
         null,
     });
-
-    if (err.code === 'HUMEDS_LOGIN_FAILED') {
-      throw err;
-    }
 
     const fallbackData =
       err.response?.data ||
       err.originalError?.humedsResponse ||
       null;
+
     const message =
-      fallbackData?.msg ||
+      (fallbackData && fallbackData.msg) ||
       err.message ||
       'Humeds login failed';
-    throw buildHumedsError(message, 'HUMEDS_LOGIN_FAILED', err);
+
+    throw buildHumedsError(message, 'HUMEDS_LOGIN_FAILED', {
+      response: fallbackData,
+      originalError: err,
+    });
   }
 }
 
