@@ -115,7 +115,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://8.148.182.90:3000\"")
+        buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://47.107.66.156:3000\"")
         buildConfigField("String", "SERVER_BASE_URL_LAN", "\"http://10.0.2.2:3000\"")
         buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"http://10.0.2.2:3000\"")
     }
@@ -127,9 +127,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://8.148.182.90:3000\"")
-            buildConfigField("String", "SERVER_BASE_URL_LAN", "\"http://8.148.182.90:3000\"")
-            buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"http://8.148.182.90:3000\"")
+            buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://47.107.66.156:3000\"")
+            buildConfigField("String", "SERVER_BASE_URL_LAN", "\"http://47.107.66.156:3000\"")
+            buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"http://47.107.66.156:3000\"")
             // 注册/登录后端：正式包当前也指向阿里云测试环境，后续再切换为正式域名
             buildConfigField("String", "BACKEND_BASE_URL", "\"http://47.107.66.156:3000\"")
             // 环境标签：prod（正式包）
@@ -138,7 +138,7 @@ android {
         debug {
             val serverUrls = resolveDebugServerUrls(localProperties)
             // 旧的音频 / 其他接口仍然使用 SERVER_BASE_URL_* 逻辑，暂不动
-            buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://8.148.182.90:3000\"")
+            buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://47.107.66.156:3000\"")
             buildConfigField("String", "SERVER_BASE_URL_LAN", "\"${serverUrls.lan}\"")
             buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"${serverUrls.emulator}\"")
             // 注册/登录后端：debug 构建直接连阿里云测试环境
@@ -148,6 +148,7 @@ android {
             buildConfigField("String", "ENVIRONMENT", "\"test\"")
         }
     }
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

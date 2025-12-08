@@ -52,9 +52,9 @@ class LoginFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.loginButton.setOnClickListener {
-            val email = binding.usernameEditText.text.toString()
-            val password = binding.passwordEditText.text.toString()
-            loginViewModel.handleIntent(AuthIntent.Login(email, password))
+            val mobile = binding.usernameEditText.text.toString().trim()
+            val password = binding.passwordEditText.text.toString().trim()
+            loginViewModel.handleIntent(AuthIntent.Login(mobile, password))
         }
         binding.registerTextView.setOnClickListener {
             parentFragmentManager.beginTransaction()

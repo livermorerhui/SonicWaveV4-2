@@ -10,6 +10,9 @@ const HUMEDS_BIND_ON_REGISTER =
 const HUMEDS_STRICT_REGISTER =
   (process.env.HUMEDS_STRICT_REGISTER || '').toLowerCase() === 'true';
 
+const REGISTER_SMS_REQUIRED =
+  (process.env.REGISTER_SMS_REQUIRED || '').toLowerCase() === 'true';
+
 const SALT_ROUNDS = 10;
 const ACCOUNT_TYPES = ['personal', 'org'];
 
@@ -60,8 +63,9 @@ async function sendRegisterCode({ mobile, accountType }) {
 
 async function submitRegister({ mobile, code, password, accountType, birthday, orgName }) {
   const normalizedMobile = typeof mobile === 'string' ? mobile.trim() : '';
-  if (!normalizedMobile || !code || !password || !accountType) {
-    const error = new Error('参数错误');
+  const normalizedCode = typeof code === 'string' ? code.trim() : '';
+  if (!normalizedMobile || !password || !accountType) {
+    const error = new Error('手机号、密码和账号类型为必填项');
     error.code = 'INVALID_INPUT';
     throw error;
   }
@@ -98,11 +102,19 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
     orgName = normalizedOrgName;
   }
 
-  const verifyResult = await smsCodeService.verifyCode(normalizedMobile, 'register', code);
-  if (!verifyResult.ok) {
-    const error = new Error(verifyResult.reason === 'EXPIRED' ? '验证码已过期' : '验证码错误');
-    error.code = verifyResult.reason === 'EXPIRED' ? 'CODE_EXPIRED' : 'CODE_MISMATCH';
-    throw error;
+  if (REGISTER_SMS_REQUIRED) {
+    if (!normalizedCode) {
+      const error = new Error('验证码不能为空');
+      error.code = 'INVALID_INPUT';
+      throw error;
+    }
+
+    const verifyResult = await smsCodeService.verifyCode(normalizedMobile, 'register', normalizedCode);
+    if (!verifyResult.ok) {
+      const error = new Error(verifyResult.reason === 'EXPIRED' ? '验证码已过期' : '验证码错误');
+      error.code = verifyResult.reason === 'EXPIRED' ? 'CODE_EXPIRED' : 'CODE_MISMATCH';
+      throw error;
+    }
   }
 
   const [existing] = await dbPool.execute('SELECT id FROM users WHERE mobile = ? LIMIT 1', [normalizedMobile]);
@@ -133,7 +145,7 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
   const [result] = await dbPool.execute(insertSql, values);
   const userId = result.insertId;
 
-  if (HUMEDS_BIND_ON_REGISTER) {
+  if (HUMEDS_BIND_ON_REGISTER && REGISTER_SMS_REQUIRED && normalizedCode) {
     logger.info('Humeds bind on register start', {
       userId,
       mobile: normalizedMobile,
@@ -143,7 +155,7 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
       await HumedsAccountService.ensureTokenForUser({
         userId,
         mobile: normalizedMobile,
-       smscode: code,
+        smscode: normalizedCode,
       });
       logger.info('Humeds bind on register success', {
         userId,

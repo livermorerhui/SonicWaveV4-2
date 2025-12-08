@@ -161,16 +161,15 @@ class RegisterFragment : Fragment() {
 
     private fun setupSendCode() {
         binding.btnSendCode.setOnClickListener {
-            val accountType = if (binding.rbPersonal.isChecked) "personal" else "org"
-            val mobile = binding.etMobile.text.toString()
-            registerViewModel.sendCode(mobile, accountType)
+            Toast.makeText(requireContext(), "当前版本注册无需验证码", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun setupRegister() {
         binding.btnRegister.setOnClickListener {
             val mobile = binding.etMobile.text.toString()
-            val code = binding.etCode.text.toString()
+            // 当前版本注册不启用验证码，保留参数以便未来接入短信
+            val code = ""
             val password = binding.etPassword.text.toString()
             val accountType = if (binding.rbPersonal.isChecked) "personal" else "org"
             val birthday = if (accountType == "personal") registerViewModel.birthday.value else null

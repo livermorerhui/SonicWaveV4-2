@@ -39,7 +39,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     fun handleIntent(intent: AuthIntent) {
         when (intent) {
-            is AuthIntent.Login -> performLogin(intent.email.trim(), intent.password.trim())
+            is AuthIntent.Login -> {
+                val mobile = intent.email.trim()
+                performLogin(mobile, intent.password.trim())
+            }
             is AuthIntent.Register -> performRegister(intent)
             AuthIntent.EnterOfflineMode -> enterOfflineMode()
             is AuthIntent.Logout -> performLogout(intent.reason)
@@ -47,18 +50,18 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun performLogin(email: String, password: String) {
-        if (email.isBlank() || password.isBlank()) {
-            emitToast("请输入邮箱和密码")
+    private fun performLogin(mobile: String, password: String) {
+        if (mobile.isBlank() || password.isBlank()) {
+            emitToast("请输入账号和密码")
             return
         }
-        if (AuthRepository.isOfflineTestCredential(email, password)) {
+        if (AuthRepository.isOfflineTestCredential(mobile, password)) {
             enterOfflineMode()
             return
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            val result = authGateway.login(email, password)
+            val result = authGateway.login(mobile, password)
             handleAuthResult(result, successMessage = "登录成功！")
         }
     }

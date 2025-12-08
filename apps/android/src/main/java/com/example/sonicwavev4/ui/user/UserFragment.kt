@@ -18,6 +18,7 @@ import com.example.sonicwavev4.ui.customer.CustomerListFragment
 import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.ui.login.LoginFragment
 import com.example.sonicwavev4.ui.login.LoginViewModel
+import com.example.sonicwavev4.ui.humeds.HumedsTestDialogFragment
 import com.example.sonicwavev4.utils.LogoutReason
 import com.example.sonicwavev4.utils.TestToneSettings
 import kotlinx.coroutines.flow.collectLatest
@@ -47,6 +48,7 @@ class UserFragment : Fragment() {
         collectAuthEvents()
         setupToneSwitch()
         observeTestToneSetting()
+        setupHumedsTestButton()
     }
 
     private fun collectAuthState() {
@@ -118,6 +120,12 @@ class UserFragment : Fragment() {
         binding.logoutButton.setOnClickListener {
             customerViewModel.clearSessionState()
             authViewModel.handleIntent(AuthIntent.Logout(LogoutReason.UserInitiated))
+        }
+    }
+
+    private fun setupHumedsTestButton() {
+        binding.btnHumedsTest.setOnClickListener {
+            HumedsTestDialogFragment().show(parentFragmentManager, "HumedsTestDialog")
         }
     }
 

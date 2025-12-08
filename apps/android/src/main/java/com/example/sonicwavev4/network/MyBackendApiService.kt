@@ -20,6 +20,11 @@ interface MyBackendApiService {
         @Body body: RegisterSubmitRequest
     ): ApiResponse<RegisterResult>
 
+    @POST("/api/humeds/test/login")
+    suspend fun humedsTestLogin(
+        @Body body: HumedsTestLoginRequest,
+    ): ApiResponse<HumedsTestLoginResult>
+
     companion object {
         fun create(): MyBackendApiService {
             val logging = HttpLoggingInterceptor().apply {

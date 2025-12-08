@@ -24,9 +24,9 @@ class AuthRepository(application: Application) : AuthGateway {
     private val appContext = application.applicationContext
     private val sessionManager = SessionManager(appContext)
 
-    override suspend fun login(email: String, password: String): Result<AuthResult> = withContext(Dispatchers.IO) {
+    override suspend fun login(account: String, password: String): Result<AuthResult> = withContext(Dispatchers.IO) {
         runCatching {
-            val loginResponse = performLoginRequest(email, password)
+            val loginResponse = performLoginRequest(account, password)
             recordLoginEvent()
             HeartbeatOrchestrator.onLogin(appContext)
             buildAuthResult(loginResponse, isOffline = false)
@@ -90,15 +90,21 @@ class AuthRepository(application: Application) : AuthGateway {
         }
     }
 
-    private suspend fun performLoginRequest(email: String, password: String): LoginResponse {
-        val loginApiResponse = RetrofitClient.api.login(LoginRequest(email, password))
+    private suspend fun performLoginRequest(mobile: String, password: String): LoginResponse {
+        // 登录只使用手机号
+        val loginApiResponse = RetrofitClient.api.login(
+            LoginRequest(
+                mobile = mobile,
+                password = password
+            )
+        )
         if (loginApiResponse.isSuccessful && loginApiResponse.body() != null) {
             val loginResponse = loginApiResponse.body()!!
             sessionManager.saveTokens(loginResponse.accessToken, loginResponse.refreshToken)
             sessionManager.saveUserSession(
                 loginResponse.userId.toString(),
                 loginResponse.username,
-                email
+                mobile
             )
             sessionManager.setOfflineTestMode(false)
             OfflineTestModeManager.setOfflineTestMode(false)
@@ -135,8 +141,8 @@ class AuthRepository(application: Application) : AuthGateway {
         private const val OFFLINE_EMAIL = "test@test.local"
         private const val OFFLINE_USERNAME_DISPLAY = "测试账号"
 
-        fun isOfflineTestCredential(email: String, password: String): Boolean {
-            return email.equals(OFFLINE_USERNAME, ignoreCase = true) && password == OFFLINE_PASSWORD
+        fun isOfflineTestCredential(account: String, password: String): Boolean {
+            return account.equals(OFFLINE_USERNAME, ignoreCase = true) && password == OFFLINE_PASSWORD
         }
     }
 }
