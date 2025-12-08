@@ -95,10 +95,6 @@ class RegisterViewModel(
             _uiState.value = RegisterUiState(errorMessage = "手机号不能为空")
             return
         }
-        if (code.isBlank()) {
-            _uiState.value = RegisterUiState(errorMessage = "验证码不能为空")
-            return
-        }
         if (password.isBlank()) {
             _uiState.value = RegisterUiState(errorMessage = "密码不能为空")
             return
@@ -112,6 +108,8 @@ class RegisterViewModel(
             return
         }
 
+        // 当前版本不强制验证码，保留参数以便未来重新启用短信验证
+        // TODO: 接入真实短信验证码后恢复对 code 的校验
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null, statusMessage = null) }
             when (

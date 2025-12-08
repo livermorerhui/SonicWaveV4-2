@@ -11,7 +11,7 @@ object ErrorMessageResolver {
 
     fun fromResponse(errorBody: ResponseBody?, statusCode: Int? = null): String {
         when (statusCode) {
-            401 -> return "邮箱或密码错误"
+            401 -> return "账号或密码错误"
             409 -> return "账号或邮箱已存在"
         }
 
@@ -33,11 +33,23 @@ object ErrorMessageResolver {
     }
 
     private fun mapToChinese(message: String): String {
-        return when (message) {
+        val normalized = message.trim()
+        if (
+            normalized.contains("账号或密码错误") ||
+            normalized.contains("邮箱或密码错误") ||
+            normalized.equals("Invalid credentials.", ignoreCase = true)
+        ) {
+            return "账号或密码错误"
+        }
+        if (
+            normalized.contains("账号和密码为必填项") ||
+            normalized.contains("Email and password are required", ignoreCase = true)
+        ) {
+            return "请输入账号和密码"
+        }
+        return when (normalized) {
             "Username, email, and password are required." -> "请填写完整的用户名、邮箱和密码"
             "Username or email already exists." -> "账号或邮箱已存在"
-            "Email and password are required." -> "请填写邮箱和密码"
-            "Invalid credentials." -> "邮箱或密码错误"
             "Internal server error." -> "服务器开小差了，请稍后再试"
             else -> message
         }

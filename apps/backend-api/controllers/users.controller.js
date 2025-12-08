@@ -74,26 +74,33 @@ const generateAndStoreRefreshToken = async (userId, dbPool) => {
     return refreshToken;
 };
 
-// 用户登录 (Refactored)
+/**
+ * 用户登录接口（手机号登录）
+ * - 请求体仅使用 mobile 作为登录账号
+ * - 只在 users.mobile 上匹配
+ * - 保持原有返回结构和错误码不变，以兼容现有前端
+ */
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json(buildError('INVALID_INPUT', '邮箱和密码为必填项'));
+    const { mobile, password } = req.body || {};
+    const normalizedMobile = (mobile || '').trim();
+
+    if (!normalizedMobile || !password) {
+      return res.status(400).json(buildError('INVALID_INPUT', '账号和密码为必填项'));
     }
 
-    const sql = 'SELECT * FROM users WHERE email = ?';
-    const [users] = await dbPool.execute(sql, [email]);
+    const sql = 'SELECT * FROM users WHERE mobile = ?';
+    const [users] = await dbPool.execute(sql, [normalizedMobile]);
 
     if (users.length === 0) {
-      return res.status(401).json(buildError('INVALID_CREDENTIALS', '邮箱或密码错误'));
+      return res.status(401).json(buildError('INVALID_CREDENTIALS', '账号或密码错误'));
     }
 
     const user = users[0];
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     if (!isPasswordMatch) {
-      return res.status(401).json(buildError('INVALID_CREDENTIALS', '邮箱或密码错误'));
+      return res.status(401).json(buildError('INVALID_CREDENTIALS', '账号或密码错误'));
     }
 
     // 1. Generate Access Token (short-lived)
