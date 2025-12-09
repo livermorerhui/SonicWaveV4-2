@@ -1,6 +1,6 @@
 package com.example.sonicwavev4.ui.customer
 
-import android.content.Intent
+import android.content.ActivityNotFoundException
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,9 +9,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.sonicwavev4.databinding.FragmentCustomerDetailBinding
 import com.example.sonicwavev4.network.Customer
 import com.example.sonicwavev4.ui.customer.CustomerViewModel
+import com.example.sonicwavev4.ui.customer.HumedsLaunchUiState
+import kotlinx.coroutines.launch
 
 class CustomerDetailFragment : Fragment() {
 
@@ -53,30 +58,57 @@ class CustomerDetailFragment : Fragment() {
         }
 
         binding.epcgButton.setOnClickListener {
-            openEpcgApp()
+            customerViewModel.onLaunchHumedsClicked()
         }
 
         binding.backButton.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
+
+        observeHumedsLaunchState()
     }
 
-    private fun openEpcgApp() {
+    private fun launchHumedsAppWithToken(tokenJwt: String? = null) {
         val context = requireContext()
-        val packageManager = context.packageManager
-        val packageName = "com.humeds.epcg"
+        val pm = context.packageManager
+        val launchIntent = pm.getLaunchIntentForPackage(HUMEDS_PACKAGE_NAME)
 
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        if (launchIntent == null) {
+            Toast.makeText(context, "未安装 Humeds APP", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        if (launchIntent != null) {
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        if (!tokenJwt.isNullOrBlank()) {
+            launchIntent.putExtra(HUMEDS_TOKEN_EXTRA, tokenJwt)
+        }
+
+        try {
             startActivity(launchIntent)
-        } else {
-            Toast.makeText(
-                context,
-                "未安装 EPCG 应用（包名：$packageName）",
-                Toast.LENGTH_SHORT
-            ).show()
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(context, "未安装 Humeds APP", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun observeHumedsLaunchState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                customerViewModel.humedsLaunchState.collect { state ->
+                    when (state) {
+                        is HumedsLaunchUiState.Idle -> binding.epcgButton.isEnabled = true
+                        is HumedsLaunchUiState.Loading -> binding.epcgButton.isEnabled = false
+                        is HumedsLaunchUiState.Success -> {
+                            binding.epcgButton.isEnabled = true
+                            launchHumedsAppWithToken(state.tokenJwt)
+                            customerViewModel.resetHumedsLaunchState()
+                        }
+                        is HumedsLaunchUiState.Error -> {
+                            binding.epcgButton.isEnabled = true
+                            Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                            customerViewModel.resetHumedsLaunchState()
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -89,6 +121,8 @@ class CustomerDetailFragment : Fragment() {
     }
 
     companion object {
+        private const val HUMEDS_PACKAGE_NAME = "com.humeds.epcg"
+        const val HUMEDS_TOKEN_EXTRA = "token_jwt"
         private const val ARG_CUSTOMER = "customer"
         fun newInstance(customer: Customer): CustomerDetailFragment {
             val fragment = CustomerDetailFragment()

@@ -7,9 +7,12 @@ import com.example.sonicwavev4.core.CustomerSource
 import com.example.sonicwavev4.core.account.CustomerEvent
 import com.example.sonicwavev4.core.account.CustomerListUiState
 import com.example.sonicwavev4.network.Customer
+import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.repository.CustomerRepository
+import com.example.sonicwavev4.repository.HumedsLaunchRepository
 import com.example.sonicwavev4.data.offlinecustomer.OfflineCustomerRepository
 import com.example.sonicwavev4.utils.OfflineTestModeManager
+import com.example.sonicwavev4.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +29,10 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
     internal var customerRepository: CustomerRepository = CustomerRepository()
     internal var offlineCustomerRepository: OfflineCustomerRepository =
         OfflineCustomerRepository.getInstance(application)
+    private val humedsLaunchRepository = HumedsLaunchRepository(
+        SessionManager(application.applicationContext),
+        RetrofitClient.api
+    )
 
     private val _uiState = MutableStateFlow(CustomerListUiState())
     val uiState: StateFlow<CustomerListUiState> = _uiState.asStateFlow()
@@ -35,6 +42,9 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
 
     private val _events = MutableSharedFlow<CustomerEvent>(extraBufferCapacity = 8)
     val events: SharedFlow<CustomerEvent> = _events.asSharedFlow()
+
+    private val _humedsLaunchState = MutableStateFlow<HumedsLaunchUiState>(HumedsLaunchUiState.Idle)
+    val humedsLaunchState: StateFlow<HumedsLaunchUiState> = _humedsLaunchState.asStateFlow()
 
     fun loadCustomers() {
         viewModelScope.launch {
@@ -157,6 +167,24 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
         _uiState.value = CustomerListUiState()
     }
 
+    fun onLaunchHumedsClicked() {
+        _humedsLaunchState.value = HumedsLaunchUiState.Loading
+        viewModelScope.launch {
+            runCatching { humedsLaunchRepository.getHumedsTokenForCurrentUser() }
+                .onSuccess { token ->
+                    _humedsLaunchState.value = HumedsLaunchUiState.Success(token)
+                }
+                .onFailure { e ->
+                    _humedsLaunchState.value =
+                        HumedsLaunchUiState.Error(e.message ?: "获取 Humeds token 失败，请稍后重试")
+                }
+        }
+    }
+
+    fun resetHumedsLaunchState() {
+        _humedsLaunchState.value = HumedsLaunchUiState.Idle
+    }
+
     private fun updateCustomers(customers: List<Customer>, offlineMode: Boolean, searchQuery: String) {
         val filtered = if (offlineMode) customers else filterCustomers(customers, searchQuery)
         _uiState.update {
@@ -179,4 +207,11 @@ class CustomerViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch { _events.emit(CustomerEvent.Error(message)) }
         _uiState.update { it.copy(errorMessage = message, isLoading = false) }
     }
+}
+
+sealed class HumedsLaunchUiState {
+    object Idle : HumedsLaunchUiState()
+    object Loading : HumedsLaunchUiState()
+    data class Success(val tokenJwt: String) : HumedsLaunchUiState()
+    data class Error(val message: String) : HumedsLaunchUiState()
 }

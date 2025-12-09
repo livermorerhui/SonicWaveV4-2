@@ -76,4 +76,7 @@ interface ApiService {
 
     @POST("api/v1/device/heartbeat")
     suspend fun sendDeviceHeartbeat(@Body request: DeviceHeartbeatRequest): Response<Unit>
+
+    @POST("api/humeds/token")
+    suspend fun getHumedsToken(@Body request: HumedsTokenRequest): Response<HumedsTokenResponse>
 }

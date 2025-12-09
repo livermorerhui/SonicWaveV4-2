@@ -10,3 +10,8 @@ data class HumedsTestLoginResult(
     val token_jwt: String?,
     val raw: Any?,
 )
+
+data class HumedsTokenResult(
+    val token_jwt: String?,
+    val source: String?,
+)

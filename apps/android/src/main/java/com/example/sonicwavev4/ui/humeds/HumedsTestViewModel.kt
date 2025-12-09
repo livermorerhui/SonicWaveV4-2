@@ -2,6 +2,7 @@ package com.example.sonicwavev4.ui.humeds
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sonicwavev4.network.HumedsTokenRequest
 import com.example.sonicwavev4.repository.HumedsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,7 @@ data class HumedsTestUiState(
     val password: String = "",
     val regionCode: String = "86",
     val isLoading: Boolean = false,
-    val token: String? = null,
+    val humedsTokenJwt: String? = null,
     val rawText: String? = null,
     val errorMessage: String? = null,
 )
@@ -49,7 +50,7 @@ class HumedsTestViewModel(
         _uiState.value = current.copy(
             isLoading = true,
             errorMessage = null,
-            token = null,
+            humedsTokenJwt = null,
             rawText = null,
         )
 
@@ -65,7 +66,7 @@ class HumedsTestViewModel(
                     val rawText = data.raw?.toString()
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        token = data.token_jwt,
+                        humedsTokenJwt = data.token_jwt,
                         rawText = rawText,
                         errorMessage = null,
                     )
@@ -74,8 +75,36 @@ class HumedsTestViewModel(
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         errorMessage = e.message ?: "请求失败",
-                        token = null,
+                        humedsTokenJwt = null,
                         rawText = null,
+                    )
+                }
+        }
+    }
+
+    fun loadHumedsTokenForCurrentUser() {
+        val current = _uiState.value
+        _uiState.value = current.copy(
+            isLoading = true,
+            errorMessage = null,
+        )
+
+        viewModelScope.launch {
+            val request = HumedsTokenRequest(userId = 0L) // TODO: hook with real logged-in user when available
+            val result = repository.getHumedsToken(request)
+            result
+                .onSuccess { data ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        humedsTokenJwt = data.token_jwt,
+                        rawText = data.source,
+                        errorMessage = null,
+                    )
+                }
+                .onFailure { e ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = e.message ?: "请求失败",
                     )
                 }
         }
