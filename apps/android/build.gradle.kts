@@ -130,8 +130,19 @@ android {
             buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://47.107.66.156:3000\"")
             buildConfigField("String", "SERVER_BASE_URL_LAN", "\"http://47.107.66.156:3000\"")
             buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"http://47.107.66.156:3000\"")
-            // 注册/登录后端：正式包当前也指向阿里云测试环境，后续再切换为正式域名
-            buildConfigField("String", "BACKEND_BASE_URL", "\"http://47.107.66.156:3000\"")
+            // Release：只需要云端地址
+            buildConfigField(
+                "String",
+                "BACKEND_BASE_URL_CLOUD",
+                "\"http://47.107.66.156:3000\""
+            )
+
+            // 为了兼容旧代码，可以让 BACKEND_BASE_URL 继续等于 CLOUD
+            buildConfigField(
+                "String",
+                "BACKEND_BASE_URL",
+                "\"http://47.107.66.156:3000\""
+            )
             // 环境标签：prod（正式包）
             buildConfigField("String", "ENVIRONMENT", "\"prod\"")
         }
@@ -141,8 +152,25 @@ android {
             buildConfigField("String", "SERVER_BASE_URL_RELEASE", "\"http://47.107.66.156:3000\"")
             buildConfigField("String", "SERVER_BASE_URL_LAN", "\"${serverUrls.lan}\"")
             buildConfigField("String", "SERVER_BASE_URL_EMULATOR", "\"${serverUrls.emulator}\"")
-            // 注册/登录后端：debug 构建直接连阿里云测试环境
-            buildConfigField("String", "BACKEND_BASE_URL", "\"http://47.107.66.156:3000\"")
+
+            // Debug：本地 + 云端两个后端地址
+            buildConfigField(
+                "String",
+                "BACKEND_BASE_URL_LOCAL",
+                "\"${serverUrls.lan}\""
+            )
+            buildConfigField(
+                "String",
+                "BACKEND_BASE_URL_CLOUD",
+                "\"http://47.107.66.156:3000\""
+            )
+
+            // 旧的 BACKEND_BASE_URL 为了兼容，可以暂时仍指向 CLOUD（后续会用新的环境管理类来替代）
+            buildConfigField(
+                "String",
+                "BACKEND_BASE_URL",
+                "\"http://47.107.66.156:3000\""
+            )
 
             // 环境标签：test（调试包指向“测试环境”）
             buildConfigField("String", "ENVIRONMENT", "\"test\"")

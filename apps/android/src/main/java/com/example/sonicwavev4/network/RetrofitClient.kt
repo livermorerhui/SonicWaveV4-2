@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.lang.reflect.Proxy
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
@@ -16,14 +17,17 @@ object RetrofitClient {
     @Volatile
     private var _apiService: ApiService? = null
 
+    private val apiDelegate: ApiService by lazy { createDelegatingApiService() }
+
     val api: ApiService
-        get() = _apiService ?: throw IllegalStateException("RetrofitClient must be initialized before use.")
+        get() = apiDelegate
 
     fun initialize(context: Context) {
         if (_apiService == null) {
             synchronized(this) {
                 if (_apiService == null) {
                     val appContext = context.applicationContext
+                    BackendEnvironment.initialize(appContext)
 
                     // 1. Create the Authenticator
                     val tokenAuthenticator = TokenAuthenticator(appContext)
@@ -57,7 +61,7 @@ object RetrofitClient {
 
                     // 3. Create the Retrofit instance
                     val retrofit = Retrofit.Builder()
-                        .baseUrl("${EndpointProvider.baseUrl}/")
+                        .baseUrl(EndpointProvider.baseUrl)
                         .client(okHttpClient)
                         .addConverterFactory(GsonConverterFactory.create())
                         .build()
@@ -68,7 +72,24 @@ object RetrofitClient {
         }
     }
 
+    fun reinitialize(context: Context) {
+        synchronized(this) {
+            _apiService = null
+            initialize(context.applicationContext)
+        }
+    }
+
     fun updateToken(newToken: String?) {
         this.authToken = newToken
+    }
+
+    private fun createDelegatingApiService(): ApiService {
+        return Proxy.newProxyInstance(
+            ApiService::class.java.classLoader,
+            arrayOf(ApiService::class.java)
+        ) { _, method, args ->
+            val delegate = _apiService ?: throw IllegalStateException("RetrofitClient must be initialized before use.")
+            method.invoke(delegate, *(args ?: emptyArray()))
+        } as ApiService
     }
 }

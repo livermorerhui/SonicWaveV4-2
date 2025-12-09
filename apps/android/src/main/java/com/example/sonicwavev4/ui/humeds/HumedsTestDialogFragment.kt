@@ -10,13 +10,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import android.util.Log
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.sonicwavev4.BuildConfig
 import com.example.sonicwavev4.databinding.DialogHumedsTestBinding
+import com.example.sonicwavev4.network.BackendEnvironment
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -51,6 +54,33 @@ class HumedsTestDialogFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (!BuildConfig.DEBUG) {
+            binding.backendEnvContainer.isVisible = false
+        } else {
+            BackendEnvironment.initialize(requireContext())
+            binding.backendEnvContainer.isVisible = true
+
+            when (BackendEnvironment.getCurrentEnv(requireContext())) {
+                BackendEnvironment.Env.LOCAL -> binding.rbEnvLocal.isChecked = true
+                BackendEnvironment.Env.CLOUD -> binding.rbEnvCloud.isChecked = true
+            }
+
+            binding.rgBackendEnv.setOnCheckedChangeListener { _, checkedId ->
+                val env = when (checkedId) {
+                    binding.rbEnvLocal.id -> BackendEnvironment.Env.LOCAL
+                    binding.rbEnvCloud.id -> BackendEnvironment.Env.CLOUD
+                    else -> BackendEnvironment.Env.CLOUD
+                }
+                BackendEnvironment.setCurrentEnv(requireContext(), env)
+                val label = if (env == BackendEnvironment.Env.LOCAL) "本地" else "阿里云"
+                Toast.makeText(
+                    requireContext(),
+                    "已切换后端环境为：$label，重启应用后生效",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
         binding.editMobile.addTextChangedListener {
             viewModel.updateMobile(it?.toString().orEmpty())

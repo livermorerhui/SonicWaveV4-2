@@ -1,5 +1,6 @@
 package com.example.sonicwavev4.network
 
+import android.content.Context
 import com.example.sonicwavev4.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -29,7 +30,7 @@ interface MyBackendApiService {
     suspend fun getHumedsToken(@Body body: HumedsTokenRequest): ApiResponse<HumedsTokenResult>
 
     companion object {
-        fun create(): MyBackendApiService {
+        fun create(context: Context? = null): MyBackendApiService {
             val logging = HttpLoggingInterceptor().apply {
                 level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
             }
@@ -37,8 +38,10 @@ interface MyBackendApiService {
                 .addInterceptor(logging)
                 .build()
 
+            context?.let { BackendEnvironment.initialize(it) }
+            val baseUrl = BackendEnvironment.getBackendBaseUrl(context)
             val retrofit = Retrofit.Builder()
-                .baseUrl("${BuildConfig.BACKEND_BASE_URL.trimEnd('/')}/")
+                .baseUrl("${baseUrl.trimEnd('/')}/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build()

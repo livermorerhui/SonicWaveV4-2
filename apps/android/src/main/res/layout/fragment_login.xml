@@ -111,4 +111,48 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/forgotPasswordTextView" />
 
+    <LinearLayout
+        android:id="@+id/debugEnvContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@id/registerTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/debugEnvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="后端环境（仅 Debug 可见）"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray" />
+
+        <RadioGroup
+            android:id="@+id/debugEnvRadioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <RadioButton
+                android:id="@+id/rbEnvAliyun"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="阿里云"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/rbEnvLocal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="本地" />
+        </RadioGroup>
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
