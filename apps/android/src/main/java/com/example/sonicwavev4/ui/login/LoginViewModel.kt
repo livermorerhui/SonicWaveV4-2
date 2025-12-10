@@ -8,6 +8,7 @@ import com.example.sonicwavev4.core.account.AuthGateway
 import com.example.sonicwavev4.core.account.AuthIntent
 import com.example.sonicwavev4.core.account.AuthResult
 import com.example.sonicwavev4.core.account.AuthUiState
+import com.example.sonicwavev4.core.account.HumedsBindInfo
 import com.example.sonicwavev4.network.ErrorMessageResolver
 import com.example.sonicwavev4.repository.AuthRepository
 import com.example.sonicwavev4.utils.GlobalLogoutManager
@@ -113,6 +114,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
             emitToast(successMessage)
+            authResult.humedsBindInfo?.let { humedsInfo ->
+                val hint = buildHumedsHintMessage(humedsInfo)
+                if (hint != null) {
+                    _events.emit(AuthEvent.ShowHumedsHint(hint))
+                }
+            }
             _events.emit(AuthEvent.NavigateToUser)
         }.onFailure { throwable ->
             val message = resolveErrorMessage(throwable)
@@ -123,6 +130,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    fun overrideUsername(newUsername: String) {
+        _uiState.update { current ->
+            current.copy(username = newUsername)
+        }
     }
 
     private fun emitToast(message: String) {
@@ -151,6 +164,22 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             ErrorMessageResolver.networkFailure(throwable)
         } else {
             throwable.message ?: "登录失败，请稍后再试"
+        }
+    }
+
+    private fun buildHumedsHintMessage(info: HumedsBindInfo): String? {
+        val status = info.status?.lowercase()
+        if (status == null || status == "success") {
+            return null
+        }
+
+        return when (info.errorCode) {
+            "HUMEDS_LOGIN_FAILED" ->
+                "已登录本应用，但 Humeds 自动登录失败，可能账号或密码不同。稍后可通过客户详情页下方的 Humeds 按钮重试或重新绑定。"
+            "HUMEDS_ACCOUNT_NOT_FOUND" ->
+                "已登录本应用，但未找到对应的 Humeds 账号。如需在 Humeds 中查看数据，请联系管理员或在 Humeds 应用中注册。"
+            else ->
+                "已登录本应用，但暂时无法自动连接 Humeds（${info.errorCode ?: "原因未知"}）。不影响本应用的正常使用。"
         }
     }
 }

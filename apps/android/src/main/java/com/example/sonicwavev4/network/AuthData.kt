@@ -18,3 +18,26 @@ data class RegisterResponse(
     val message: String,
     val userId: Int
 )
+
+data class PasswordResetSendCodeRequest(
+    val mobile: String,
+)
+
+data class PasswordResetSubmitRequest(
+    val mobile: String,
+    val code: String,
+    val newPassword: String,
+)
+
+data class SimpleMessageResponse(
+    val message: String,
+)
+
+data class UpdateUserProfileRequest(
+    val username: String?
+)
+
+data class ChangePasswordRequest(
+    val oldPassword: String,
+    val newPassword: String
+)

@@ -4,6 +4,8 @@ const crypto = require('crypto');
 const SHA256 = require('crypto-js/sha256');
 const { dbPool } = require('../config/db');
 const logger = require('../logger');
+const HumedsAccountService = require('../services/humedsAccount.service');
+const smsCodeService = require('../services/smsCode.service');
 const { hasColumn } = require('../utils/schema');
 
 const buildError = (code, message) => ({
@@ -17,7 +19,7 @@ const buildError = (code, message) => ({
 // 用户注册
 const registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, mobile } = req.body;
     if (!username || !email || !password) {
       return res.status(400).json(buildError('INVALID_INPUT', '用户名、邮箱和密码均为必填项'));
     }
@@ -46,10 +48,44 @@ const registerUser = async (req, res) => {
     const sql = `INSERT INTO users (${columns.join(', ')}) VALUES (${placeholders.join(', ')})`;
     const [result] = await dbPool.execute(sql, values);
 
+    let humedsBindStatus = 'skipped';
+    let humedsErrorCode = null;
+    let humedsErrorMessage = null;
+
+    if (mobile && password) {
+      const normalizedMobile = mobile.trim();
+      try {
+        await HumedsAccountService.ensureTokenForUser({
+          userId: result.insertId,
+          mobile: normalizedMobile,
+          password,
+          loginMode: 'APP_SHARED_PASSWORD_REGISTER',
+        });
+        humedsBindStatus = 'success';
+        logger.info('Humeds token ensured on register', {
+          userId: result.insertId,
+          mobile: normalizedMobile,
+        });
+      } catch (err) {
+        humedsBindStatus = 'failed';
+        humedsErrorCode = err.code || null;
+        humedsErrorMessage = err.message || null;
+        logger.warn('Humeds bind on register failed', {
+          userId: result.insertId,
+          mobile: normalizedMobile,
+          code: err.code,
+          error: err.message,
+        });
+      }
+    }
+
     res.status(201).json({
       message: '用户创建成功',
       userId: result.insertId,
-      username
+      username,
+      humedsBindStatus,
+      humedsErrorCode,
+      humedsErrorMessage,
     });
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
@@ -119,6 +155,34 @@ const loginUser = async (req, res) => {
     // 2. Generate and Store Refresh Token (long-lived)
     const refreshToken = await generateAndStoreRefreshToken(user.id, dbPool);
 
+    // Bind Humeds account on login (best effort)
+    let humedsBindStatus = 'skipped';
+    let humedsErrorCode = null;
+    let humedsErrorMessage = null;
+    try {
+      await HumedsAccountService.ensureTokenForUser({
+        userId: user.id,
+        mobile: normalizedMobile,
+        password,
+        loginMode: 'APP_SHARED_PASSWORD_LOGIN',
+      });
+      humedsBindStatus = 'success';
+      logger.info('Humeds token ensured on login', {
+        userId: user.id,
+        mobile: normalizedMobile
+      });
+    } catch (err) {
+      humedsBindStatus = 'failed';
+      humedsErrorCode = err.code || null;
+      humedsErrorMessage = err.message || null;
+      logger.warn('Humeds bind on login failed', {
+        userId: user.id,
+        mobile: normalizedMobile,
+        code: err.code,
+        error: err.message
+      });
+    }
+
     // 3. Return both tokens to the client
     res.json({
       message: '登录成功',
@@ -127,7 +191,10 @@ const loginUser = async (req, res) => {
       username: user.username,
       userId: user.id,
       role: accessTokenPayload.role,
-      accountType: accessTokenPayload.accountType
+      accountType: accessTokenPayload.accountType,
+      humedsBindStatus,
+      humedsErrorCode,
+      humedsErrorMessage
     });
   } catch (error) {
     logger.error('Error during user login:', { error: error.message });
@@ -213,9 +280,135 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+// 修改当前用户密码
+const changePassword = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?.userId;
+    if (!userId) {
+      return res.status(401).json(buildError('UNAUTHENTICATED', '需要登录才能访问'));
+    }
+
+    const { oldPassword, newPassword } = req.body || {};
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json(buildError('INVALID_INPUT', '旧密码和新密码均为必填项'));
+    }
+
+    if (typeof newPassword !== 'string' || newPassword.length < 6 || newPassword.length > 100) {
+      return res
+        .status(400)
+        .json(buildError('INVALID_INPUT', '新密码长度应在 6~100 之间'));
+    }
+
+    const sql = 'SELECT id, password FROM users WHERE id = ?';
+    const [users] = await dbPool.execute(sql, [userId]);
+
+    if (users.length === 0) {
+      return res.status(404).json(buildError('USER_NOT_FOUND', '未找到用户'));
+    }
+
+    const user = users[0];
+
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordMatch) {
+      return res.status(401).json(buildError('INVALID_CREDENTIALS', '旧密码不正确'));
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    const updateSql = 'UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+    await dbPool.execute(updateSql, [hashedPassword, userId]);
+
+    const deleteTokensSql = 'DELETE FROM refresh_tokens WHERE user_id = ?';
+    await dbPool.execute(deleteTokensSql, [userId]);
+
+    return res.json({
+      message: '密码修改成功'
+    });
+  } catch (error) {
+    logger.error('Error changing user password:', { error: error.message });
+    return res.status(500).json(buildError('INTERNAL_ERROR', '服务器内部错误'));
+  }
+};
+
+// 忘记密码：发送验证码
+const sendResetPasswordCode = async (req, res) => {
+  try {
+    const { mobile } = req.body || {};
+    const normalizedMobile = (mobile || '').trim();
+
+    if (!normalizedMobile) {
+      return res.status(400).json(buildError('INVALID_INPUT', '手机号不能为空'));
+    }
+
+    if (normalizedMobile.length > 32) {
+      return res.status(400).json(buildError('INVALID_INPUT', '手机号格式不正确'));
+    }
+
+    const [users] = await dbPool.execute('SELECT id FROM users WHERE mobile = ? LIMIT 1', [normalizedMobile]);
+    if (users.length === 0) {
+      return res.status(404).json(buildError('MOBILE_NOT_FOUND', '手机号未注册'));
+    }
+
+    await smsCodeService.sendCode(normalizedMobile, 'reset_password');
+
+    return res.json({ message: '验证码已发送' });
+  } catch (error) {
+    logger.error('Error sending reset password code:', { error: error.message });
+    return res.status(500).json(buildError('INTERNAL_ERROR', '服务器内部错误'));
+  }
+};
+
+// 忘记密码：提交验证码与新密码
+const resetPassword = async (req, res) => {
+  try {
+    const { mobile, code, newPassword } = req.body || {};
+    const normalizedMobile = (mobile || '').trim();
+    const normalizedCode = (code || '').trim();
+    const nextPassword = (newPassword || '').trim();
+
+    if (!normalizedMobile || !normalizedCode || !nextPassword) {
+      return res.status(400).json(buildError('INVALID_INPUT', '手机号、验证码和新密码均为必填项'));
+    }
+
+    if (normalizedMobile.length > 32) {
+      return res.status(400).json(buildError('INVALID_INPUT', '手机号格式不正确'));
+    }
+
+    const [users] = await dbPool.execute('SELECT id FROM users WHERE mobile = ? LIMIT 1', [normalizedMobile]);
+    if (users.length === 0) {
+      return res.status(404).json(buildError('MOBILE_NOT_FOUND', '手机号未注册'));
+    }
+
+    const verifyResult = await smsCodeService.verifyCode(normalizedMobile, 'reset_password', normalizedCode);
+    if (!verifyResult.ok) {
+      if (verifyResult.reason === 'EXPIRED') {
+        return res.status(400).json(buildError('CODE_EXPIRED', '验证码已过期，请重新获取'));
+      }
+      return res.status(400).json(buildError('CODE_INVALID', '验证码错误，请检查后重试'));
+    }
+
+    const hashedPassword = await bcrypt.hash(nextPassword, 10);
+
+    await dbPool.execute(
+      'UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [hashedPassword, users[0].id]
+    );
+
+    return res.json({ message: '密码重置成功' });
+  } catch (error) {
+    logger.error('Error resetting password:', { error: error.message });
+    return res.status(500).json(buildError('INTERNAL_ERROR', '服务器内部错误'));
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
-  updateUserProfile
+  updateUserProfile,
+  changePassword,
+  sendResetPasswordCode,
+  resetPassword
 };

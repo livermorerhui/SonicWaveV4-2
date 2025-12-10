@@ -62,7 +62,7 @@
 
     <ImageButton
         android:id="@+id/epcg_button"
-        android:layout_width="64dp"
+        android:layout_width="128dp"
         android:layout_height="64dp"
         android:layout_marginTop="16dp"
         android:background="?attr/selectableItemBackgroundBorderless"

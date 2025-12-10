@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sonicwavev4.repository.RegisterRepository
 import com.example.sonicwavev4.repository.RegisterResult
+import com.example.sonicwavev4.utils.PasswordValidator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -97,6 +98,14 @@ class RegisterViewModel(
         }
         if (password.isBlank()) {
             _uiState.value = RegisterUiState(errorMessage = "密码不能为空")
+            return
+        }
+
+        val validation = PasswordValidator.validate(password)
+        if (!validation.isValid) {
+            _uiState.value = RegisterUiState(
+                errorMessage = validation.message ?: "密码至少 6 位，且需包含数字、字母、符号中至少两种"
+            )
             return
         }
         if (accountType == "personal" && birthday.isNullOrBlank()) {

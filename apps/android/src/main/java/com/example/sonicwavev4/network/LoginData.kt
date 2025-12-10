@@ -20,5 +20,15 @@ data class LoginResponse(
     val userId: Int,
 
     @SerializedName("accountType")
-    val accountType: String?
+    val accountType: String?,
+
+    // 新增：Humeds 自动绑定结果（可选）
+    @SerializedName("humedsBindStatus")
+    val humedsBindStatus: String? = null,
+
+    @SerializedName("humedsErrorCode")
+    val humedsErrorCode: String? = null,
+
+    @SerializedName("humedsErrorMessage")
+    val humedsErrorMessage: String? = null,
 )

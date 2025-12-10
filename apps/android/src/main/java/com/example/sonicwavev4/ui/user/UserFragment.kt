@@ -49,6 +49,7 @@ class UserFragment : Fragment() {
         setupToneSwitch()
         observeTestToneSetting()
         setupHumedsTestButton()
+        setupProfileDialogEntry()
     }
 
     private fun collectAuthState() {
@@ -126,6 +127,13 @@ class UserFragment : Fragment() {
     private fun setupHumedsTestButton() {
         binding.btnHumedsTest.setOnClickListener {
             HumedsTestDialogFragment().show(parentFragmentManager, "HumedsTestDialog")
+        }
+    }
+
+    private fun setupProfileDialogEntry() {
+        binding.userNameTextview.setOnClickListener {
+            val dialog = UserProfileDialogFragment()
+            dialog.show(parentFragmentManager, "UserProfileDialog")
         }
     }
 

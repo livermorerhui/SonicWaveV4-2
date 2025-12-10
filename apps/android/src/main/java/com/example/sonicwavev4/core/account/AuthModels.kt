@@ -38,6 +38,7 @@ data class AuthUiState(
 sealed class AuthEvent {
     data class ShowToast(val message: String) : AuthEvent()
     data class ShowError(val message: String) : AuthEvent()
+    data class ShowHumedsHint(val message: String) : AuthEvent()
     object NavigateToUser : AuthEvent()
     object NavigateToLogin : AuthEvent()
 }
@@ -45,8 +46,18 @@ sealed class AuthEvent {
 /**
  * Result returned from the authentication gateway.
  */
+/**
+ * Detail info about Humeds auto-bind result for a login attempt.
+ */
+data class HumedsBindInfo(
+    val status: String?,       // "success" / "failed" / null
+    val errorCode: String?,    // e.g. "HUMEDS_LOGIN_FAILED"
+    val errorMessage: String?, // human-readable message, mainly for logging / debug
+)
+
 data class AuthResult(
     val username: String?,
     val accountType: String?,
-    val isOfflineMode: Boolean
+    val isOfflineMode: Boolean,
+    val humedsBindInfo: HumedsBindInfo? = null,
 )

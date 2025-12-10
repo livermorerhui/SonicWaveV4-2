@@ -100,6 +100,10 @@ async function getTokenForUser(req, res) {
 
   try {
     if (hasCredentials) {
+      const loginMode =
+        password ? 'MANUAL_PASSWORD'
+        : smscode ? 'MANUAL_SMSCODE'
+        : 'UNKNOWN';
       const { tokenJwt, raw } =
         await HumedsAccountService.ensureTokenForUser({
           userId,
@@ -107,6 +111,7 @@ async function getTokenForUser(req, res) {
           password,
           smscode,
           regionCode,
+          loginMode,
         });
 
       logger.info('Humeds token ensured via remote login', {

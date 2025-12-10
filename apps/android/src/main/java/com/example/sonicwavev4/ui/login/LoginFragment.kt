@@ -21,6 +21,7 @@ import com.example.sonicwavev4.databinding.FragmentLoginBinding
 import com.example.sonicwavev4.network.EndpointProvider
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.register.RegisterFragment
+import com.example.sonicwavev4.ui.login.ResetPasswordFragment
 import com.example.sonicwavev4.ui.user.UserFragment
 import com.example.sonicwavev4.utils.OfflineModeRemoteSync
 import kotlinx.coroutines.flow.collectLatest
@@ -66,6 +67,11 @@ class LoginFragment : Fragment() {
                 .replace(R.id.fragment_right_main, RegisterFragment())
                 .commit()
         }
+        binding.forgotPasswordTextView.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_right_main, ResetPasswordFragment())
+                .commit()
+        }
         binding.offlineModeButton.setOnClickListener {
             loginViewModel.handleIntent(AuthIntent.EnterOfflineMode)
         }
@@ -88,9 +94,14 @@ class LoginFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 loginViewModel.events.collectLatest { event ->
                     when (event) {
-                        is AuthEvent.ShowToast -> Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
-                        is AuthEvent.ShowError -> handleLoginFailure(event.message)
-                        AuthEvent.NavigateToUser -> navigateToUserFragment()
+                        is AuthEvent.ShowToast ->
+                            Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                        is AuthEvent.ShowError ->
+                            handleLoginFailure(event.message)
+                        is AuthEvent.ShowHumedsHint ->
+                            Toast.makeText(requireContext(), event.message, Toast.LENGTH_LONG).show()
+                        AuthEvent.NavigateToUser ->
+                            navigateToUserFragment()
                         AuthEvent.NavigateToLogin -> Unit
                     }
                 }

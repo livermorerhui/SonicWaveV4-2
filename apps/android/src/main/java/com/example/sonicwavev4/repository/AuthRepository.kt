@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import com.example.sonicwavev4.core.account.AuthGateway
 import com.example.sonicwavev4.core.account.AuthResult
+import com.example.sonicwavev4.core.account.HumedsBindInfo
 import com.example.sonicwavev4.network.ErrorMessageResolver
 import com.example.sonicwavev4.network.LoginRequest
 import com.example.sonicwavev4.network.LoginResponse
@@ -127,10 +128,25 @@ class AuthRepository(application: Application) : AuthGateway {
     }
 
     private fun buildAuthResult(loginResponse: LoginResponse, isOffline: Boolean): AuthResult {
+        val humedsInfo =
+            if (loginResponse.humedsBindStatus == null &&
+                loginResponse.humedsErrorCode == null &&
+                loginResponse.humedsErrorMessage == null
+            ) {
+                null
+            } else {
+                HumedsBindInfo(
+                    status = loginResponse.humedsBindStatus,
+                    errorCode = loginResponse.humedsErrorCode,
+                    errorMessage = loginResponse.humedsErrorMessage,
+                )
+            }
+
         return AuthResult(
             username = loginResponse.username,
             accountType = loginResponse.accountType,
-            isOfflineMode = isOffline
+            isOfflineMode = isOffline,
+            humedsBindInfo = humedsInfo,
         )
     }
 

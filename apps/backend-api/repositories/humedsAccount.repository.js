@@ -36,19 +36,20 @@ async function findByMobile(mobile, regionCode) {
   }
 }
 
-async function insertAccount({ userId, mobile, regionCode, tokenJwt, status }) {
+async function insertAccount({ userId, mobile, regionCode, tokenJwt, status, loginMode }) {
   const now = new Date();
   try {
     const [result] = await dbPool.execute(
       `INSERT INTO humeds_accounts
-        (user_id, mobile, region_code, token_jwt, status, last_login_at, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        (user_id, mobile, region_code, token_jwt, status, login_mode, last_login_at, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         userId,
         mobile,
         regionCode,
         tokenJwt || null,
         status || 'active',
+        loginMode || 'UNKNOWN',
         now,
         now,
         now,
@@ -68,14 +69,14 @@ async function insertAccount({ userId, mobile, regionCode, tokenJwt, status }) {
   }
 }
 
-async function updateToken({ userId, tokenJwt }) {
+async function updateToken({ userId, tokenJwt, loginMode }) {
   const now = new Date();
   try {
     const [result] = await dbPool.execute(
       `UPDATE humeds_accounts
-        SET token_jwt = ?, last_login_at = ?, updated_at = ?
+        SET token_jwt = ?, login_mode = ?, last_login_at = ?, updated_at = ?
         WHERE user_id = ?`,
-      [tokenJwt, now, now, userId]
+      [tokenJwt, loginMode || 'UNKNOWN', now, now, userId]
     );
     return result.affectedRows;
   } catch (err) {

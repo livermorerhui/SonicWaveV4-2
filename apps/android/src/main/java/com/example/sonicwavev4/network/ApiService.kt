@@ -6,6 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.PATCH
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -20,6 +21,16 @@ interface ApiService {
 
     @POST("api/v1/users/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+
+    @POST("api/v1/users/password/reset/send_code")
+    suspend fun sendPasswordResetCode(
+        @Body request: PasswordResetSendCodeRequest
+    ): Response<SimpleMessageResponse>
+
+    @POST("api/v1/users/password/reset/submit")
+    suspend fun resetPassword(
+        @Body request: PasswordResetSubmitRequest
+    ): Response<SimpleMessageResponse>
 
     // --- 日志与操作记录 ---
     @POST("api/v1/logs")
@@ -79,4 +90,15 @@ interface ApiService {
 
     @POST("api/humeds/token")
     suspend fun getHumedsToken(@Body request: HumedsTokenRequest): Response<HumedsTokenResponse>
+
+    // --- 用户资料与密码 ---
+    @PUT("api/v1/users/me")
+    suspend fun updateCurrentUser(
+        @Body request: UpdateUserProfileRequest
+    ): Response<Unit>
+
+    @PATCH("api/v1/users/me/password")
+    suspend fun changeMyPassword(
+        @Body request: ChangePasswordRequest
+    ): Response<Unit>
 }

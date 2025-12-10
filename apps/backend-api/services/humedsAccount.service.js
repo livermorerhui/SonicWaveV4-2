@@ -12,7 +12,9 @@ class HumedsAccountService {
       password,
       smscode,
       regionCode = humedsConfig.defaultRegionCode,
+      loginMode,
     } = params || {};
+    const resolvedLoginMode = loginMode || 'UNKNOWN';
 
     if (!userId || !mobile) {
       const error = new Error('userId and mobile are required');
@@ -37,10 +39,11 @@ class HumedsAccountService {
         regionCode,
         tokenJwt,
         status: 'active',
+        loginMode: resolvedLoginMode,
       });
       logger.info('Humeds account created', { userId, mobile });
     } else {
-      await humedsAccountRepo.updateToken({ userId, tokenJwt });
+      await humedsAccountRepo.updateToken({ userId, tokenJwt, loginMode: resolvedLoginMode });
       logger.info('Humeds account token updated', { userId, mobile });
     }
 
