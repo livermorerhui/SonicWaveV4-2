@@ -4,6 +4,7 @@ import type { CustomerDTO, CustomerDetail } from '@/models/CustomerDTO';
 import type { PaginatedResponse } from '@/models/PaginatedResponse';
 import type { FeatureFlag, FeatureFlagSnapshot } from '@/models/FeatureFlag';
 import type { DeviceDTO } from '@/models/Device';
+import type { MusicCategoryDTO, MusicTrackDTO } from '@/models/Music';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
@@ -42,17 +43,25 @@ const parseError = async (response: Response): Promise<ErrorEnvelope | undefined
 };
 
 const request = async <T>(path: string, options: RequestOptions = {}): Promise<T> => {
-  const headers = new Headers(options.headers || {});
-  if (options.token) {
-    headers.set('Authorization', `Bearer ${options.token}`);
+  const { token, body, ...rest } = options;
+  const headers = new Headers(rest.headers || {});
+
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
   }
-  if (options.body && !(options.body instanceof FormData)) {
+
+  let finalBody: BodyInit | undefined;
+  if (body instanceof FormData) {
+    finalBody = body;
+  } else if (body !== undefined && body !== null) {
     headers.set('Content-Type', 'application/json');
+    finalBody = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
   const response = await fetch(resolveUrl(path), {
-    ...options,
+    ...rest,
     headers,
+    body: finalBody,
     credentials: 'include'
   });
 
@@ -276,3 +285,92 @@ export const forceExitDeviceOffline = (deviceId: string, countdownSec: number, t
       body: JSON.stringify({ countdownSec })
     }
   );
+
+export const fetchMusicCategories = (token: string) =>
+  request<{ message: string; categories: MusicCategoryDTO[] }>('/api/v1/music/categories', {
+    method: 'GET',
+    token
+  });
+
+export const createMusicCategory = (payload: { name: string }, token: string) =>
+  request<{ message: string; category: MusicCategoryDTO }>('/api/v1/music/categories', {
+    method: 'POST',
+    token,
+    body: JSON.stringify(payload)
+  });
+
+export const updateMusicCategory = (id: number, payload: { name: string }, token: string) =>
+  request<{ message: string; category: MusicCategoryDTO }>(`/api/v1/music/categories/${id}`, {
+    method: 'PATCH',
+    token,
+    body: JSON.stringify(payload)
+  });
+
+export const deleteMusicCategory = (id: number, token: string) =>
+  request<{ message: string }>(`/api/v1/music/categories/${id}`, {
+    method: 'DELETE',
+    token
+  });
+
+export const fetchMusicTracks = (token: string) =>
+  request<{ message: string; tracks: MusicTrackDTO[] }>('/api/v1/music', {
+    method: 'GET',
+    token
+  });
+
+export const updateMusicTrackCategory = (
+  id: number,
+  payload: { categoryId: number | null },
+  token: string
+) =>
+  request<{ message: string; track: MusicTrackDTO }>(`/api/v1/music/${id}/category`, {
+    method: 'PATCH',
+    token,
+    body: JSON.stringify(payload)
+  });
+
+export const updateMusicTrackMetadata = (
+  id: number,
+  payload: { title?: string; artist?: string },
+  token: string
+) =>
+  request<{ message: string; track: MusicTrackDTO }>(`/api/v1/music/${id}`, {
+    method: 'PATCH',
+    token,
+    body: payload
+  });
+
+export const uploadMusicTrack = (
+  payload: {
+    title: string;
+    artist?: string;
+    categoryId?: number | null;
+    file: File;
+  },
+  token: string
+) => {
+  const formData = new FormData();
+  formData.append('title', payload.title);
+  if (payload.artist) {
+    formData.append('artist', payload.artist);
+  }
+  if (payload.categoryId != null) {
+    formData.append('categoryId', String(payload.categoryId));
+  }
+  formData.append('musicFile', payload.file);
+
+  return request<{ message: string; trackId?: number; file_key?: string }>(
+    '/api/v1/music/upload',
+    {
+      method: 'POST',
+      token,
+      body: formData
+    }
+  );
+};
+
+export const deleteMusicTrack = (id: number, token: string) =>
+  request<{ message: string }>(`/api/v1/music/${id}`, {
+    method: 'DELETE',
+    token
+  });

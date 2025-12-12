@@ -6,15 +6,9 @@
     android:padding="8dp"
     android:gravity="center_vertical">
 
-    <CheckBox
-        android:id="@+id/music_checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -34,4 +28,11 @@
             android:textColor="@android:color/darker_gray" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/music_download_status_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="@null"
+        android:src="@android:drawable/stat_sys_download" />
 </LinearLayout>

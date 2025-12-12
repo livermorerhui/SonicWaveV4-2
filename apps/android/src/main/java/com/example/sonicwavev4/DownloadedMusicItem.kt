@@ -7,7 +7,8 @@ data class DownloadedMusicItem(
     val fileName: String,
     val title: String,
     val artist: String,
-    val internalPath: String // Absolute path to the file in internal storage
+    val internalPath: String, // Absolute path to the file in internal storage
+    val cloudTrackId: Long? = null // ID of the corresponding cloud track, if any
 ) {
     // Helper to convert to MusicItem for display
     fun toMusicItem(): MusicItem? =

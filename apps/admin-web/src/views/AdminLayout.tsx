@@ -33,6 +33,9 @@ export const AdminLayout = () => {
           <NavLink className="nav-link" to="/feature-flags">
             功能开关
           </NavLink>
+          <NavLink className="nav-link" to="/music">
+            音乐管理
+          </NavLink>
         </nav>
         <div className="admin-session">
           <div className="session-user">

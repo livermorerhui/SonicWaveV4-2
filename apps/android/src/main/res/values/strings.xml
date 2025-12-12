@@ -63,6 +63,16 @@
 
     <string name="soft_stop">停止</string>
     <string name="soft_resume">恢复</string>
+    <string name="music_download_cloud">下载云端音乐</string>
+    <string name="music_local_all">本地音乐</string>
+
+    <string name="dialog_song_options_title">歌曲选项</string>
+    <string name="dialog_option_add_to_playlist">添加到歌单</string>
+    <string name="dialog_option_remove_from_playlist">从当前歌单移除</string>
+    <string name="dialog_add_to_my_list_title">添加到我的列表</string>
+    <string name="dialog_add_to_my_list_message">选择要添加到的歌单</string>
+    <string name="dialog_add_to_my_list_confirm">确定</string>
+    <string name="dialog_add_to_my_list_cancel">取消</string>
 
     <string-array name="gender_options">
         <item>男</item>

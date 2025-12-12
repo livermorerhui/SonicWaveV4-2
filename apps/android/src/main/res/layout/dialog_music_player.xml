@@ -4,22 +4,152 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="@drawable/bg_music_dialog_round">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCategories"
+    <!-- Left panel: cloud list + local + my list -->
+    <LinearLayout
+        android:id="@+id/leftPanel"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:orientation="vertical"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintWidth_percent="0.25"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent">
 
+        <!-- Cloud group: header + categories share one rounded background -->
+        <LinearLayout
+            android:id="@+id/llCloudGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_music_section_normal">
+
+            <!-- Cloud list header -->
+            <TextView
+                android:id="@+id/rowCloudHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="云端列表"
+                android:textSize="18sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+
+            <!-- Cloud categories -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCloudCategories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/rowLocalMusicHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_music_section_normal"
+            android:text="@string/music_local_all"
+            android:textSize="18sp" />
+
+        <!-- My list group: header + playlists share one rounded background -->
+        <LinearLayout
+            android:id="@+id/llMyListGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_music_section_normal">
+
+            <!-- My list header -->
+            <LinearLayout
+                android:id="@+id/rowMyListHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <TextView
+                    android:id="@+id/tvMyListHeader"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="我的列表"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/tvMyListAdd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+"
+                    android:textSize="20sp"
+                    android:paddingStart="8dp" />
+            </LinearLayout>
+
+            <!-- Children: input + playlists -->
+            <LinearLayout
+                android:id="@+id/llMyListChildren"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <!-- New playlist input (initially hidden) -->
+                <EditText
+                    android:id="@+id/etNewPlaylistName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="输入歌单名称，回车或点击其他地方确认"
+                    android:singleLine="true"
+                    android:imeOptions="actionDone"
+                    android:background="#EEEEEE"
+                    android:padding="8dp"
+                    android:visibility="gone" />
+
+                <!-- My playlists -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvMyPlaylists"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Right: songs -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/rightContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintStart_toEndOf="@id/rvCategories"
+        app:layout_constraintStart_toEndOf="@id/leftPanel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
@@ -31,19 +161,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/btnCloseMusic" />
-
-        <Button
-            android:id="@+id/btnCloseMusic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="返回"
-            android:textSize="24dp"
-            android:textColor="@color/black"
-            android:layout_margin="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-             />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

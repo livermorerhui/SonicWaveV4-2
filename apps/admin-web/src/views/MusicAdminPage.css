@@ -1,0 +1,216 @@
+/* file: apps/admin-web/src/views/MusicAdminPage.css */
+
+.music-admin-root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.music-admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.music-admin-title {
+  margin: 0;
+  font-size: 20px;
+}
+
+.music-admin-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.music-admin-header-actions button {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.music-admin-error {
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.music-admin-loading,
+.music-admin-empty {
+  padding: 16px;
+  font-size: 14px;
+}
+
+.music-admin-body {
+  display: flex;
+  gap: 24px;
+}
+
+.music-admin-column {
+  flex: 1;
+}
+
+.music-admin-categories {
+  max-width: 320px;
+}
+
+.music-admin-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.music-admin-category-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background-color: #fafafa;
+}
+
+.music-admin-category-item--active {
+  border-color: #1976d2;
+  background-color: #e3f2fd;
+}
+
+.music-admin-category-main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.music-admin-category-name {
+  font-size: 14px;
+}
+
+.music-admin-category-count {
+  font-size: 12px;
+  color: #666;
+}
+
+.music-admin-category-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.music-admin-category-actions button {
+  font-size: 12px;
+  padding: 2px 6px;
+}
+
+.music-admin-category-edit-input {
+  flex: 1;
+  font-size: 13px;
+  padding: 2px 4px;
+}
+
+.music-admin-new-category {
+  display: flex;
+  gap: 8px;
+}
+
+.music-admin-new-category input {
+  flex: 1;
+  font-size: 13px;
+  padding: 4px 6px;
+}
+
+.music-admin-new-category button {
+  font-size: 13px;
+  padding: 4px 10px;
+}
+
+.music-admin-tracks {
+  min-width: 0;
+}
+
+.music-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.music-admin-table th,
+.music-admin-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eeeeee;
+  text-align: left;
+}
+
+.music-admin-table th {
+  font-weight: 600;
+  background-color: #fafafa;
+  color: #333;
+}
+
+.music-admin-upload-form {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  font-size: 13px;
+}
+
+.music-admin-upload-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.music-admin-upload-row label {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+  color: #333;
+  font-weight: 500;
+}
+
+.music-admin-upload-row input,
+.music-admin-upload-row select {
+  font-size: 13px;
+  padding: 4px 6px;
+}
+
+.music-admin-upload-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.music-admin-upload-actions button {
+  font-size: 13px;
+  padding: 4px 10px;
+}
+
+.music-admin-track-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.music-admin-track-actions select {
+  font-size: 13px;
+  padding: 2px 4px;
+}
+
+.music-admin-track-actions button {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+
+.music-admin-track-edit-input {
+  width: 100%;
+  font-size: 13px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}

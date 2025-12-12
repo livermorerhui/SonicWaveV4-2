@@ -1,5 +1,7 @@
 package com.example.sonicwavev4.network
 
+import com.example.sonicwavev4.data.remote.dto.CloudMusicCategoriesResponse
+import com.example.sonicwavev4.data.remote.dto.CloudMusicTracksResponse
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -101,4 +103,17 @@ interface ApiService {
     suspend fun changeMyPassword(
         @Body request: ChangePasswordRequest
     ): Response<Unit>
+
+    // --- Music categories ---
+    @GET("api/v1/music/categories")
+    suspend fun getMusicCategories(): Response<MusicCategoryResponse>
+
+    // --- Cloud Music ---
+    @GET("api/v1/music/categories")
+    suspend fun getCloudMusicCategories(): CloudMusicCategoriesResponse
+
+    @GET("api/v1/music")
+    suspend fun getCloudMusicTracks(
+        @Query("categoryId") categoryId: Long? = null
+    ): CloudMusicTracksResponse
 }

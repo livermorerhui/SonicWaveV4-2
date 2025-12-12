@@ -113,7 +113,14 @@ class MusicDownloadDialogFragment : DialogFragment() {
             val body = response.body?.string() ?: throw IOException("服务器返回空数据")
             val musicResponse = gson.fromJson(body, MusicListResponse::class.java)
             val downloadedMusicRepo = DownloadedMusicRepository(appContext)
-            val downloadedFiles = downloadedMusicRepo.loadDownloadedMusic()
+            val downloadedList = downloadedMusicRepo.loadDownloadedMusic()
+            val downloadedByTrackId: Map<Long, DownloadedMusicItem> =
+                downloadedList.mapNotNull { item ->
+                    val id = item.cloudTrackId
+                    if (id != null && id > 0) id to item else null
+                }.toMap()
+
+            val downloadedByFileName: Set<String> = downloadedList
                 .map { it.fileName }
                 .toSet()
 
@@ -122,7 +129,8 @@ class MusicDownloadDialogFragment : DialogFragment() {
                 if (fileKey.isBlank()) return@mapNotNull null
                 val fileName = fileKey.substringAfterLast('/')
                 val downloadUrl = "$baseUrl/${fileKey.trimStart('/')}"
-                val isDownloaded = downloadedFiles.contains(fileName)
+                val isDownloaded =
+                    downloadedByTrackId.containsKey(track.id) || downloadedByFileName.contains(fileName)
                 DownloadableFile(
                     id = track.id,
                     title = track.title.orEmpty(),

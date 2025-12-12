@@ -53,4 +53,20 @@ class DownloadedMusicRepository(private val context: Context) {
             saveDownloadedMusic(newList)
         }
     }
+
+    fun findByCloudTrackId(trackId: Long): DownloadedMusicItem? {
+        if (trackId <= 0L) return null
+        return loadDownloadedMusic().firstOrNull { it.cloudTrackId == trackId }
+    }
+
+    fun findByCloudTrackIds(trackIds: Collection<Long>): Map<Long, DownloadedMusicItem> {
+        if (trackIds.isEmpty()) return emptyMap()
+        val set = trackIds.toSet()
+        return loadDownloadedMusic()
+            .mapNotNull { item ->
+                val id = item.cloudTrackId
+                if (id != null && id in set) id to item else null
+            }
+            .toMap()
+    }
 }

@@ -61,6 +61,8 @@ import com.example.sonicwavev4.utils.DeviceIdentityProvider
 import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.utils.OfflineForceExitManager
 import com.example.sonicwavev4.utils.SessionManager
+import com.example.sonicwavev4.MusicDownloadEvent
+import com.example.sonicwavev4.MusicDownloadEventBus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -206,6 +208,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             Toast.makeText(this@MainActivity, "开始下载 ${files.size} 个文件...", Toast.LENGTH_SHORT).show()
             val accessToken = sessionManager.fetchAccessToken()
 
+            var lastDownloadError: MusicDownloadError? = null
             val failedDownloads = withContext(Dispatchers.IO) {
                 files.mapNotNull { file ->
                     val downloadedFile = musicDownloader.downloadMusic(
@@ -218,22 +221,49 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                             fileName = downloadedFile.name,
                             title = file.title.ifBlank { downloadedFile.nameWithoutExtension },
                             artist = file.artist.ifBlank { "Downloaded" },
-                            internalPath = downloadedFile.absolutePath
+                            internalPath = downloadedFile.absolutePath,
+                            cloudTrackId = file.id
                         )
                         downloadedMusicRepository.addDownloadedMusic(downloadedItem)
+                        MusicDownloadEventBus.emit(MusicDownloadEvent.Success(file.downloadUrl))
                         null
                     } else {
+                        lastDownloadError = musicDownloader.lastError
                         file.fileName
                     }
                 }
             }
 
             if (failedDownloads.isEmpty()) {
-                Toast.makeText(this@MainActivity, "下载完成", Toast.LENGTH_SHORT).show()
-            } else {
                 Toast.makeText(
                     this@MainActivity,
-                    "部分音乐下载失败: ${failedDownloads.joinToString()}",
+                    "音乐下载完成，共 ${files.size} 首。",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                val baseMessage = when (val error = lastDownloadError) {
+                    is MusicDownloadError.Http -> {
+                        if (error.code == 401 || error.code == 403) {
+                            "下载失败：登录已过期或权限不足，请重新登录后重试。"
+                        } else {
+                            "下载失败：服务器返回错误（HTTP ${error.code}）。"
+                        }
+                    }
+                    is MusicDownloadError.Network -> "下载失败：网络异常，请检查网络连接。"
+                    is MusicDownloadError.Io -> "下载失败：存储或服务器错误，请稍后再试。"
+                    else -> "部分音乐下载失败。"
+                }
+
+                val failedNames = failedDownloads.joinToString(separator = ", ")
+                val message = if (files.size > failedDownloads.size) {
+                    "$baseMessage 已成功下载 ${files.size - failedDownloads.size} 首；失败：$failedNames"
+                } else {
+                    "$baseMessage 失败曲目：$failedNames"
+                }
+
+                Toast.makeText(
+                    this@MainActivity,
+                    message,
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -399,9 +429,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         }
 
         downloadButton?.setOnClickListener {
-            val dialog = MusicDownloadDialogFragment()
-            dialog.listener = this
-            dialog.show(supportFragmentManager, "MusicDownloadDialogFragment")
+            showMusicDownloadDialog()
         }
         playPauseButton?.setOnClickListener { musicViewModel.togglePlayPause() }
         prevButton?.setOnClickListener { musicViewModel.playPrevious() }
@@ -414,6 +442,12 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private fun onMusicItemSelected(position: Int) {
         musicAdapter.setSelectedPosition(position)
         musicViewModel.playAt(position)
+    }
+
+    fun showMusicDownloadDialog() {
+        val dialog = MusicDownloadDialogFragment()
+        dialog.listener = this
+        dialog.show(supportFragmentManager, "MusicDownloadDialogFragment")
     }
 
     private fun loadMusic() {

@@ -25,4 +25,6 @@
     <!-- 温和的粉绿色，用于 DatePicker 确定按钮背景 -->
     <color name="date_picker_positive_bg">#FF8BF1C1</color>
     <color name="background_light_gray">#FFF2F2F2</color>
+    <color name="music_dialog_bg">#F2F2F2</color>
+    <color name="music_section_border_selected">#26A69A</color>
 </resources>

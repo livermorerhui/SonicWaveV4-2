@@ -4,7 +4,7 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -23,9 +23,9 @@ class DownloadableMusicAdapter(
 ) : RecyclerView.Adapter<DownloadableMusicAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val checkBox: CheckBox = view.findViewById(R.id.music_checkbox)
         val title: TextView = view.findViewById(R.id.music_title_textview)
         val artist: TextView = view.findViewById(R.id.music_artist_textview)
+        val statusIcon: ImageView = view.findViewById(R.id.music_download_status_icon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -36,28 +36,40 @@ class DownloadableMusicAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val file = musicFiles[position]
-        holder.checkBox.setOnCheckedChangeListener(null)
-        holder.checkBox.isChecked = file.isSelected
         holder.title.text = file.title.ifBlank { file.fileName }
         holder.artist.text = file.artist.ifBlank { "未知艺术家" }
 
-        if (file.isDownloaded) {
-            holder.title.setTextColor(Color.GRAY)
-            holder.artist.setTextColor(Color.GRAY)
-            holder.checkBox.isEnabled = false
-        } else {
-            holder.title.setTextColor(Color.BLACK)
-            holder.artist.setTextColor(Color.DKGRAY)
-            holder.checkBox.isEnabled = true
-        }
+        holder.itemView.setOnClickListener(null)
+        holder.statusIcon.setOnClickListener(null)
 
-        holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-            file.isSelected = isChecked
-        }
-        holder.itemView.setOnClickListener {
-            if (!file.isDownloaded && holder.checkBox.isEnabled) {
-                holder.checkBox.isChecked = !holder.checkBox.isChecked
+        if (file.isDownloaded) {
+            holder.title.setTextColor(Color.BLACK)
+            holder.artist.setTextColor(Color.BLACK)
+            holder.statusIcon.setImageResource(android.R.drawable.checkbox_on_background)
+            holder.statusIcon.isEnabled = false
+        } else {
+            val isSelected = file.isSelected
+
+            val textColor = if (isSelected) Color.BLACK else Color.GRAY
+            holder.title.setTextColor(textColor)
+            holder.artist.setTextColor(textColor)
+
+            holder.statusIcon.setImageResource(android.R.drawable.stat_sys_download)
+            holder.statusIcon.isEnabled = true
+
+            val toggleSelection: (View) -> Unit = {
+                val adapterPosition = holder.bindingAdapterPosition
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    val current = musicFiles[adapterPosition]
+                    if (!current.isDownloaded) {
+                        current.isSelected = !current.isSelected
+                        notifyItemChanged(adapterPosition)
+                    }
+                }
             }
+
+            holder.itemView.setOnClickListener(toggleSelection)
+            holder.statusIcon.setOnClickListener(toggleSelection)
         }
     }
 

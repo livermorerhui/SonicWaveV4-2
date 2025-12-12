@@ -9,6 +9,7 @@ const { WebSocketServer } = require('ws');
 const jwt = require('jsonwebtoken');
 const url = require('url');
 const swaggerUi = require('swagger-ui-express');
+const path = require('path');
 
 const logger = require('./logger');
 const { checkDbConnection } = require('./config/db');
@@ -63,6 +64,8 @@ app.use(
     credentials: true
   })
 );
+// Expose uploaded music files so the mobile client can download via baseUrl + fileKey.
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 创建 HTTP 和 WebSocket 服务器
 const server = http.createServer(app);

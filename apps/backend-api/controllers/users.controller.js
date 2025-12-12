@@ -111,22 +111,43 @@ const generateAndStoreRefreshToken = async (userId, dbPool) => {
 };
 
 /**
- * 用户登录接口（手机号登录）
- * - 请求体仅使用 mobile 作为登录账号
- * - 只在 users.mobile 上匹配
+ * 用户登录接口（支持手机号或邮箱）
+ * - 请求体可以使用 mobile（手机号）或 email（邮箱）作为登录账号
+ * - mobile 优先，其次 email
  * - 保持原有返回结构和错误码不变，以兼容现有前端
  */
 const loginUser = async (req, res) => {
   try {
-    const { mobile, password } = req.body || {};
-    const normalizedMobile = (mobile || '').trim();
+    const { mobile, email, password } = req.body || {};
 
-    if (!normalizedMobile || !password) {
+    const rawAccount = mobile || email || '';
+    const normalizedAccount = (rawAccount || '').trim();
+
+    if (!normalizedAccount || !password) {
       return res.status(400).json(buildError('INVALID_INPUT', '账号和密码为必填项'));
     }
 
-    const sql = 'SELECT * FROM users WHERE mobile = ?';
-    const [users] = await dbPool.execute(sql, [normalizedMobile]);
+    // Decide login mode: mobile or email
+    let loginBy = 'mobile';
+    let sql;
+    let params;
+
+    if (mobile && typeof mobile === 'string' && mobile.trim().length > 0) {
+      // Mobile login: query by users.mobile
+      loginBy = 'mobile';
+      sql = 'SELECT * FROM users WHERE mobile = ?';
+      params = [normalizedAccount];
+    } else if (email && typeof email === 'string' && email.trim().length > 0) {
+      // Email login: query by users.email
+      loginBy = 'email';
+      sql = 'SELECT * FROM users WHERE email = ?';
+      params = [normalizedAccount];
+    } else {
+      // Fallback, should already be covered by normalizedAccount check
+      return res.status(400).json(buildError('INVALID_INPUT', '账号和密码为必填项'));
+    }
+
+    const [users] = await dbPool.execute(sql, params);
 
     if (users.length === 0) {
       return res.status(401).json(buildError('INVALID_CREDENTIALS', '账号或密码错误'));
@@ -155,32 +176,34 @@ const loginUser = async (req, res) => {
     // 2. Generate and Store Refresh Token (long-lived)
     const refreshToken = await generateAndStoreRefreshToken(user.id, dbPool);
 
-    // Bind Humeds account on login (best effort)
+    // Bind Humeds account on login (best effort, only for mobile logins)
     let humedsBindStatus = 'skipped';
     let humedsErrorCode = null;
     let humedsErrorMessage = null;
-    try {
-      await HumedsAccountService.ensureTokenForUser({
-        userId: user.id,
-        mobile: normalizedMobile,
-        password,
-        loginMode: 'APP_SHARED_PASSWORD_LOGIN',
-      });
-      humedsBindStatus = 'success';
-      logger.info('Humeds token ensured on login', {
-        userId: user.id,
-        mobile: normalizedMobile
-      });
-    } catch (err) {
-      humedsBindStatus = 'failed';
-      humedsErrorCode = err.code || null;
-      humedsErrorMessage = err.message || null;
-      logger.warn('Humeds bind on login failed', {
-        userId: user.id,
-        mobile: normalizedMobile,
-        code: err.code,
-        error: err.message
-      });
+    if (loginBy === 'mobile') {
+      try {
+        await HumedsAccountService.ensureTokenForUser({
+          userId: user.id,
+          mobile: normalizedAccount,
+          password,
+          loginMode: 'APP_SHARED_PASSWORD_LOGIN',
+        });
+        humedsBindStatus = 'success';
+        logger.info('Humeds token ensured on login', {
+          userId: user.id,
+          mobile: normalizedAccount
+        });
+      } catch (err) {
+        humedsBindStatus = 'failed';
+        humedsErrorCode = err.code || null;
+        humedsErrorMessage = err.message || null;
+        logger.warn('Humeds bind on login failed', {
+          userId: user.id,
+          mobile: normalizedAccount,
+          code: err.code,
+          error: err.message
+        });
+      }
     }
 
     // 3. Return both tokens to the client
