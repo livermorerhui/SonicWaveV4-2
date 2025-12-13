@@ -35,6 +35,7 @@ rsync -avz --delete \
   --exclude '*.log' \
   --exclude 'npm-debug.log' \
   --exclude 'data' \
+  --exclude 'uploads' \
   "${LOCAL_BACKEND_DIR}/" \
   "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/"
 

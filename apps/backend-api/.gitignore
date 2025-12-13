@@ -1,3 +1,15 @@
-node_modules
+# ------------------------
+# backend-api/.gitignore
+# ------------------------
+
+node_modules/
 .env
 *.log
+
+# runtime uploads (do not commit)
+uploads/
+
+# If you want to keep an empty uploads/ directory in git:
+# 1) create: apps/backend-api/uploads/.gitkeep
+# 2) uncomment the next line
+# !uploads/.gitkeep

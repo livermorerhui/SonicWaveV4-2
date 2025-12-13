@@ -19,8 +19,9 @@ export class ApiError extends Error {
   }
 }
 
-interface RequestOptions extends RequestInit {
+interface RequestOptions extends Omit<RequestInit, 'body'> {
   token?: string | null;
+  body?: BodyInit | Record<string, unknown> | null;
 }
 
 const resolveUrl = (path: string) => {
@@ -83,13 +84,19 @@ const request = async <T>(path: string, options: RequestOptions = {}): Promise<T
   return null as T;
 };
 
-const buildQueryString = (params: Record<string, string | number | boolean | undefined>) => {
+const buildQueryString = <T extends object>(params: T) => {
   const searchParams = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && `${value}`.length > 0) {
-      searchParams.set(key, String(value));
+
+  Object.entries(params as Record<string, unknown>).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      return;
+    }
+    const stringValue = String(value);
+    if (stringValue.length > 0) {
+      searchParams.set(key, stringValue);
     }
   });
+
   const query = searchParams.toString();
   return query ? `?${query}` : '';
 };
@@ -222,8 +229,8 @@ export const patchCustomer = (
     gender?: string | null;
     phone?: string | null;
     email?: string | null;
-    height?: number;
-    weight?: number;
+    height?: number | null;
+    weight?: number | null;
   },
   token: string
 ) =>

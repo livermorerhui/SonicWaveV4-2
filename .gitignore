@@ -4,12 +4,6 @@
 
 # IntelliJ IDEA / Android Studio
 /.idea/
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
 
 # Project files
 *.iml
@@ -25,12 +19,10 @@
 # ------------------------
 
 # Gradle cache
-.gradle
 .gradle/
 
 # Local machine specific config
 local.properties
-/local.properties
 
 # ------------------------
 # Android / Java build outputs
@@ -49,12 +41,10 @@ local.properties
 bin/
 gen/
 out/
-captures
 captures/
 externalNativeBuild/
-.externalNativeBuild
+.externalNativeBuild/
 .cxx/
-.cxx
 
 # Built application files
 *.apk
@@ -74,30 +64,26 @@ externalNativeBuild/
 **/.kotlin/
 
 # ------------------------
-# Node dependencies
+# Node dependencies / Web build cache
 # ------------------------
 
 node_modules/
-SonicWaveV5-backend/node_modules/
-SW-backend-admin/node_modules/
-apps/backend-api/node_modules/
-apps/admin-web/node_modules/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Vite / admin-web generated files & outputs
+apps/admin-web/vite.config.d.ts
+apps/admin-web/dist/
+apps/admin-web/.vite/
 
 # ------------------------
 # Backend runtime data & logs
 # ------------------------
 
-SonicWaveV5-backend/data/
-SonicWaveV5-backend/*.log
 apps/backend-api/data/
+apps/backend-api/uploads/
 apps/backend-api/*.log
-
-# ------------------------
-# Admin web logs
-# ------------------------
-
-SW-backend-admin/*.log
-apps/admin-web/*.log
 
 # ------------------------
 # Local databases & generic logs
@@ -118,3 +104,13 @@ database.db
 
 *.jks
 *.keystore
+
+# ------------------------
+# Release artifacts
+# ------------------------
+apps/release/
+
+# ------------------------
+# Deploy scripts (ONLY enable if they include secrets / machine-specific info)
+# ------------------------
+# deploy-*-aliyun.sh

@@ -80,6 +80,12 @@ export const useAuthVM = () => {
       setError(null);
       try {
         const response = await loginRequest(credentials);
+
+        // 防御性检查：后端响应异常（例如返回了 HTML 或缺少 accessToken）
+        if (!response || !response.accessToken) {
+          throw new Error('登录响应异常：缺少 accessToken，请联系管理员检查后台服务配置');
+        }
+
         localStorage.setItem(ACCESS_TOKEN_KEY, response.accessToken);
         if (response.refreshToken) {
           localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
