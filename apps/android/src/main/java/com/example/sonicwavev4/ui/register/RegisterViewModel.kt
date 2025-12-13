@@ -24,6 +24,14 @@ class RegisterViewModel(
         val errorMessage: String? = null,
         val statusMessage: String? = null,
         val codeSent: Boolean = false,
+        val needSmsInput: Boolean = true,
+        val registrationMode: String? = null,
+        val partnerRegistered: Boolean? = null,
+        val selfRegistered: Boolean? = null,
+        val selfBound: Boolean? = null,
+        val humedsBindStatus: String? = null,
+        val humedsErrorCode: String? = null,
+        val humedsErrorMessage: String? = null,
     )
 
     private val _uiState = MutableStateFlow(RegisterUiState())
@@ -47,14 +55,22 @@ class RegisterViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null, statusMessage = null, codeSent = false) }
             when (val result = registerRepository.sendCode(mobile.trim(), accountType)) {
-                RegisterResult.Success -> {
+                is RegisterResult.Success -> {
+                    val status = result.sendCodeStatus
                     _uiState.update {
+                        val needSms = status?.needSmsInput ?: true
+                        val smsMessage = if (needSms) "验证码已发送" else "当前无需验证码，可直接注册"
                         it.copy(
                             isLoading = false,
                             success = false,
                             errorMessage = null,
-                            statusMessage = "验证码已发送",
+                            statusMessage = smsMessage,
                             codeSent = true,
+                            needSmsInput = needSms,
+                            registrationMode = status?.registrationMode,
+                            partnerRegistered = status?.partnerRegistered,
+                            selfRegistered = status?.selfRegistered,
+                            selfBound = status?.selfBound,
                         )
                     }
                 }
@@ -117,8 +133,11 @@ class RegisterViewModel(
             return
         }
 
-        // 当前版本不强制验证码，保留参数以便未来重新启用短信验证
-        // TODO: 接入真实短信验证码后恢复对 code 的校验
+        if (_uiState.value.needSmsInput && code.isBlank()) {
+            _uiState.value = RegisterUiState(errorMessage = "验证码不能为空，请先获取验证码")
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null, statusMessage = null) }
             when (
@@ -131,13 +150,25 @@ class RegisterViewModel(
                     orgName = orgName,
                 )
             ) {
-                RegisterResult.Success -> {
+                is RegisterResult.Success -> {
+                    val submit = result.submitStatus
+                    val humedsStatus = submit?.humedsBindStatus
+                    val statusMessage = when (humedsStatus) {
+                        "success" -> "注册成功，Humeds 已绑定"
+                        "failed" -> "注册成功，Humeds 绑定失败：" + (submit?.humedsErrorMessage ?: submit?.humedsErrorCode
+                            ?: "unknown")
+                        "skipped" -> "注册成功，已跳过 Humeds 绑定"
+                        else -> "注册成功"
+                    }
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             success = true,
                             errorMessage = null,
-                            statusMessage = "注册成功",
+                            statusMessage = statusMessage,
+                            humedsBindStatus = humedsStatus,
+                            humedsErrorCode = submit?.humedsErrorCode,
+                            humedsErrorMessage = submit?.humedsErrorMessage,
                         )
                     }
                 }

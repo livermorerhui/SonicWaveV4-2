@@ -3,6 +3,7 @@ const { dbPool } = require('../config/db');
 const smsCodeService = require('./smsCode.service');
 const HumedsAccountService = require('./humedsAccount.service');
 const logger = require('../logger');
+const humedsApi = require('./humedsApi.client');
 
 const HUMEDS_BIND_ON_REGISTER =
   (process.env.HUMEDS_BIND_ON_REGISTER || '').toLowerCase() === 'true';
@@ -12,6 +13,9 @@ const HUMEDS_STRICT_REGISTER =
 
 const REGISTER_SMS_REQUIRED =
   (process.env.REGISTER_SMS_REQUIRED || '').toLowerCase() === 'true';
+
+const HUMEDS_CHECK_USER_EXIST_ON_REGISTER =
+  (process.env.HUMEDS_CHECK_USER_EXIST_ON_REGISTER || '').toLowerCase() === 'true';
 
 const SALT_ROUNDS = 10;
 const ACCOUNT_TYPES = ['personal', 'org'];
@@ -47,7 +51,10 @@ async function sendRegisterCode({ mobile, accountType }) {
     throw error;
   }
 
-  const [existing] = await dbPool.execute('SELECT id FROM users WHERE mobile = ? LIMIT 1', [normalizedMobile]);
+  const [existing] = await dbPool.execute(
+    'SELECT id FROM users WHERE mobile = ? LIMIT 1',
+    [normalizedMobile],
+  );
   if (existing.length > 0) {
     logger.info('sendRegisterCode: mobile already exists, skip sms', {
       mobile: normalizedMobile,
@@ -58,7 +65,58 @@ async function sendRegisterCode({ mobile, accountType }) {
     throw error;
   }
 
+  // 调用 Humeds /userexist，推断 partnerRegistered
+  let partnerRegistered = null;
+
+  if (HUMEDS_CHECK_USER_EXIST_ON_REGISTER) {
+    try {
+      const userExistResult = await humedsApi.userExist({
+        mobile: normalizedMobile,
+        // regionCode 留空，客户端会使用默认值
+      });
+
+      const raw = userExistResult.raw || {};
+      const humedsCode = raw.code;
+      const humedsData = raw.data || {};
+
+      if (humedsCode === 200) {
+        const existFlag =
+          humedsData.exist !== undefined ? humedsData.exist : humedsData.exists;
+        partnerRegistered = existFlag === true || existFlag === 1 || existFlag === '1';
+      }
+    } catch (err) {
+      logger.warn('sendRegisterCode: Humeds userExist failed, fallback to null', {
+        mobile: normalizedMobile,
+        error: err.message,
+        code: err.code,
+      });
+      partnerRegistered = null;
+    }
+  }
+
+  let registrationMode = 'LOCAL_ONLY';
+  if (HUMEDS_BIND_ON_REGISTER) {
+    if (partnerRegistered === true) {
+      registrationMode = 'LOCAL_AND_BIND_HUMEDS_EXISTING';
+    } else if (partnerRegistered === false) {
+      registrationMode = 'LOCAL_AND_BIND_HUMEDS_NEW';
+    } else {
+      registrationMode = 'LOCAL_AND_BIND_HUMEDS_UNKNOWN';
+    }
+  }
+
+  // 仍然发送本地短信验证码，行为不变
   await smsCodeService.sendCode(normalizedMobile, 'register');
+
+  // 返回状态骨架，供 controller 展开到响应顶层
+  return {
+    mobile: normalizedMobile,
+    accountType,
+    selfRegistered: false,
+    partnerRegistered,
+    needSmsInput: REGISTER_SMS_REQUIRED,
+    registrationMode,
+  };
 }
 
 async function submitRegister({ mobile, code, password, accountType, birthday, orgName }) {
@@ -145,6 +203,10 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
   const [result] = await dbPool.execute(insertSql, values);
   const userId = result.insertId;
 
+  let humedsBindStatus = 'skipped';
+  let humedsErrorCode = null;
+  let humedsErrorMessage = null;
+
   if (HUMEDS_BIND_ON_REGISTER && REGISTER_SMS_REQUIRED && normalizedCode) {
     logger.info('Humeds bind on register start', {
       userId,
@@ -156,11 +218,13 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
         userId,
         mobile: normalizedMobile,
         smscode: normalizedCode,
+        loginMode: 'APP_SMS_REGISTER',
       });
       logger.info('Humeds bind on register success', {
         userId,
         mobile: normalizedMobile,
       });
+      humedsBindStatus = 'success';
     } catch (err) {
       logger.error('Humeds bind on register failed', {
         userId,
@@ -169,6 +233,10 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
         code: err.code,
       });
 
+      humedsBindStatus = 'failed';
+      humedsErrorCode = err.code || null;
+      humedsErrorMessage = err.message || null;
+
       if (HUMEDS_STRICT_REGISTER) {
         throw err;
       }
@@ -176,7 +244,12 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
   }
 
 
-  return { userId };
+  return {
+    userId,
+    humedsBindStatus,
+    humedsErrorCode,
+    humedsErrorMessage,
+  };
 }
 
 module.exports = {

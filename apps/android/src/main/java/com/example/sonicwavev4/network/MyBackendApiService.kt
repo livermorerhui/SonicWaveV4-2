@@ -2,6 +2,7 @@ package com.example.sonicwavev4.network
 
 import android.content.Context
 import com.example.sonicwavev4.BuildConfig
+import com.example.sonicwavev4.network.EndpointProvider
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -14,12 +15,12 @@ interface MyBackendApiService {
     @POST("/api/register/send_code")
     suspend fun sendRegisterCode(
         @Body body: SendCodeRequest
-    ): ApiResponse<Unit>
+    ): RegisterSendCodeResponse
 
     @POST("/api/register/submit")
     suspend fun submitRegister(
         @Body body: RegisterSubmitRequest
-    ): ApiResponse<RegisterResult>
+    ): RegisterSubmitResponse
 
     @POST("/api/humeds/test/login")
     suspend fun humedsTestLogin(
@@ -38,8 +39,7 @@ interface MyBackendApiService {
                 .addInterceptor(logging)
                 .build()
 
-            context?.let { BackendEnvironment.initialize(it) }
-            val baseUrl = BackendEnvironment.getBackendBaseUrl(context)
+            val baseUrl = EndpointProvider.baseUrl
             val retrofit = Retrofit.Builder()
                 .baseUrl("${baseUrl.trimEnd('/')}/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -73,8 +73,30 @@ data class RegisterSubmitRequest(
     val orgName: String?
 )
 
-data class RegisterResult(
+data class RegisterSubmitData(
     val userId: String?
+)
+
+data class RegisterSendCodeResponse(
+    val code: Int,
+    val msg: String?,
+    val data: Any?,
+    val selfRegistered: Boolean?,
+    val selfBound: Boolean?,
+    val partnerRegistered: Boolean?,
+    val needSmsInput: Boolean?,
+    val registrationMode: String?,
+    val mobile: String?,
+    val accountType: String?
+)
+
+data class RegisterSubmitResponse(
+    val code: Int,
+    val msg: String?,
+    val data: RegisterSubmitData?,
+    val humedsBindStatus: String?,
+    val humedsErrorCode: String?,
+    val humedsErrorMessage: String?
 )
 
 /*

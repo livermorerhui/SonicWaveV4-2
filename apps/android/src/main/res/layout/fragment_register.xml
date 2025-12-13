@@ -31,12 +31,13 @@
             android:layout_marginTop="8dp" />
 
         <LinearLayout
+            android:id="@+id/layout_code_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_marginTop="12dp"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <EditText
                 android:id="@+id/et_code"

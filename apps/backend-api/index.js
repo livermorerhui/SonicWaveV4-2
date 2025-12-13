@@ -1,6 +1,13 @@
 
 require('dotenv').config();
 console.log("--- Backend service starting ---");
+console.log('[boot.config]', {
+  NODE_ENV: process.env.NODE_ENV,
+  REGISTER_SMS_REQUIRED: process.env.REGISTER_SMS_REQUIRED,
+  HUMEDS_BIND_ON_REGISTER: process.env.HUMEDS_BIND_ON_REGISTER,
+  HUMEDS_STRICT_REGISTER: process.env.HUMEDS_STRICT_REGISTER,
+  HUMEDS_CHECK_USER_EXIST_ON_REGISTER: process.env.HUMEDS_CHECK_USER_EXIST_ON_REGISTER,
+});
 
 const express = require('express');
 const cors = require('cors');
