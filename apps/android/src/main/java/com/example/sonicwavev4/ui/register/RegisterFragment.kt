@@ -196,9 +196,21 @@ class RegisterFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 registerViewModel.uiState.collectLatest { state ->
-                    binding.btnSendCode.isEnabled = !state.isLoading
+                    val sec = state.sendCodeCooldownSeconds
+                    binding.btnSendCode.isEnabled = !state.isLoading && sec == 0
                     binding.btnRegister.isEnabled = !state.isLoading
                     binding.layoutCodeContainer.visibility = if (state.needSmsInput) View.VISIBLE else View.GONE
+                    if (sec > 0) {
+                        binding.btnSendCode.text = "重新发送(${sec}s)"
+                    } else {
+                        binding.btnSendCode.text = "获取验证码"
+                    }
+                    if (!state.flowHint.isNullOrBlank()) {
+                        binding.tvRegisterFlowHint.visibility = View.VISIBLE
+                        binding.tvRegisterFlowHint.text = state.flowHint
+                    } else {
+                        binding.tvRegisterFlowHint.visibility = View.GONE
+                    }
 
                     state.statusMessage?.let {
                         Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()

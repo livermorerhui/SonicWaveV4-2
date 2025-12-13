@@ -57,6 +57,16 @@
                 android:text="获取验证码" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tv_register_flow_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:visibility="gone"
+            android:text="" />
+
         <EditText
             android:id="@+id/et_password"
             android:layout_width="match_parent"

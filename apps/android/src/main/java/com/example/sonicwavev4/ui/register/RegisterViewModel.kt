@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.sonicwavev4.repository.RegisterRepository
 import com.example.sonicwavev4.repository.RegisterResult
 import com.example.sonicwavev4.utils.PasswordValidator
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,12 +34,15 @@ class RegisterViewModel(
         val humedsBindStatus: String? = null,
         val humedsErrorCode: String? = null,
         val humedsErrorMessage: String? = null,
+        val sendCodeCooldownSeconds: Int = 0,
+        val flowHint: String? = null,
     )
 
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
     private val _birthday = MutableStateFlow<String?>(null)
     val birthday: StateFlow<String?> = _birthday.asStateFlow()
+    private var sendCodeCooldownJob: Job? = null
 
     fun onBirthdaySelected(birthday: String) {
         _birthday.value = birthday
@@ -45,6 +50,20 @@ class RegisterViewModel(
 
     fun clearMessages() {
         _uiState.update { it.copy(errorMessage = null, statusMessage = null) }
+    }
+
+    private fun startSendCodeCooldown(totalSeconds: Int = 60) {
+        sendCodeCooldownJob?.cancel()
+        _uiState.update { it.copy(sendCodeCooldownSeconds = totalSeconds) }
+
+        sendCodeCooldownJob = viewModelScope.launch {
+            for (sec in totalSeconds - 1 downTo 1) {
+                delay(1000)
+                _uiState.update { it.copy(sendCodeCooldownSeconds = sec) }
+            }
+            delay(1000)
+            _uiState.update { it.copy(sendCodeCooldownSeconds = 0) }
+        }
     }
 
     fun sendCode(mobile: String, accountType: String) {
@@ -57,9 +76,17 @@ class RegisterViewModel(
             when (val result = registerRepository.sendCode(mobile.trim(), accountType)) {
                 is RegisterResult.Success -> {
                     val status = result.sendCodeStatus
+                    val needSms = status?.needSmsInput ?: true
+                    val mode = status?.registrationMode
+                    val flowHint = when {
+                        !needSms -> "当前无需短信验证码，可直接注册"
+                        mode?.contains("LOCAL_ONLY") == true -> "将仅注册本应用账号（不绑定 Humeds）"
+                        mode?.contains("EXISTING") == true -> "检测到 Humeds 已存在账号，注册后将尝试自动绑定"
+                        mode?.contains("NEW") == true -> "Humeds 未检测到账号（仅供参考），注册后将尝试绑定"
+                        else -> "注册后将尝试绑定 Humeds（如失败可登录后重试）"
+                    }
+                    val smsMessage = if (needSms) "验证码已发送" else "当前无需验证码，可直接注册"
                     _uiState.update {
-                        val needSms = status?.needSmsInput ?: true
-                        val smsMessage = if (needSms) "验证码已发送" else "当前无需验证码，可直接注册"
                         it.copy(
                             isLoading = false,
                             success = false,
@@ -71,7 +98,14 @@ class RegisterViewModel(
                             partnerRegistered = status?.partnerRegistered,
                             selfRegistered = status?.selfRegistered,
                             selfBound = status?.selfBound,
+                            flowHint = flowHint,
                         )
+                    }
+                    if (needSms) {
+                        startSendCodeCooldown(60)
+                    } else {
+                        sendCodeCooldownJob?.cancel()
+                        _uiState.update { it.copy(sendCodeCooldownSeconds = 0) }
                     }
                 }
                 is RegisterResult.BusinessError -> {
@@ -82,6 +116,8 @@ class RegisterViewModel(
                             errorMessage = result.message,
                             statusMessage = null,
                             codeSent = false,
+                            sendCodeCooldownSeconds = 0,
+                            flowHint = null,
                         )
                     }
                 }
@@ -93,6 +129,8 @@ class RegisterViewModel(
                             errorMessage = result.message,
                             statusMessage = null,
                             codeSent = false,
+                            sendCodeCooldownSeconds = 0,
+                            flowHint = null,
                         )
                     }
                 }
@@ -194,5 +232,10 @@ class RegisterViewModel(
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        sendCodeCooldownJob?.cancel()
     }
 }
