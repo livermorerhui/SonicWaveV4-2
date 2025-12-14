@@ -2,6 +2,7 @@ package com.example.sonicwavev4.ui.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sonicwavev4.repository.HumedsBindRepairRepository
 import com.example.sonicwavev4.repository.RegisterRepository
 import com.example.sonicwavev4.repository.RegisterResult
 import com.example.sonicwavev4.utils.PasswordValidator
@@ -36,6 +37,8 @@ class RegisterViewModel(
         val humedsErrorMessage: String? = null,
         val sendCodeCooldownSeconds: Int = 0,
         val flowHint: String? = null,
+        val registeredUserId: Long? = null,
+        val registeredMobile: String? = null,
     )
 
     private val _uiState = MutableStateFlow(RegisterUiState())
@@ -43,6 +46,7 @@ class RegisterViewModel(
     private val _birthday = MutableStateFlow<String?>(null)
     val birthday: StateFlow<String?> = _birthday.asStateFlow()
     private var sendCodeCooldownJob: Job? = null
+    private val humedsBindRepairRepository: HumedsBindRepairRepository = HumedsBindRepairRepository()
 
     fun onBirthdaySelected(birthday: String) {
         _birthday.value = birthday
@@ -198,6 +202,7 @@ class RegisterViewModel(
                         "skipped" -> "注册成功，已跳过 Humeds 绑定"
                         else -> "注册成功"
                     }
+                    val parsedUserId = submit?.userId?.toLongOrNull()
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -207,6 +212,8 @@ class RegisterViewModel(
                             humedsBindStatus = humedsStatus,
                             humedsErrorCode = submit?.humedsErrorCode,
                             humedsErrorMessage = submit?.humedsErrorMessage,
+                            registeredUserId = parsedUserId,
+                            registeredMobile = mobile.trim(),
                         )
                     }
                 }
@@ -237,5 +244,72 @@ class RegisterViewModel(
     override fun onCleared() {
         super.onCleared()
         sendCodeCooldownJob?.cancel()
+    }
+
+    fun repairHumedsBindingByPassword(humedsPassword: String, regionCode: String = "86") {
+        val current = _uiState.value
+        val userId = current.registeredUserId
+        val mobile = current.registeredMobile
+
+        if (userId == null || mobile.isNullOrBlank()) {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = "注册信息缺失，请返回重试",
+                    statusMessage = null,
+                    humedsBindStatus = current.humedsBindStatus,
+                )
+            }
+            return
+        }
+
+        if (humedsPassword.isBlank()) {
+            _uiState.update { it.copy(errorMessage = "请输入 Humeds 密码", statusMessage = null) }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null,
+                    statusMessage = null,
+                    humedsErrorCode = null,
+                    humedsErrorMessage = null,
+                )
+            }
+
+            runCatching {
+                humedsBindRepairRepository.bindWithPassword(
+                    userId = userId,
+                    mobile = mobile,
+                    humedsPassword = humedsPassword,
+                    regionCode = regionCode,
+                )
+            }.onSuccess { _ ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        humedsBindStatus = "success",
+                        humedsErrorCode = null,
+                        humedsErrorMessage = null,
+                        statusMessage = "Humeds 绑定成功",
+                        errorMessage = null,
+                    )
+                }
+            }.onFailure { e ->
+                val msg = e.message ?: "Humeds 绑定失败"
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        humedsBindStatus = "failed",
+                        humedsErrorCode = "HUMEDS_BIND_REPAIR_FAILED",
+                        humedsErrorMessage = msg,
+                        errorMessage = msg,
+                        statusMessage = null,
+                    )
+                }
+            }
+        }
     }
 }

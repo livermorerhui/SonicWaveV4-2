@@ -2,13 +2,20 @@ package com.example.sonicwavev4.ui.register
 
 import android.app.Dialog
 import android.os.Bundle
+import android.text.InputType
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams
 import android.widget.Toast
 import android.widget.NumberPicker
 import android.view.Gravity
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -27,6 +34,10 @@ class RegisterFragment : Fragment() {
     private val registerViewModel: RegisterViewModel by viewModels()
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
+    private var hasShownHumedsBindDialog = false
+    private var hasNavigatedBack = false
+    private var humedsBindDialog: AlertDialog? = null
+    private var humedsPwdInput: EditText? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -224,8 +235,13 @@ class RegisterFragment : Fragment() {
                         registerViewModel.clearMessages()
                     }
 
-                    if (state.success) {
-                        navigateBackToLogin()
+                    humedsBindDialog?.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = !state.isLoading
+
+                    if (state.humedsBindStatus == "success") {
+                        humedsBindDialog?.dismiss()
+                        navigateBackToLoginOnce()
+                    } else if (state.success) {
+                        showHumedsBindDialogIfNeeded(state)
                     }
                 }
             }
@@ -241,5 +257,116 @@ class RegisterFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun showHumedsBindDialogIfNeeded(state: RegisterViewModel.RegisterUiState) {
+        if (!state.success) return
+        if (hasShownHumedsBindDialog || hasNavigatedBack) return
+        if (state.humedsBindStatus == "success") return
+
+        hasShownHumedsBindDialog = true
+        val messageText = buildString {
+            if (state.humedsBindStatus == "failed" && !state.humedsErrorMessage.isNullOrBlank()) {
+                append("上次绑定失败原因：")
+                append(state.humedsErrorMessage)
+                append("\n")
+            }
+            append("可输入 Humeds 密码进行绑定（不影响本应用登录）")
+        }
+
+        val padding = (20 * resources.displayMetrics.density).toInt()
+        val marginTop = (12 * resources.displayMetrics.density).toInt()
+
+        val container = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(padding, padding, padding, padding)
+            layoutParams = LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val tvMsg = TextView(requireContext()).apply {
+            text = messageText
+            layoutParams = LinearLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val tvLabel = TextView(requireContext()).apply {
+            text = "Humeds 密码"
+            layoutParams = LinearLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = marginTop }
+        }
+
+        val input = EditText(requireContext()).apply {
+            hint = "请输入 Humeds 密码"
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            layoutParams = LinearLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = (6 * resources.displayMetrics.density).toInt() }
+            setPadding(marginTop, marginTop, marginTop, marginTop)
+            setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
+            setHintTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
+            setBackgroundResource(android.R.drawable.edit_text)
+            isCursorVisible = true
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                textCursorDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.edittext_cursor)
+            } else {
+                try {
+                    val field = TextView::class.java.getDeclaredField("mCursorDrawableRes")
+                    field.isAccessible = true
+                    field.set(this, R.drawable.edittext_cursor)
+                } catch (_: Exception) {
+                    // ignore if reflection fails; fallback to default cursor
+                }
+            }
+        }
+
+        container.addView(tvMsg)
+        container.addView(tvLabel)
+        container.addView(input)
+
+        humedsPwdInput = input
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("绑定 Humeds")
+            .setView(container)
+            .setNegativeButton("跳过") { d, _ ->
+                d.dismiss()
+                navigateBackToLoginOnce()
+            }
+            .setPositiveButton("绑定", null)
+            .create()
+
+        dialog.setOnShowListener {
+            val positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            positive.setOnClickListener {
+                val pwd = input.text?.toString()?.trim().orEmpty()
+                if (pwd.isBlank()) {
+                    input.error = "请输入 Humeds 密码"
+                    return@setOnClickListener
+                }
+                registerViewModel.repairHumedsBindingByPassword(pwd)
+            }
+        }
+
+        dialog.setOnDismissListener {
+            humedsBindDialog = null
+            humedsPwdInput = null
+        }
+
+        humedsBindDialog = dialog
+        dialog.show()
+    }
+
+    private fun navigateBackToLoginOnce() {
+        if (hasNavigatedBack) return
+        hasNavigatedBack = true
+        navigateBackToLogin()
     }
 }

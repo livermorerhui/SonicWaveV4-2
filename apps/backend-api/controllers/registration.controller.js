@@ -16,19 +16,9 @@ async function sendRegisterCode(req, res) {
       return res.status(400).json(buildApiResponse(4001, '参数错误', null));
     }
 
-    // 从 service 获取状态信息（自注册 / 对方注册 / 是否需要验证码 / 注册模式）
     const status = await registrationService.sendRegisterCode({ mobile, accountType });
-
-    return res.json(
-      buildApiResponse(200, '验证码已发送', null, {
-        selfRegistered: status.selfRegistered,
-        partnerRegistered: status.partnerRegistered,
-        needSmsInput: status.needSmsInput,
-        registrationMode: status.registrationMode,
-        mobile: status.mobile,
-        accountType: status.accountType,
-      }),
-    );
+    const msg = status.needSmsInput ? '验证码已发送' : '无需验证码';
+    return res.json({ ...buildApiResponse(200, msg, null), ...status });
   } catch (err) {
     console.error(err);
 
@@ -48,7 +38,7 @@ async function submitRegister(req, res) {
   try {
     const { mobile, code, password, accountType, birthday, orgName } = req.body || {};
 
-    if (!mobile || !code || !password || !accountType) {
+    if (!mobile || !password || !accountType) {
       return res.status(400).json(buildApiResponse(4001, '参数错误', null));
     }
 

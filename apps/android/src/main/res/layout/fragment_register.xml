@@ -28,7 +28,11 @@
             android:inputType="phone"
             android:padding="12dp"
             android:background="@android:drawable/edit_text"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:cursorVisible="true"
+            android:textCursorDrawable="@drawable/edittext_cursor"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
 
         <LinearLayout
             android:id="@+id/layout_code_container"
@@ -47,7 +51,11 @@
                 android:hint="请输入验证码"
                 android:inputType="number"
                 android:padding="12dp"
-                android:background="@android:drawable/edit_text" />
+                android:background="@android:drawable/edit_text"
+                android:cursorVisible="true"
+                android:textCursorDrawable="@drawable/edittext_cursor"
+                android:focusable="true"
+                android:focusableInTouchMode="true" />
 
             <Button
                 android:id="@+id/btn_send_code"
@@ -75,7 +83,11 @@
             android:inputType="textPassword"
             android:padding="12dp"
             android:background="@android:drawable/edit_text"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="12dp"
+            android:cursorVisible="true"
+            android:textCursorDrawable="@drawable/edittext_cursor"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
 
         <TextView
             android:id="@+id/tv_password_hint"
@@ -162,7 +174,11 @@
                 android:hint="请输入机构名称"
                 android:padding="12dp"
                 android:background="@android:drawable/edit_text"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:cursorVisible="true"
+                android:textCursorDrawable="@drawable/edittext_cursor"
+                android:focusable="true"
+                android:focusableInTouchMode="true" />
         </LinearLayout>
 
         <Button

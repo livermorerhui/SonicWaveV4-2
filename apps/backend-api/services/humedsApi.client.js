@@ -121,18 +121,64 @@ async function login({ mobile, password, smscode, regionCode }) {
 
 async function userExist({ mobile, regionCode }) {
   try {
-    const payload = {
-      mobile,
-      regionCode: regionCode || humedsConfig.defaultRegionCode,
-    };
+    if (!mobile) {
+      throw buildHumedsError('mobile is required for Humeds userExist', 'HUMEDS_USER_EXIST_FAILED');
+    }
 
-    const res = await client.post('/api/userexist', payload);
+    const form = new URLSearchParams();
+    form.append('mobile', mobile);
+
+    const region = regionCode || humedsConfig.defaultRegionCode || process.env.HUMEDS_REGION_CODE || '86';
+    form.append('regionCode', region);
+
+    const res = await client.post('/api/userexist', form.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
     const data = res.data || {};
+    const humedsCode = data.code;
+    const humedsMsg = data.msg || data.desc || '';
 
-    return {
-      raw: data,
-    };
+    const dataText =
+      typeof data.data === 'string' ? data.data :
+      typeof humedsMsg === 'string' ? humedsMsg :
+      '';
+
+    const textHasNotExist = dataText && dataText.includes('不存在');
+
+    if (humedsCode === 200) {
+      const parsedExist = textHasNotExist ? false : true;
+      return { raw: data, parsedExist };
+    }
+
+    if (humedsCode === 201) {
+      // Humeds 用 201 表示“手机号不存在”，这是正常业务态
+      return { raw: data, parsedExist: false };
+    }
+
+    // 其他 code 才当作失败
+    const message = humedsMsg && humedsCode
+      ? `Humeds userExist failed: ${humedsMsg} (code=${humedsCode})`
+      : (humedsMsg || `Humeds userExist failed with code ${humedsCode}`);
+
+    throw buildHumedsError(message, 'HUMEDS_USER_EXIST_FAILED', { humedsResponse: data });
   } catch (err) {
+    if (err.code === 'HUMEDS_USER_EXIST_FAILED') {
+      logger.error('Humeds userExist error', {
+        error: err.message,
+        stack: err.stack,
+        status: err.status || err.response?.status,
+        response:
+          err.originalError?.humedsResponse ||
+          err.originalError?.response?.data ||
+          err.response?.data ||
+          null,
+      });
+      throw err;
+    }
+
     logger.error('Humeds userExist error', {
       error: err.message,
       stack: err.stack,
