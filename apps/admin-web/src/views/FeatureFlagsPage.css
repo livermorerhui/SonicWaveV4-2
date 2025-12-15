@@ -164,6 +164,55 @@
   font-weight: 600;
 }
 
+.profile-card__actions {
+  display: flex;
+  flex: 1 1 320px;
+  gap: 12px;
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.profile-button {
+  flex: 1 1 180px;
+  min-width: 180px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.08);
+  color: #e2e8f0;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.profile-button:hover:not(:disabled) {
+  border-color: rgba(94, 234, 212, 0.6);
+  transform: translateY(-1px);
+}
+
+.profile-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.profile-button--active {
+  border-color: rgba(52, 211, 153, 0.8);
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.15);
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.18), rgba(16, 185, 129, 0.28));
+}
+
+.profile-button__title {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.profile-button__note {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  color: rgba(148, 163, 184, 0.9);
+}
+
 @media (max-width: 768px) {
   .feature-flags-page {
     padding: 20px;

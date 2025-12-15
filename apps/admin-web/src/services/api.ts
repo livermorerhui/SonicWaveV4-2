@@ -2,7 +2,12 @@ import type { ErrorEnvelope } from '@/models/ErrorEnvelope';
 import type { UserDTO, UserDetail } from '@/models/UserDTO';
 import type { CustomerDTO, CustomerDetail } from '@/models/CustomerDTO';
 import type { PaginatedResponse } from '@/models/PaginatedResponse';
-import type { FeatureFlag, FeatureFlagSnapshot } from '@/models/FeatureFlag';
+import type {
+  FeatureFlag,
+  FeatureFlagSnapshot,
+  RegisterRolloutProfileFlag,
+  RegisterRolloutProfileValue
+} from '@/models/FeatureFlag';
 import type { DeviceDTO } from '@/models/Device';
 import type { MusicCategoryDTO, MusicTrackDTO } from '@/models/Music';
 
@@ -253,6 +258,19 @@ export const patchOfflineModeFlag = (enabled: boolean, token: string, notifyOnli
       method: 'PATCH',
       token,
       body: JSON.stringify({ enabled, notifyOnline })
+    }
+  );
+
+export const patchRegisterRolloutProfile = (
+  profile: RegisterRolloutProfileValue,
+  token: string
+) =>
+  request<{ message: string; registerRolloutProfile: RegisterRolloutProfileFlag }>(
+    '/api/admin/feature-flags/register-rollout-profile',
+    {
+      method: 'PATCH',
+      token,
+      body: JSON.stringify({ profile })
     }
   );
 

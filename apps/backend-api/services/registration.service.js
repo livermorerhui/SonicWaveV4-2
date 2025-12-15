@@ -3,29 +3,54 @@ const { dbPool } = require('../config/db');
 const smsCodeService = require('./smsCode.service');
 const HumedsAccountService = require('./humedsAccount.service');
 const humedsApiClient = require('./humedsApi.client');
+const featureFlagsService = require('./featureFlags.service');
 const logger = require('../logger');
-
-const HUMEDS_BIND_ON_REGISTER =
-  (process.env.HUMEDS_BIND_ON_REGISTER || '').toLowerCase() === 'true';
-
-const HUMEDS_STRICT_REGISTER =
-  (process.env.HUMEDS_STRICT_REGISTER || '').toLowerCase() === 'true';
-
-const REGISTER_SMS_REQUIRED =
-  (process.env.REGISTER_SMS_REQUIRED || '').toLowerCase() === 'true';
-const REGISTER_SMS_PROVIDER = (process.env.REGISTER_SMS_PROVIDER || 'local').toLowerCase();
-
-const HUMEDS_CHECK_USER_EXIST_ON_REGISTER =
-  (process.env.HUMEDS_CHECK_USER_EXIST_ON_REGISTER || '').toLowerCase() === 'true';
-const HUMEDS_SIGNUP_ON_REGISTER =
-  (process.env.HUMEDS_SIGNUP_ON_REGISTER || '').toLowerCase() === 'true';
 
 const SALT_ROUNDS = 10;
 const ACCOUNT_TYPES = ['personal', 'org'];
 
-function computeNeedSmsInput({ registerSmsRequired, humedsBindOnRegister, partnerRegistered }) {
-  if (!registerSmsRequired) return false;
-  if (humedsBindOnRegister && partnerRegistered === true) return false;
+function getBaseRegisterConfig() {
+  return {
+    provider: (process.env.REGISTER_SMS_PROVIDER || 'local').toLowerCase(),
+    smsRequired: (process.env.REGISTER_SMS_REQUIRED || '').toLowerCase() === 'true',
+    bindOnRegister: (process.env.HUMEDS_BIND_ON_REGISTER || '').toLowerCase() === 'true',
+    checkExist: (process.env.HUMEDS_CHECK_USER_EXIST_ON_REGISTER || '').toLowerCase() === 'true',
+    signupOnRegister: (process.env.HUMEDS_SIGNUP_ON_REGISTER || '').toLowerCase() === 'true',
+    strictRegister: (process.env.HUMEDS_STRICT_REGISTER || '').toLowerCase() === 'true'
+  };
+}
+
+function applyProfile(profile) {
+  const base = getBaseRegisterConfig();
+  const normalized = typeof profile === 'string' ? profile.toUpperCase() : 'NORMAL';
+  const effective = {
+    ...base,
+    provider: base.provider || 'local',
+    shortCircuitHumeds: false
+  };
+
+  if (normalized === 'ROLLBACK_A') {
+    effective.provider = 'local';
+    effective.smsRequired = true;
+    effective.bindOnRegister = false;
+    effective.checkExist = false;
+    effective.signupOnRegister = false;
+    effective.shortCircuitHumeds = true;
+  } else if (normalized === 'ROLLBACK_B') {
+    effective.provider = 'local';
+    effective.smsRequired = false;
+    effective.bindOnRegister = false;
+    effective.checkExist = false;
+    effective.signupOnRegister = false;
+    effective.shortCircuitHumeds = false;
+  }
+
+  return effective;
+}
+
+function computeNeedSmsInput({ smsRequired, bindOnRegister, partnerRegistered }) {
+  if (!smsRequired) return false;
+  if (bindOnRegister && partnerRegistered === true) return false;
   return true;
 }
 
@@ -114,15 +139,6 @@ function computeRegistrationMode({ bindOnRegister, partnerRegistered }) {
   return 'LOCAL_AND_BIND_HUMEDS_UNKNOWN';
 }
 
-function computeNeedSmsInput({ smsRequired, bindOnRegister, partnerRegistered }) {
-  if (!smsRequired) return false;
-
-  // 关键：Humeds 已存在账号 -> 不需要验证码（用于“已有 Humeds 账号”的注册场景）
-  if (bindOnRegister && partnerRegistered === true) return false;
-
-  return true;
-}
-
 async function sendRegisterCode({ mobile, accountType }) {
   const normalizedMobile = typeof mobile === 'string' ? mobile.trim() : '';
   if (!normalizedMobile) {
@@ -157,8 +173,19 @@ async function sendRegisterCode({ mobile, accountType }) {
     throw error;
   }
 
+  const profile = await featureFlagsService.getRegisterRolloutProfile({ bypassCache: true });
+  const effectiveConfig = applyProfile(profile);
+  logger.debug('sendRegisterCode: effective profile', {
+    profile,
+    effectiveProvider: effectiveConfig.provider,
+    smsRequired: effectiveConfig.smsRequired
+  });
+
   let partnerRegistered = null;
-  if (HUMEDS_CHECK_USER_EXIST_ON_REGISTER || HUMEDS_BIND_ON_REGISTER) {
+  const shouldCheckPartner =
+    !effectiveConfig.shortCircuitHumeds &&
+    (effectiveConfig.checkExist || effectiveConfig.bindOnRegister);
+  if (shouldCheckPartner) {
     try {
       const existRes = await humedsApiClient.userExist({ mobile: normalizedMobile });
       if (typeof existRes?.parsedExist === 'boolean') {
@@ -183,18 +210,18 @@ async function sendRegisterCode({ mobile, accountType }) {
     }
   }
 
+  if (!effectiveConfig.bindOnRegister && !effectiveConfig.checkExist) {
+    partnerRegistered = null;
+  }
+
   const needSmsInput = computeNeedSmsInput({
-    smsRequired: REGISTER_SMS_REQUIRED,
-    bindOnRegister: HUMEDS_BIND_ON_REGISTER,
+    smsRequired: effectiveConfig.smsRequired,
+    bindOnRegister: effectiveConfig.bindOnRegister,
     partnerRegistered,
   });
 
-  if (!needSmsInput) {
-    logger.info('sendRegisterCode: skip sms (humeds already registered)', { mobile: normalizedMobile });
-  }
-
   if (needSmsInput) {
-    if (REGISTER_SMS_PROVIDER === 'humeds') {
+    if (effectiveConfig.provider === 'humeds') {
       try {
         await humedsApiClient.sendSmsCode({ mobile: normalizedMobile });
         logger.info('sendRegisterCode: humeds smscode sent', { mobile: normalizedMobile });
@@ -207,11 +234,13 @@ async function sendRegisterCode({ mobile, accountType }) {
       await smsCodeService.sendCode(normalizedMobile, 'register');
     }
   } else {
-    logger.info('sendRegisterCode: humeds user exists, skip smscode', { mobile: normalizedMobile });
+    logger.info('sendRegisterCode: skip sms (not required under current profile/config)', {
+      mobile: normalizedMobile
+    });
   }
 
   const registrationMode = computeRegistrationMode({
-    bindOnRegister: HUMEDS_BIND_ON_REGISTER,
+    bindOnRegister: effectiveConfig.bindOnRegister,
     partnerRegistered,
   });
 
@@ -232,6 +261,13 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
   let partnerRegistered = null;
   let needSmsInput = true;
   let humedsSignupDone = false;
+  const profile = await featureFlagsService.getRegisterRolloutProfile({ bypassCache: true });
+  const effectiveConfig = applyProfile(profile);
+  logger.debug('submitRegister: effective profile', {
+    profile,
+    effectiveProvider: effectiveConfig.provider,
+    smsRequired: effectiveConfig.smsRequired
+  });
 
   if (!normalizedMobile || !password || !accountType) {
     const error = new Error('手机号、密码和账号类型为必填项');
@@ -251,7 +287,11 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
     throw error;
   }
 
-  if (HUMEDS_BIND_ON_REGISTER && HUMEDS_CHECK_USER_EXIST_ON_REGISTER) {
+  const shouldCheckPartner =
+    !effectiveConfig.shortCircuitHumeds &&
+    effectiveConfig.bindOnRegister &&
+    effectiveConfig.checkExist;
+  if (shouldCheckPartner) {
     try {
       const existRes = await humedsApiClient.userExist({ mobile: normalizedMobile });
       if (typeof existRes?.parsedExist === 'boolean') {
@@ -264,9 +304,13 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
     }
   }
 
+  if (!effectiveConfig.bindOnRegister && !effectiveConfig.checkExist) {
+    partnerRegistered = null;
+  }
+
   needSmsInput = computeNeedSmsInput({
-    smsRequired: REGISTER_SMS_REQUIRED,
-    bindOnRegister: HUMEDS_BIND_ON_REGISTER,
+    smsRequired: effectiveConfig.smsRequired,
+    bindOnRegister: effectiveConfig.bindOnRegister,
     partnerRegistered,
   });
 
@@ -297,7 +341,7 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
       throw error;
     }
 
-    if (REGISTER_SMS_PROVIDER === 'humeds') {
+    if (effectiveConfig.provider === 'humeds' && !effectiveConfig.shortCircuitHumeds) {
       if (partnerRegistered === true) {
         try {
           await humedsApiClient.login({ mobile: normalizedMobile, smscode: normalizedCode });
@@ -314,7 +358,7 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
           throw err;
         }
       } else if (partnerRegistered === false) {
-        if (HUMEDS_SIGNUP_ON_REGISTER) {
+        if (effectiveConfig.signupOnRegister) {
           try {
             await humedsApiClient.signup({
               mobile: normalizedMobile,
@@ -353,8 +397,8 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
           throw error;
         }
       } catch (e) {
-        if (HUMEDS_BIND_ON_REGISTER && partnerRegistered === false && HUMEDS_SIGNUP_ON_REGISTER) {
-          logger.warn('submitRegister: local sms verify failed but continue for humeds signup', {
+        if (effectiveConfig.bindOnRegister && partnerRegistered === false && effectiveConfig.signupOnRegister) {
+          logger.info('submitRegister: local sms verify failed but continue for humeds signup', {
             mobile: normalizedMobile,
             error: e.message,
           });
@@ -397,13 +441,13 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
   let humedsErrorCode = null;
   let humedsErrorMessage = null;
   const registrationMode = computeRegistrationMode({
-    bindOnRegister: HUMEDS_BIND_ON_REGISTER,
+    bindOnRegister: effectiveConfig.bindOnRegister,
     partnerRegistered,
   });
 
-  if (HUMEDS_BIND_ON_REGISTER && password) {
+  if (effectiveConfig.bindOnRegister && !effectiveConfig.shortCircuitHumeds && password) {
     if (partnerRegistered === false) {
-      if (HUMEDS_SIGNUP_ON_REGISTER) {
+      if (effectiveConfig.signupOnRegister) {
         // 如果前面已完成 signup 校验，则跳过再次 signup
         if (!humedsSignupDone) {
           logger.info('Humeds signup on register start', { userId, mobile: normalizedMobile });
@@ -425,7 +469,7 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
               error: humedsErrorMessage,
               code: humedsErrorCode,
             });
-            if (HUMEDS_STRICT_REGISTER) {
+            if (effectiveConfig.strictRegister) {
               throw e;
             }
           }
@@ -463,7 +507,7 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
               code: humedsErrCode,
             };
             if (bizCodes.has(humedsErrCode)) {
-              logger.warn('Humeds bind on register failed(biz)', logMeta);
+              logger.info('Humeds bind on register failed(biz)', logMeta);
             } else {
               logger.error('Humeds bind on register failed(system)', {
                 ...logMeta,
@@ -475,7 +519,7 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
             humedsErrorCode = humedsErrCode;
             humedsErrorMessage = humedsErrMessage;
 
-            if (HUMEDS_STRICT_REGISTER) {
+            if (effectiveConfig.strictRegister) {
               throw err;
             }
           }
@@ -525,9 +569,9 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
           error: humedsErrMessage,
           code: humedsErrCode,
         };
-        if (bizCodes.has(humedsErrCode)) {
-          logger.warn('Humeds bind on register failed(biz)', logMeta);
-        } else {
+            if (bizCodes.has(humedsErrCode)) {
+              logger.info('Humeds bind on register failed(biz)', logMeta);
+            } else {
           logger.error('Humeds bind on register failed(system)', {
             ...logMeta,
             stack: err?.stack,
@@ -538,7 +582,7 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
         humedsErrorCode = humedsErrCode;
         humedsErrorMessage = humedsErrMessage;
 
-        if (HUMEDS_STRICT_REGISTER) {
+        if (effectiveConfig.strictRegister) {
           throw err;
         }
       }

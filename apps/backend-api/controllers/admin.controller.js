@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 let adminService = require('../services/admin.service');
+const featureFlagsService = require('../services/featureFlags.service');
 const logger = require('../logger');
 
 const buildError = (code, message) => ({
@@ -400,6 +401,27 @@ const updateOfflineModeFlag = async (req, res) => {
   }
 };
 
+const updateRegisterRolloutProfile = async (req, res) => {
+  try {
+    const { profile } = req.body;
+    const result = await featureFlagsService.setRegisterRolloutProfile({
+      profile,
+      actorId: toActorId(req)
+    });
+    res.json(
+      buildSuccess('注册链路档位已更新', {
+        registerRolloutProfile: result
+      })
+    );
+  } catch (error) {
+    if (error.code === 'INVALID_PROFILE') {
+      return res.status(400).json(buildError('INVALID_PROFILE', '无效的注册链路档位'));
+    }
+    logger.error('[AdminController] Failed to update register rollout profile', { error: error.message });
+    res.status(500).json(buildError('INTERNAL_ERROR', '更新注册链路档位失败'));
+  }
+};
+
 const forceExitOfflineMode = async (req, res) => {
   try {
     const countdownSec = Number.parseInt(req.body.countdownSec, 10);
@@ -436,6 +458,7 @@ module.exports = {
   updateCustomer,
   getFeatureFlags,
   updateOfflineModeFlag,
+  updateRegisterRolloutProfile,
   forceExitOfflineMode,
   setAdminService,
   getDevices,

@@ -70,7 +70,7 @@ const registerUser = async (req, res) => {
         humedsBindStatus = 'failed';
         humedsErrorCode = err.code || null;
         humedsErrorMessage = err.message || null;
-        logger.warn('Humeds bind on register failed', {
+        logger.info('Humeds bind on register failed', {
           userId: result.insertId,
           mobile: normalizedMobile,
           code: err.code,
@@ -197,7 +197,7 @@ const loginUser = async (req, res) => {
         humedsBindStatus = 'failed';
         humedsErrorCode = err.code || null;
         humedsErrorMessage = err.message || null;
-        logger.warn('Humeds bind on login failed', {
+        logger.info('Humeds bind on login failed', {
           userId: user.id,
           mobile: normalizedAccount,
           code: err.code,

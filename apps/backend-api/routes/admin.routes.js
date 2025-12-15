@@ -319,6 +319,13 @@ router.patch(
   adminController.updateOfflineModeFlag
 );
 
+router.patch(
+  '/feature-flags/register-rollout-profile',
+  [body('profile').isIn(['NORMAL', 'ROLLBACK_A', 'ROLLBACK_B']).withMessage('profile 非法')],
+  validate,
+  adminController.updateRegisterRolloutProfile
+);
+
 router.post(
   '/feature-flags/offline-mode/force-exit',
   [

@@ -28,14 +28,44 @@ if (process.env.NODE_ENV !== 'production') {
       splat(),
       printf(info => {
         const { timestamp, level, message, ...meta } = info;
-        
-        // 检查是否有堆栈信息（来自 errors({ stack: true })）
-        const stack = info.stack ? `\n${info.stack}` : '';
 
-        // 检查是否有附加的元数据对象 (来自 splat())
+        // splat() 传入的附加参数（通常是一个 meta object）
         const splatData = meta[Symbol.for('splat')];
-        const metaString = splatData ? `\n${JSON.stringify(splatData[0], null, 2)}` : '';
-        
+
+        let metaObj = null;
+        let stackValue = info.stack;
+
+        if (Array.isArray(splatData) && splatData.length > 0) {
+          const first = splatData[0];
+
+          // 常见：logger.xxx('msg', { ... })
+          if (first && typeof first === 'object' && !Array.isArray(first)) {
+            metaObj = { ...first };
+
+            // 如果 stack 被放进了 meta（常见写法：{ stack: err.stack }），则只打印一次：
+            // 1) 从 meta 里读出来作为 stackValue
+            // 2) 从 metaString 中移除 stack 字段，避免 JSON 和尾部 stack 重复
+            if (!stackValue && typeof metaObj.stack === 'string' && metaObj.stack.trim().length > 0) {
+              stackValue = metaObj.stack;
+            }
+            if (metaObj.stack !== undefined) {
+              delete metaObj.stack;
+            }
+          } else if (first !== undefined) {
+            // 兜底：如果不是 object，就直接 stringify
+            metaObj = first;
+          }
+        }
+
+        const metaString =
+          metaObj === null
+            ? ''
+            : typeof metaObj === 'object'
+            ? `\n${JSON.stringify(metaObj, null, 2)}`
+            : `\n${String(metaObj)}`;
+
+        const stack = stackValue ? `\n${stackValue}` : '';
+
         return `${timestamp} ${level}: ${message}${metaString}${stack}`;
       })
     ),

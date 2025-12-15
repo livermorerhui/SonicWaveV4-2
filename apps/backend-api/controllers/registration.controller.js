@@ -76,7 +76,7 @@ async function sendRegisterCode(req, res) {
   } catch (err) {
     const meta = buildErrMeta(req, err);
     if (isBusinessError(err)) {
-      logger.warn('sendRegisterCode business error', meta);
+      logger.info('sendRegisterCode business error', meta);
     } else {
       logger.error('sendRegisterCode unexpected error', { ...meta, stack: err?.stack });
     }
@@ -132,7 +132,7 @@ async function submitRegister(req, res) {
   } catch (err) {
     const meta = buildErrMeta(req, err);
     if (isBusinessError(err)) {
-      logger.warn('submitRegister business error', meta);
+      logger.info('submitRegister business error', meta);
     } else {
       logger.error('submitRegister unexpected error', { ...meta, stack: err?.stack });
     }

@@ -1,6 +1,11 @@
-import { useEffect, useState } from 'react';
-import { fetchFeatureFlags, patchOfflineModeFlag, forceExitOfflineMode } from '@/services/api';
-import type { FeatureFlagSnapshot } from '@/models/FeatureFlag';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  fetchFeatureFlags,
+  patchOfflineModeFlag,
+  forceExitOfflineMode,
+  patchRegisterRolloutProfile
+} from '@/services/api';
+import type { FeatureFlagSnapshot, RegisterRolloutProfileValue } from '@/models/FeatureFlag';
 import { useAuth } from '@/viewmodels/AuthProvider';
 import './FeatureFlagsPage.css';
 
@@ -11,9 +16,26 @@ export const FeatureFlagsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
   const [forceExiting, setForceExiting] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const FORCE_COUNTDOWN = 5;
+  const profileOptions = useMemo(
+    () => [
+      { key: 'NORMAL' as RegisterRolloutProfileValue, label: '正常', note: '标准注册链路' },
+      {
+        key: 'ROLLBACK_A' as RegisterRolloutProfileValue,
+        label: '回滚A',
+        note: '本地验证码，不走 Humeds'
+      },
+      {
+        key: 'ROLLBACK_B' as RegisterRolloutProfileValue,
+        label: '回滚B',
+        note: '紧急放行，不需要验证码'
+      }
+    ],
+    []
+  );
 
   useEffect(() => {
     if (!token) {
@@ -55,6 +77,7 @@ export const FeatureFlagsPage = () => {
       setSnapshot(prev =>
         prev
           ? {
+              ...prev,
               offlineMode: {
                 ...prev.offlineMode,
                 enabled: false,
@@ -85,7 +108,15 @@ export const FeatureFlagsPage = () => {
     setError(null);
     try {
       const response = await patchOfflineModeFlag(nextEnabled, token, true);
-      setSnapshot({ offlineMode: response.featureFlag });
+      setSnapshot(prev => ({
+        offlineMode: response.featureFlag,
+        registerRolloutProfile:
+          prev?.registerRolloutProfile || snapshot.registerRolloutProfile || {
+            profile: 'NORMAL',
+            updatedAt: null,
+            updatedBy: null
+          }
+      }));
       setCountdown(null);
       setInfoMessage(nextEnabled ? '已启用离线模式并通知在线设备' : '已关闭离线模式，设备将在用户退出后生效');
     } catch (err) {
@@ -112,6 +143,31 @@ export const FeatureFlagsPage = () => {
     }
   };
 
+  const handleProfileChange = async (profile: RegisterRolloutProfileValue) => {
+    if (!token || !snapshot) {
+      return;
+    }
+    if (snapshot.registerRolloutProfile.profile === profile) {
+      return;
+    }
+    setProfileSaving(true);
+    setError(null);
+    try {
+      const response = await patchRegisterRolloutProfile(profile, token);
+      setSnapshot(prev =>
+        prev
+          ? { ...prev, registerRolloutProfile: response.registerRolloutProfile }
+          : prev
+      );
+      const label = profileOptions.find(item => item.key === profile)?.label || profile;
+      setInfoMessage(`注册链路档位已切换为 ${label}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '更新注册链路档位失败');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
   const renderStatus = () => {
     if (loading) {
       return <span className="flag-status flag-status--loading">加载中...</span>;
@@ -130,6 +186,13 @@ export const FeatureFlagsPage = () => {
     snapshot?.offlineMode.updatedAt && !loading
       ? new Date(snapshot.offlineMode.updatedAt).toLocaleString()
       : '—';
+  const currentProfile = snapshot?.registerRolloutProfile.profile;
+  const registerProfileUpdatedAt =
+    snapshot?.registerRolloutProfile.updatedAt && !loading
+      ? new Date(snapshot.registerRolloutProfile.updatedAt).toLocaleString()
+      : '—';
+  const currentProfileLabel =
+    profileOptions.find(item => item.key === currentProfile)?.label || '—';
 
   return (
     <div className="feature-flags-page">
@@ -181,6 +244,41 @@ export const FeatureFlagsPage = () => {
                 ? '指令发送中...'
                 : '强制退出离线模式（5秒）'}
           </button>
+        </div>
+      </section>
+
+      <section className="feature-card profile-card">
+        <div className="feature-card__content">
+          <h2>注册链路档位</h2>
+          <p>在异常或紧急情况下切换注册链路的执行模式，实时生效。</p>
+          <ul>
+            <li>正常：按当前线上逻辑执行，沿用 Humeds 检查/验证码配置。</li>
+            <li>回滚A：仅使用本地验证码，不调用 Humeds。</li>
+            <li>回滚B：完全本地化，放行注册且不需要验证码。</li>
+          </ul>
+          <div className="feature-card__meta">
+            <span>当前档位：{currentProfileLabel}</span>
+            <span>最后更新：{registerProfileUpdatedAt}</span>
+            {snapshot?.registerRolloutProfile.updatedBy && (
+              <span>操作者ID：{snapshot.registerRolloutProfile.updatedBy}</span>
+            )}
+          </div>
+        </div>
+        <div className="profile-card__actions">
+          {profileOptions.map(option => {
+            const active = option.key === currentProfile;
+            return (
+              <button
+                key={option.key}
+                className={`profile-button ${active ? 'profile-button--active' : ''}`}
+                onClick={() => handleProfileChange(option.key)}
+                disabled={loading || profileSaving}
+              >
+                <div className="profile-button__title">{option.label}</div>
+                <div className="profile-button__note">{option.note}</div>
+              </button>
+            );
+          })}
         </div>
       </section>
 
