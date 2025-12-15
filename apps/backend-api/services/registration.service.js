@@ -16,6 +16,8 @@ const REGISTER_SMS_REQUIRED =
 
 const HUMEDS_CHECK_USER_EXIST_ON_REGISTER =
   (process.env.HUMEDS_CHECK_USER_EXIST_ON_REGISTER || '').toLowerCase() === 'true';
+const HUMEDS_SIGNUP_ON_REGISTER =
+  (process.env.HUMEDS_SIGNUP_ON_REGISTER || '').toLowerCase() === 'true';
 
 const SALT_ROUNDS = 10;
 const ACCOUNT_TYPES = ['personal', 'org'];
@@ -170,6 +172,19 @@ async function sendRegisterCode({ mobile, accountType }) {
     await smsCodeService.sendCode(normalizedMobile, 'register');
   }
 
+  if (needSmsInput && process.env.HUMEDS_SMSCODE_MIRROR === 'true') {
+    try {
+      await humedsApiClient.sendSmsCode({ mobile: normalizedMobile });
+      logger.info('sendRegisterCode: humeds smscode mirrored', { mobile: normalizedMobile });
+    } catch (e) {
+      logger.warn('sendRegisterCode: humeds smscode mirror failed', {
+        mobile: normalizedMobile,
+        error: e.message,
+        code: e.code || 'HUMEDS_SMSCODE_FAILED',
+      });
+    }
+  }
+
   const registrationMode = computeRegistrationMode({
     bindOnRegister: HUMEDS_BIND_ON_REGISTER,
     partnerRegistered,
@@ -189,6 +204,9 @@ async function sendRegisterCode({ mobile, accountType }) {
 async function submitRegister({ mobile, code, password, accountType, birthday, orgName }) {
   const normalizedMobile = typeof mobile === 'string' ? mobile.trim() : '';
   const normalizedCode = typeof code === 'string' ? code.trim() : '';
+  let partnerRegistered = null;
+  const needSmsInput = !!REGISTER_SMS_REQUIRED;
+
   if (!normalizedMobile || !password || !accountType) {
     const error = new Error('手机号、密码和账号类型为必填项');
     error.code = 'INVALID_INPUT';
@@ -205,6 +223,19 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
     const error = new Error('账号类型不合法');
     error.code = 'INVALID_INPUT';
     throw error;
+  }
+
+  if (HUMEDS_BIND_ON_REGISTER && HUMEDS_CHECK_USER_EXIST_ON_REGISTER) {
+    try {
+      const existRes = await humedsApiClient.userExist({ mobile: normalizedMobile });
+      if (typeof existRes?.parsedExist === 'boolean') {
+        partnerRegistered = existRes.parsedExist;
+      } else {
+        partnerRegistered = parseHumedsExistFlag(existRes?.raw);
+      }
+    } catch (_err) {
+      partnerRegistered = null;
+    }
   }
 
   if (accountType === 'personal') {
@@ -234,11 +265,22 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
       throw error;
     }
 
-    const verifyResult = await smsCodeService.verifyCode(normalizedMobile, 'register', normalizedCode);
-    if (!verifyResult.ok) {
-      const error = new Error(verifyResult.reason === 'EXPIRED' ? '验证码已过期' : '验证码错误');
-      error.code = verifyResult.reason === 'EXPIRED' ? 'CODE_EXPIRED' : 'CODE_MISMATCH';
-      throw error;
+    try {
+      const verifyResult = await smsCodeService.verifyCode(normalizedMobile, 'register', normalizedCode);
+      if (!verifyResult.ok) {
+        const error = new Error(verifyResult.reason === 'EXPIRED' ? '验证码已过期' : '验证码错误');
+        error.code = verifyResult.reason === 'EXPIRED' ? 'CODE_EXPIRED' : 'CODE_MISMATCH';
+        throw error;
+      }
+    } catch (e) {
+      if (HUMEDS_BIND_ON_REGISTER && partnerRegistered === false && HUMEDS_SIGNUP_ON_REGISTER) {
+        logger.warn('submitRegister: local sms verify failed but continue for humeds signup', {
+          mobile: normalizedMobile,
+          error: e.message,
+        });
+      } else {
+        throw e;
+      }
     }
   }
 
@@ -273,39 +315,108 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
   let humedsBindStatus = 'skipped';
   let humedsErrorCode = null;
   let humedsErrorMessage = null;
+  const registrationMode = computeRegistrationMode({
+    bindOnRegister: HUMEDS_BIND_ON_REGISTER,
+    partnerRegistered,
+  });
 
   if (HUMEDS_BIND_ON_REGISTER && password) {
-    logger.info('Humeds bind on register start', {
-      userId,
-      mobile: normalizedMobile,
-    });
+    if (partnerRegistered === false) {
+      if (HUMEDS_SIGNUP_ON_REGISTER) {
+        logger.info('Humeds signup on register start', { userId, mobile: normalizedMobile });
+        try {
+          await humedsApiClient.signup({
+            mobile: normalizedMobile,
+            password,
+            smscode: normalizedCode,
+          });
+          logger.info('Humeds signup on register success', { userId, mobile: normalizedMobile });
 
-    try {
-      await HumedsAccountService.ensureTokenForUser({
+          await HumedsAccountService.ensureTokenForUser({
+            userId,
+            mobile: normalizedMobile,
+            password,
+            loginMode: 'APP_SHARED_PASSWORD_REGISTER',
+          });
+
+          humedsBindStatus = 'success';
+          humedsErrorCode = null;
+          humedsErrorMessage = null;
+        } catch (e) {
+          humedsBindStatus = 'failed';
+          humedsErrorCode = e.code || 'HUMEDS_SIGNUP_FAILED';
+          humedsErrorMessage = e.message || 'Humeds signup failed';
+          logger.error('Humeds signup on register failed', {
+            userId,
+            mobile: normalizedMobile,
+            error: humedsErrorMessage,
+            code: humedsErrorCode,
+          });
+          if (HUMEDS_STRICT_REGISTER) {
+            throw e;
+          }
+        }
+      } else {
+        humedsBindStatus = 'failed';
+        humedsErrorCode = 'HUMEDS_USER_NOT_EXISTS';
+        humedsErrorMessage = 'Humeds 用户不存在（需走 Humeds 注册/验证码流程）';
+        logger.warn('Humeds bind on register skipped: user not exists', {
+          userId,
+          mobile: normalizedMobile,
+        });
+      }
+    } else {
+      logger.info('Humeds bind on register start', {
         userId,
         mobile: normalizedMobile,
-        password,
-        loginMode: 'APP_SHARED_PASSWORD_REGISTER',
-      });
-      logger.info('Humeds bind on register success', {
-        userId,
-        mobile: normalizedMobile,
-      });
-      humedsBindStatus = 'success';
-    } catch (err) {
-      logger.error('Humeds bind on register failed', {
-        userId,
-        mobile: normalizedMobile,
-        error: err.message,
-        code: err.code,
       });
 
-      humedsBindStatus = 'failed';
-      humedsErrorCode = err.code || null;
-      humedsErrorMessage = err.message || null;
+      try {
+        await HumedsAccountService.ensureTokenForUser({
+          userId,
+          mobile: normalizedMobile,
+          password,
+          loginMode: 'APP_SHARED_PASSWORD_REGISTER',
+        });
+        logger.info('Humeds bind on register success', {
+          userId,
+          mobile: normalizedMobile,
+        });
+        humedsBindStatus = 'success';
+        humedsErrorCode = null;
+        humedsErrorMessage = null;
+      } catch (err) {
+        const bizCodes = new Set([
+          'HUMEDS_LOGIN_FAILED',
+          'HUMEDS_SIGNUP_FAILED',
+          'HUMEDS_USER_NOT_EXISTS',
+          'HUMEDS_SMSCODE_FAILED',
+          'HUMEDS_USER_EXIST_FAILED',
+        ]);
+        const humedsErrCode = err.code || 'HUMEDS_LOGIN_FAILED';
+        const humedsErrMessage = err.message || 'Humeds login failed';
+        const logMeta = {
+          userId,
+          mobile: normalizedMobile,
+          error: humedsErrMessage,
+          code: humedsErrCode,
+        };
+        if (bizCodes.has(humedsErrCode)) {
+          logger.warn('Humeds bind on register failed(biz)', logMeta);
+        } else {
+          logger.error('Humeds bind on register failed(system)', {
+            ...logMeta,
+            stack: err?.stack,
+          });
+        }
 
-      if (HUMEDS_STRICT_REGISTER) {
-        throw err;
+        humedsBindStatus = 'failed';
+        humedsErrorCode = humedsErrCode;
+        humedsErrorMessage = humedsErrMessage;
+
+        if (HUMEDS_STRICT_REGISTER) {
+          throw err;
+        }
       }
     }
   }
@@ -313,6 +424,9 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
 
   return {
     userId,
+    partnerRegistered,
+    needSmsInput,
+    registrationMode,
     humedsBindStatus,
     humedsErrorCode,
     humedsErrorMessage,

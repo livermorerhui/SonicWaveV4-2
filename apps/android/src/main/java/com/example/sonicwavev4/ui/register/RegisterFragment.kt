@@ -216,9 +216,10 @@ class RegisterFragment : Fragment() {
                     } else {
                         binding.btnSendCode.text = "获取验证码"
                     }
-                    if (!state.flowHint.isNullOrBlank()) {
+                    val hint = state.flowHint?.trim().orEmpty()
+                    if (hint.isNotEmpty()) {
                         binding.tvRegisterFlowHint.visibility = View.VISIBLE
-                        binding.tvRegisterFlowHint.text = state.flowHint
+                        binding.tvRegisterFlowHint.text = hint
                     } else {
                         binding.tvRegisterFlowHint.visibility = View.GONE
                     }

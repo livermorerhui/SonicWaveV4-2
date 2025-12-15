@@ -15,12 +15,12 @@ interface MyBackendApiService {
     @POST("/api/register/send_code")
     suspend fun sendRegisterCode(
         @Body body: SendCodeRequest
-    ): RegisterSendCodeResponse
+    ): ApiResponse<RegisterSendCodeData>
 
     @POST("/api/register/submit")
     suspend fun submitRegister(
         @Body body: RegisterSubmitRequest
-    ): RegisterSubmitResponse
+    ): ApiResponse<RegisterSubmitData>
 
     @POST("/api/humeds/test/login")
     suspend fun humedsTestLogin(
@@ -73,30 +73,24 @@ data class RegisterSubmitRequest(
     val orgName: String?
 )
 
-data class RegisterSubmitData(
-    val userId: String?
-)
-
-data class RegisterSendCodeResponse(
-    val code: Int,
-    val msg: String?,
-    val data: Any?,
+data class RegisterSendCodeData(
+    val mobile: String?,
+    val accountType: String?,
     val selfRegistered: Boolean?,
     val selfBound: Boolean?,
     val partnerRegistered: Boolean?,
     val needSmsInput: Boolean?,
     val registrationMode: String?,
-    val mobile: String?,
-    val accountType: String?
 )
 
-data class RegisterSubmitResponse(
-    val code: Int,
-    val msg: String?,
-    val data: RegisterSubmitData?,
+data class RegisterSubmitData(
+    val userId: String?,
+    val partnerRegistered: Boolean?,
+    val needSmsInput: Boolean?,
+    val registrationMode: String?,
     val humedsBindStatus: String?,
     val humedsErrorCode: String?,
-    val humedsErrorMessage: String?
+    val humedsErrorMessage: String?,
 )
 
 /*

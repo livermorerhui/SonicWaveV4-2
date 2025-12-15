@@ -2,17 +2,20 @@ package com.example.sonicwavev4.repository
 
 import com.example.sonicwavev4.network.MyBackendApiService
 import com.example.sonicwavev4.network.NetworkErrorParser
-import com.example.sonicwavev4.network.RegisterSendCodeResponse
+import com.example.sonicwavev4.network.RegisterSendCodeData
 import com.example.sonicwavev4.network.RegisterSubmitRequest
-import com.example.sonicwavev4.network.RegisterSubmitResponse
+import com.example.sonicwavev4.network.RegisterSubmitData
 import com.example.sonicwavev4.network.SendCodeRequest
 import java.io.IOException
 import retrofit2.HttpException
 
 sealed class RegisterResult {
-    data class Success(
-        val sendCodeStatus: SendCodeStatus? = null,
-        val submitStatus: SubmitStatus? = null,
+    data class SendCodeSuccess(
+        val resp: com.example.sonicwavev4.network.ApiResponse<RegisterSendCodeData>
+    ) : RegisterResult()
+
+    data class SubmitSuccess(
+        val resp: com.example.sonicwavev4.network.ApiResponse<RegisterSubmitData>
     ) : RegisterResult()
 
     data class BusinessError(val code: Int?, val message: String) : RegisterResult()
@@ -40,16 +43,9 @@ class RegisterRepository(
 
     suspend fun sendCode(mobile: String, accountType: String): RegisterResult {
         return try {
-            val resp: RegisterSendCodeResponse = api.sendRegisterCode(SendCodeRequest(mobile, accountType))
+            val resp = api.sendRegisterCode(SendCodeRequest(mobile, accountType))
             if (resp.code == 200) {
-                val status = SendCodeStatus(
-                    selfRegistered = resp.selfRegistered,
-                    selfBound = resp.selfBound,
-                    partnerRegistered = resp.partnerRegistered,
-                    needSmsInput = resp.needSmsInput,
-                    registrationMode = resp.registrationMode,
-                )
-                RegisterResult.Success(sendCodeStatus = status)
+                RegisterResult.SendCodeSuccess(resp)
             } else {
                 RegisterResult.BusinessError(resp.code, resp.msg ?: "发送验证码失败")
             }
@@ -76,7 +72,7 @@ class RegisterRepository(
         orgName: String?,
     ): RegisterResult {
         return try {
-            val resp: RegisterSubmitResponse = api.submitRegister(
+            val resp = api.submitRegister(
                 RegisterSubmitRequest(
                     mobile = mobile,
                     code = code,
@@ -87,13 +83,7 @@ class RegisterRepository(
                 ),
             )
             if (resp.code == 200) {
-                val status = SubmitStatus(
-                    userId = resp.data?.userId,
-                    humedsBindStatus = resp.humedsBindStatus,
-                    humedsErrorCode = resp.humedsErrorCode,
-                    humedsErrorMessage = resp.humedsErrorMessage,
-                )
-                RegisterResult.Success(submitStatus = status)
+                RegisterResult.SubmitSuccess(resp)
             } else {
                 RegisterResult.BusinessError(resp.code, resp.msg ?: "注册失败")
             }

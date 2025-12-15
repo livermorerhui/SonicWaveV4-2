@@ -17,6 +17,43 @@ function buildHumedsError(message, code, originalError) {
   return error;
 }
 
+function getHumedsResponse(err) {
+  return (
+    err?.originalError?.humedsResponse ||
+    err?.response?.data ||
+    err?.response ||
+    null
+  );
+}
+
+function isHumedsBizFailure(err) {
+  const r = getHumedsResponse(err);
+  const code = r?.code;
+  if (code === 201) return true;
+  if (typeof code === 'number' && code >= 200 && code < 500) {
+    return code !== 200;
+  }
+  return false;
+}
+
+function logHumedsError(action, err, ctx = {}) {
+  const r = getHumedsResponse(err);
+
+  const meta = {
+    action,
+    mobile: ctx.mobile,
+    errCode: err?.code,
+    error: err?.message,
+    response: r ? { code: r.code, msg: r.msg, data: r.data } : null,
+  };
+
+  if (isHumedsBizFailure(err)) {
+    logger.warn(`Humeds ${action} failed(biz)`, meta);
+  } else {
+    logger.error(`Humeds ${action} failed(system)`, { ...meta, stack: err?.stack });
+  }
+}
+
 async function login({ mobile, password, smscode, regionCode }) {
   try {
     if (!mobile) {
@@ -78,29 +115,7 @@ async function login({ mobile, password, smscode, regionCode }) {
       raw: data,
     };
   } catch (err) {
-    if (err.code === 'HUMEDS_LOGIN_FAILED') {
-      logger.error('Humeds login error', {
-        error: err.message,
-        stack: err.stack,
-        status: err.status || err.response?.status,
-        response:
-          err.originalError?.humedsResponse ||
-          err.originalError?.response?.data ||
-          err.response?.data ||
-          null,
-      });
-      throw err;
-    }
-
-    logger.error('Humeds login error', {
-      error: err.message,
-      stack: err.stack,
-      status: err.status || err.response?.status,
-      response:
-        err.response?.data ||
-        err.originalError?.humedsResponse ||
-        null,
-    });
+    logHumedsError('login', err, { mobile });
 
     const fallbackData =
       err.response?.data ||
@@ -116,6 +131,81 @@ async function login({ mobile, password, smscode, regionCode }) {
       response: fallbackData,
       originalError: err,
     });
+  }
+}
+
+async function signup({ mobile, password, smscode, regionCode }) {
+  try {
+    if (!mobile || !password || !smscode) {
+      throw buildHumedsError(
+        'mobile/password/smscode are required for Humeds signup',
+        'HUMEDS_SIGNUP_FAILED',
+      );
+    }
+
+    const form = new URLSearchParams();
+    form.append('mobile', mobile);
+    form.append('password', password);
+    form.append('smscode', smscode);
+
+    const region =
+      regionCode || humedsConfig.defaultRegionCode || process.env.HUMEDS_REGION_CODE || '86';
+    form.append('regionCode', region);
+
+    const res = await client.post('/api/signup', form.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+
+    const data = res.data || {};
+    const humedsCode = data.code;
+    const humedsMsg = data.msg || data.desc || (typeof data.data === 'string' ? data.data : '');
+
+    if (humedsCode !== 200) {
+      const message = humedsMsg
+        ? `Humeds signup failed: ${humedsMsg} (code=${humedsCode})`
+        : `Humeds signup failed with code ${humedsCode}`;
+      throw buildHumedsError(message, 'HUMEDS_SIGNUP_FAILED', { humedsResponse: data });
+    }
+
+    return { raw: data };
+  } catch (err) {
+    logHumedsError('signup', err, { mobile });
+    throw err;
+  }
+}
+
+async function sendSmsCode({ mobile, regionCode }) {
+  try {
+    if (!mobile) {
+      throw buildHumedsError('mobile is required for Humeds smscode', 'HUMEDS_SMSCODE_FAILED');
+    }
+
+    const form = new URLSearchParams();
+    form.append('mobile', mobile);
+
+    const region = regionCode || humedsConfig.defaultRegionCode || process.env.HUMEDS_REGION_CODE || '86';
+    form.append('regionCode', region);
+
+    const res = await client.post('/api/smscode', form.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+
+    const data = res.data || {};
+    const humedsCode = data.code;
+    const humedsMsg = data.msg || data.desc || data.data || '';
+
+    if (humedsCode !== 200) {
+      const message = humedsMsg
+        ? `Humeds smscode failed: ${humedsMsg} (code=${humedsCode})`
+        : `Humeds smscode failed with code ${humedsCode}`;
+      throw buildHumedsError(message, 'HUMEDS_SMSCODE_FAILED', { humedsResponse: data });
+    }
+
+    return { raw: data };
+  } catch (err) {
+    // 不在这里吞异常；上层（registration.service）会做 best-effort mirror
+    logHumedsError('smscode', err, { mobile });
+    throw err;
   }
 }
 
@@ -165,26 +255,7 @@ async function userExist({ mobile, regionCode }) {
 
     throw buildHumedsError(message, 'HUMEDS_USER_EXIST_FAILED', { humedsResponse: data });
   } catch (err) {
-    if (err.code === 'HUMEDS_USER_EXIST_FAILED') {
-      logger.error('Humeds userExist error', {
-        error: err.message,
-        stack: err.stack,
-        status: err.status || err.response?.status,
-        response:
-          err.originalError?.humedsResponse ||
-          err.originalError?.response?.data ||
-          err.response?.data ||
-          null,
-      });
-      throw err;
-    }
-
-    logger.error('Humeds userExist error', {
-      error: err.message,
-      stack: err.stack,
-      response: err.response?.data,
-      status: err.response?.status,
-    });
+    logHumedsError('userExist', err, { mobile });
 
     const message = err.response?.data?.msg || err.message || 'Humeds user existence check failed';
     const wrapped = buildHumedsError(message, 'HUMEDS_USER_EXIST_FAILED', err);
@@ -195,4 +266,6 @@ async function userExist({ mobile, regionCode }) {
 module.exports = {
   login,
   userExist,
+  signup,
+  sendSmsCode,
 };
