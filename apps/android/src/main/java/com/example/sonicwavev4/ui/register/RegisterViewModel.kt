@@ -56,11 +56,32 @@ class RegisterViewModel(
         _uiState.update { it.copy(errorMessage = null, statusMessage = null) }
     }
 
+    fun onMobileChanged() {
+        sendCodeCooldownJob?.cancel()
+        _uiState.update {
+            it.copy(
+                // 清理 send_code 相关状态
+                codeSent = false,
+                needSmsInput = true,
+                sendCodeCooldownSeconds = 0,
+                registrationMode = null,
+                partnerRegistered = null,
+                selfRegistered = null,
+                selfBound = null,
+                flowHint = null,
+                // 同时清理提示，避免频繁 toast
+                errorMessage = null,
+                statusMessage = null,
+            )
+        }
+    }
+
     private fun buildFlowHintForSendCode(
         registrationMode: String?,
         partnerRegistered: Boolean?,
         needSmsInput: Boolean,
     ): String? {
+        if (!needSmsInput) return null
         // 统一提示：本应用验证码与 Humeds 验证码是两套体系
         val smsLine = if (needSmsInput) {
             "验证码用于本应用注册（不等同于 Humeds 验证码）。"

@@ -61,7 +61,7 @@ async function sendRegisterCode(req, res) {
     }
 
     const status = await registrationService.sendRegisterCode({ mobile, accountType });
-    const msg = status.needSmsInput ? '验证码已发送' : '无需验证码';
+    const msg = status.needSmsInput ? '验证码已发送' : 'Humeds 已注册，无需验证码';
     return res.json(
       buildApiResponse(200, msg, {
         mobile: status.mobile,
@@ -83,6 +83,14 @@ async function sendRegisterCode(req, res) {
 
     if (err.code === 'INVALID_INPUT') {
       return res.status(400).json(buildApiResponse(4001, err.message || '参数错误', null));
+    }
+
+    if (err.code === 'HUMEDS_SMSCODE_FAILED') {
+      return res.status(500).json(buildApiResponse(5006, '验证码发送失败，请稍后重试', null));
+    }
+
+    if (err.code === 'HUMEDS_USER_EXIST_FAILED') {
+      return res.status(500).json(buildApiResponse(5008, 'Humeds 状态查询失败，请稍后重试', null));
     }
 
     if (err.code === 'MOBILE_EXISTS') {
@@ -131,6 +139,18 @@ async function submitRegister(req, res) {
 
     if (err.code === 'INVALID_INPUT') {
       return res.status(400).json(buildApiResponse(4001, err.message || '参数错误', null));
+    }
+
+    if (err.code === 'HUMEDS_SMSCODE_FAILED') {
+      return res.status(500).json(buildApiResponse(5006, '验证码发送失败，请稍后重试', null));
+    }
+
+    if (err.code === 'HUMEDS_SIGNUP_FAILED') {
+      return res.status(500).json(buildApiResponse(5007, 'Humeds 注册失败，请稍后重试', null));
+    }
+
+    if (err.code === 'HUMEDS_USER_EXIST_FAILED') {
+      return res.status(500).json(buildApiResponse(5008, 'Humeds 状态查询失败，请稍后重试', null));
     }
 
     if (err.code === 'CODE_EXPIRED' || err.code === 'CODE_MISMATCH') {

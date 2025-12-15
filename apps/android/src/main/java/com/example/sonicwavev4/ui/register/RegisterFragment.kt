@@ -1,6 +1,7 @@
 package com.example.sonicwavev4.ui.register
 
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
 import android.text.InputType
 import android.os.Build
@@ -8,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import android.widget.NumberPicker
 import android.view.Gravity
@@ -16,6 +18,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AlertDialog
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -38,6 +41,8 @@ class RegisterFragment : Fragment() {
     private var hasNavigatedBack = false
     private var humedsBindDialog: AlertDialog? = null
     private var humedsPwdInput: EditText? = null
+    private var lastCodeSent: Boolean = false
+    private var lastNeedSmsInput: Boolean = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,6 +56,9 @@ class RegisterFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupAccountTypeSwitch()
         setupDatePicker()
+        binding.etMobile.doAfterTextChanged {
+            registerViewModel.onMobileChanged()
+        }
         setupSendCode()
         setupRegister()
         setupLoginLink()
@@ -208,14 +216,16 @@ class RegisterFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 registerViewModel.uiState.collectLatest { state ->
                     val sec = state.sendCodeCooldownSeconds
-                    binding.btnSendCode.isEnabled = !state.isLoading && sec == 0
-                    binding.btnRegister.isEnabled = !state.isLoading
-                    binding.layoutCodeContainer.visibility = if (state.needSmsInput) View.VISIBLE else View.GONE
-                    if (sec > 0) {
-                        binding.btnSendCode.text = "重新发送(${sec}s)"
+                    val needSms = state.needSmsInput
+                    binding.layoutCodeContainer.visibility = View.VISIBLE
+                    if (!needSms && state.codeSent) {
+                        binding.btnSendCode.isEnabled = false
+                        binding.btnSendCode.text = "已验证"
                     } else {
-                        binding.btnSendCode.text = "获取验证码"
+                        binding.btnSendCode.isEnabled = !state.isLoading && sec == 0
+                        binding.btnSendCode.text = if (sec > 0) "重新发送(${sec}s)" else "获取验证码"
                     }
+                    binding.btnRegister.isEnabled = !state.isLoading
                     val hint = state.flowHint?.trim().orEmpty()
                     if (hint.isNotEmpty()) {
                         binding.tvRegisterFlowHint.visibility = View.VISIBLE
@@ -223,6 +233,38 @@ class RegisterFragment : Fragment() {
                     } else {
                         binding.tvRegisterFlowHint.visibility = View.GONE
                     }
+
+                    if (!needSms && state.codeSent) {
+                        binding.etCode.isEnabled = false
+                        binding.etCode.isFocusable = false
+                        binding.etCode.isFocusableInTouchMode = false
+                        binding.etCode.isCursorVisible = false
+                        binding.etCode.hint = "无需验证码"
+                        binding.etCode.setText("")
+                        val d = ContextCompat.getDrawable(requireContext(), R.drawable.ic_check_circle_green)
+                        binding.etCode.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null)
+                        binding.etCode.compoundDrawablePadding = (6 * resources.displayMetrics.density).toInt()
+                        binding.etCode.setBackgroundResource(R.drawable.bg_edit_text_disabled)
+                    } else {
+                        binding.etCode.isEnabled = true
+                        binding.etCode.isFocusable = true
+                        binding.etCode.isFocusableInTouchMode = true
+                        binding.etCode.isCursorVisible = true
+                        binding.etCode.hint = "请输入验证码"
+                        binding.etCode.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
+                        binding.etCode.setBackgroundResource(android.R.drawable.edit_text)
+                    }
+
+                    val justSent = state.codeSent && !lastCodeSent
+                    if (justSent) {
+                        if (needSms) {
+                            focusCodeInput()
+                        } else {
+                            focusPasswordInput()
+                        }
+                    }
+                    lastCodeSent = state.codeSent
+                    lastNeedSmsInput = state.needSmsInput
 
                     state.statusMessage?.let {
                         Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
@@ -369,5 +411,25 @@ class RegisterFragment : Fragment() {
         if (hasNavigatedBack) return
         hasNavigatedBack = true
         navigateBackToLogin()
+    }
+
+    private fun focusCodeInput() {
+        binding.etCode.post {
+            binding.etCode.requestFocus()
+            val len = binding.etCode.text?.length ?: 0
+            binding.etCode.setSelection(len)
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(binding.etCode, InputMethodManager.SHOW_IMPLICIT)
+        }
+    }
+
+    private fun focusPasswordInput() {
+        binding.etPassword.post {
+            binding.etPassword.requestFocus()
+            val len = binding.etPassword.text?.length ?: 0
+            binding.etPassword.setSelection(len)
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(binding.etPassword, InputMethodManager.SHOW_IMPLICIT)
+        }
     }
 }

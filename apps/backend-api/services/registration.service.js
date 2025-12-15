@@ -13,6 +13,7 @@ const HUMEDS_STRICT_REGISTER =
 
 const REGISTER_SMS_REQUIRED =
   (process.env.REGISTER_SMS_REQUIRED || '').toLowerCase() === 'true';
+const REGISTER_SMS_PROVIDER = (process.env.REGISTER_SMS_PROVIDER || 'local').toLowerCase();
 
 const HUMEDS_CHECK_USER_EXIST_ON_REGISTER =
   (process.env.HUMEDS_CHECK_USER_EXIST_ON_REGISTER || '').toLowerCase() === 'true';
@@ -21,6 +22,12 @@ const HUMEDS_SIGNUP_ON_REGISTER =
 
 const SALT_ROUNDS = 10;
 const ACCOUNT_TYPES = ['personal', 'org'];
+
+function computeNeedSmsInput({ registerSmsRequired, humedsBindOnRegister, partnerRegistered }) {
+  if (!registerSmsRequired) return false;
+  if (humedsBindOnRegister && partnerRegistered === true) return false;
+  return true;
+}
 
 function isValidBirthday(value) {
   if (typeof value !== 'string') return false;
@@ -107,6 +114,15 @@ function computeRegistrationMode({ bindOnRegister, partnerRegistered }) {
   return 'LOCAL_AND_BIND_HUMEDS_UNKNOWN';
 }
 
+function computeNeedSmsInput({ smsRequired, bindOnRegister, partnerRegistered }) {
+  if (!smsRequired) return false;
+
+  // 关键：Humeds 已存在账号 -> 不需要验证码（用于“已有 Humeds 账号”的注册场景）
+  if (bindOnRegister && partnerRegistered === true) return false;
+
+  return true;
+}
+
 async function sendRegisterCode({ mobile, accountType }) {
   const normalizedMobile = typeof mobile === 'string' ? mobile.trim() : '';
   if (!normalizedMobile) {
@@ -142,7 +158,7 @@ async function sendRegisterCode({ mobile, accountType }) {
   }
 
   let partnerRegistered = null;
-  if (HUMEDS_BIND_ON_REGISTER) {
+  if (HUMEDS_CHECK_USER_EXIST_ON_REGISTER || HUMEDS_BIND_ON_REGISTER) {
     try {
       const existRes = await humedsApiClient.userExist({ mobile: normalizedMobile });
       if (typeof existRes?.parsedExist === 'boolean') {
@@ -167,22 +183,31 @@ async function sendRegisterCode({ mobile, accountType }) {
     }
   }
 
-  const needSmsInput = !!REGISTER_SMS_REQUIRED;
-  if (needSmsInput) {
-    await smsCodeService.sendCode(normalizedMobile, 'register');
+  const needSmsInput = computeNeedSmsInput({
+    smsRequired: REGISTER_SMS_REQUIRED,
+    bindOnRegister: HUMEDS_BIND_ON_REGISTER,
+    partnerRegistered,
+  });
+
+  if (!needSmsInput) {
+    logger.info('sendRegisterCode: skip sms (humeds already registered)', { mobile: normalizedMobile });
   }
 
-  if (needSmsInput && process.env.HUMEDS_SMSCODE_MIRROR === 'true') {
-    try {
-      await humedsApiClient.sendSmsCode({ mobile: normalizedMobile });
-      logger.info('sendRegisterCode: humeds smscode mirrored', { mobile: normalizedMobile });
-    } catch (e) {
-      logger.warn('sendRegisterCode: humeds smscode mirror failed', {
-        mobile: normalizedMobile,
-        error: e.message,
-        code: e.code || 'HUMEDS_SMSCODE_FAILED',
-      });
+  if (needSmsInput) {
+    if (REGISTER_SMS_PROVIDER === 'humeds') {
+      try {
+        await humedsApiClient.sendSmsCode({ mobile: normalizedMobile });
+        logger.info('sendRegisterCode: humeds smscode sent', { mobile: normalizedMobile });
+      } catch (e) {
+        const err = new Error('验证码发送失败（Humeds）');
+        err.code = 'HUMEDS_SMSCODE_FAILED';
+        throw err;
+      }
+    } else {
+      await smsCodeService.sendCode(normalizedMobile, 'register');
     }
+  } else {
+    logger.info('sendRegisterCode: humeds user exists, skip smscode', { mobile: normalizedMobile });
   }
 
   const registrationMode = computeRegistrationMode({
@@ -205,7 +230,8 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
   const normalizedMobile = typeof mobile === 'string' ? mobile.trim() : '';
   const normalizedCode = typeof code === 'string' ? code.trim() : '';
   let partnerRegistered = null;
-  const needSmsInput = !!REGISTER_SMS_REQUIRED;
+  let needSmsInput = true;
+  let humedsSignupDone = false;
 
   if (!normalizedMobile || !password || !accountType) {
     const error = new Error('手机号、密码和账号类型为必填项');
@@ -238,6 +264,12 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
     }
   }
 
+  needSmsInput = computeNeedSmsInput({
+    smsRequired: REGISTER_SMS_REQUIRED,
+    bindOnRegister: HUMEDS_BIND_ON_REGISTER,
+    partnerRegistered,
+  });
+
   if (accountType === 'personal') {
     const normalizedBirthday = typeof birthday === 'string' ? birthday.trim() : '';
     if (!normalizedBirthday || !isValidBirthday(normalizedBirthday)) {
@@ -258,28 +290,77 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
     orgName = normalizedOrgName;
   }
 
-  if (REGISTER_SMS_REQUIRED) {
+  if (needSmsInput) {
     if (!normalizedCode) {
       const error = new Error('验证码不能为空');
       error.code = 'INVALID_INPUT';
       throw error;
     }
 
-    try {
-      const verifyResult = await smsCodeService.verifyCode(normalizedMobile, 'register', normalizedCode);
-      if (!verifyResult.ok) {
-        const error = new Error(verifyResult.reason === 'EXPIRED' ? '验证码已过期' : '验证码错误');
-        error.code = verifyResult.reason === 'EXPIRED' ? 'CODE_EXPIRED' : 'CODE_MISMATCH';
-        throw error;
-      }
-    } catch (e) {
-      if (HUMEDS_BIND_ON_REGISTER && partnerRegistered === false && HUMEDS_SIGNUP_ON_REGISTER) {
-        logger.warn('submitRegister: local sms verify failed but continue for humeds signup', {
-          mobile: normalizedMobile,
-          error: e.message,
-        });
+    if (REGISTER_SMS_PROVIDER === 'humeds') {
+      if (partnerRegistered === true) {
+        try {
+          await humedsApiClient.login({ mobile: normalizedMobile, smscode: normalizedCode });
+        } catch (e) {
+          const msg = e?.message || '';
+          const codeToThrow =
+            msg.includes('过期') || msg.includes('超时')
+              ? 'CODE_EXPIRED'
+              : msg.includes('验证码') || msg.includes('短信')
+              ? 'CODE_MISMATCH'
+              : 'HUMEDS_SMSCODE_FAILED';
+          const err = new Error(msg || 'Humeds 验证码校验失败');
+          err.code = codeToThrow;
+          throw err;
+        }
+      } else if (partnerRegistered === false) {
+        if (HUMEDS_SIGNUP_ON_REGISTER) {
+          try {
+            await humedsApiClient.signup({
+              mobile: normalizedMobile,
+              password,
+              smscode: normalizedCode,
+            });
+            humedsSignupDone = true;
+          } catch (e) {
+            const msg = e?.message || '';
+            const codeToThrow =
+              msg.includes('过期') || msg.includes('超时')
+                ? 'CODE_EXPIRED'
+                : msg.includes('验证码') || msg.includes('短信')
+                ? 'CODE_MISMATCH'
+                : 'HUMEDS_SIGNUP_FAILED';
+            const err = new Error(msg || 'Humeds 注册失败');
+            err.code = codeToThrow;
+            throw err;
+          }
+        } else {
+          const err = new Error('Humeds 用户不存在');
+          err.code = 'HUMEDS_USER_NOT_EXISTS';
+          throw err;
+        }
       } else {
-        throw e;
+        const err = new Error('Humeds 状态未知，请稍后重试');
+        err.code = 'HUMEDS_USER_EXIST_FAILED';
+        throw err;
+      }
+    } else {
+      try {
+        const verifyResult = await smsCodeService.verifyCode(normalizedMobile, 'register', normalizedCode);
+        if (!verifyResult.ok) {
+          const error = new Error(verifyResult.reason === 'EXPIRED' ? '验证码已过期' : '验证码错误');
+          error.code = verifyResult.reason === 'EXPIRED' ? 'CODE_EXPIRED' : 'CODE_MISMATCH';
+          throw error;
+        }
+      } catch (e) {
+        if (HUMEDS_BIND_ON_REGISTER && partnerRegistered === false && HUMEDS_SIGNUP_ON_REGISTER) {
+          logger.warn('submitRegister: local sms verify failed but continue for humeds signup', {
+            mobile: normalizedMobile,
+            error: e.message,
+          });
+        } else {
+          throw e;
+        }
       }
     }
   }
@@ -323,37 +404,80 @@ async function submitRegister({ mobile, code, password, accountType, birthday, o
   if (HUMEDS_BIND_ON_REGISTER && password) {
     if (partnerRegistered === false) {
       if (HUMEDS_SIGNUP_ON_REGISTER) {
-        logger.info('Humeds signup on register start', { userId, mobile: normalizedMobile });
-        try {
-          await humedsApiClient.signup({
-            mobile: normalizedMobile,
-            password,
-            smscode: normalizedCode,
-          });
-          logger.info('Humeds signup on register success', { userId, mobile: normalizedMobile });
+        // 如果前面已完成 signup 校验，则跳过再次 signup
+        if (!humedsSignupDone) {
+          logger.info('Humeds signup on register start', { userId, mobile: normalizedMobile });
+          try {
+            await humedsApiClient.signup({
+              mobile: normalizedMobile,
+              password,
+              smscode: normalizedCode,
+            });
+            logger.info('Humeds signup on register success', { userId, mobile: normalizedMobile });
+            humedsSignupDone = true;
+          } catch (e) {
+            humedsBindStatus = 'failed';
+            humedsErrorCode = e.code || 'HUMEDS_SIGNUP_FAILED';
+            humedsErrorMessage = e.message || 'Humeds signup failed';
+            logger.error('Humeds signup on register failed', {
+              userId,
+              mobile: normalizedMobile,
+              error: humedsErrorMessage,
+              code: humedsErrorCode,
+            });
+            if (HUMEDS_STRICT_REGISTER) {
+              throw e;
+            }
+          }
+        }
 
-          await HumedsAccountService.ensureTokenForUser({
-            userId,
-            mobile: normalizedMobile,
-            password,
-            loginMode: 'APP_SHARED_PASSWORD_REGISTER',
-          });
+        if (humedsSignupDone) {
+          try {
+            await HumedsAccountService.ensureTokenForUser({
+              userId,
+              mobile: normalizedMobile,
+              password,
+              loginMode: 'APP_SHARED_PASSWORD_REGISTER',
+            });
+            logger.info('Humeds bind on register success', {
+              userId,
+              mobile: normalizedMobile,
+            });
+            humedsBindStatus = 'success';
+            humedsErrorCode = null;
+            humedsErrorMessage = null;
+          } catch (err) {
+            const bizCodes = new Set([
+              'HUMEDS_LOGIN_FAILED',
+              'HUMEDS_SIGNUP_FAILED',
+              'HUMEDS_USER_NOT_EXISTS',
+              'HUMEDS_SMSCODE_FAILED',
+              'HUMEDS_USER_EXIST_FAILED',
+            ]);
+            const humedsErrCode = err.code || 'HUMEDS_LOGIN_FAILED';
+            const humedsErrMessage = err.message || 'Humeds login failed';
+            const logMeta = {
+              userId,
+              mobile: normalizedMobile,
+              error: humedsErrMessage,
+              code: humedsErrCode,
+            };
+            if (bizCodes.has(humedsErrCode)) {
+              logger.warn('Humeds bind on register failed(biz)', logMeta);
+            } else {
+              logger.error('Humeds bind on register failed(system)', {
+                ...logMeta,
+                stack: err?.stack,
+              });
+            }
 
-          humedsBindStatus = 'success';
-          humedsErrorCode = null;
-          humedsErrorMessage = null;
-        } catch (e) {
-          humedsBindStatus = 'failed';
-          humedsErrorCode = e.code || 'HUMEDS_SIGNUP_FAILED';
-          humedsErrorMessage = e.message || 'Humeds signup failed';
-          logger.error('Humeds signup on register failed', {
-            userId,
-            mobile: normalizedMobile,
-            error: humedsErrorMessage,
-            code: humedsErrorCode,
-          });
-          if (HUMEDS_STRICT_REGISTER) {
-            throw e;
+            humedsBindStatus = 'failed';
+            humedsErrorCode = humedsErrCode;
+            humedsErrorMessage = humedsErrMessage;
+
+            if (HUMEDS_STRICT_REGISTER) {
+              throw err;
+            }
           }
         }
       } else {
