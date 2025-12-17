@@ -31,4 +31,13 @@
         android:layout_height="32dp"
         android:paddingStart="8dp"
         android:contentDescription="@null" />
+
+    <ImageView
+        android:id="@+id/ivDeleteFromPlaylist"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:paddingStart="8dp"
+        android:contentDescription="@null"
+        android:src="@android:drawable/ic_menu_delete"
+        android:visibility="gone" />
 </LinearLayout>

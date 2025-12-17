@@ -265,6 +265,30 @@ class MusicDialogViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    suspend fun removeSongRowFromPlaylist(playlistId: String, row: SongRowUi) {
+        val targetUriString = row.downloadedLocalUriString ?: row.playUriString
+        val musicItem = MusicItem(
+            title = row.title,
+            artist = row.artist,
+            uri = Uri.parse(targetUriString),
+            isDownloaded = row.isDownloaded
+        )
+
+        val updatedPlaylists = withContext(Dispatchers.IO) {
+            playlistRepository.removeTrackFromPlaylist(playlistId, musicItem)
+        }
+
+        _uiState.update { state ->
+            val updatedState = state.copy(
+                playlists = updatedPlaylists,
+                selectedSection = MusicSection.MY_LIST,
+                selectedPlaylistId = playlistId,
+                myListExpanded = true
+            )
+            updatedState.copy(songs = computeSongs(updatedState))
+        }
+    }
+
     private fun refreshCloudTracks(categoryId: Long?) {
         viewModelScope.launch {
             _uiState.update { it.copy(cloudLoading = true, cloudError = null) }

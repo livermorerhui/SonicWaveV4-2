@@ -86,7 +86,8 @@ class MusicDialogFragment : DialogFragment() {
         songAdapter = SongListAdapter(
             onSongClick = { row -> handleSongClick(row) },
             onDownloadClick = { row -> handleDownloadClick(row) },
-            onSongLongPress = { row -> handleSongLongPress(row) }
+            onSongLongPress = { row -> handleSongLongPress(row) },
+            onDeleteClick = { row -> handleSongDelete(row) }
         )
 
         rvCloudCategories.layoutManager = LinearLayoutManager(requireContext())
@@ -184,6 +185,8 @@ class MusicDialogFragment : DialogFragment() {
                         }
                         playlistAdapter.isActive = state.selectedSection == MusicSection.MY_LIST
                         playlistAdapter.selectedPlaylistId = state.selectedPlaylistId
+                        songAdapter.isMyListMode = state.selectedSection == MusicSection.MY_LIST &&
+                            state.selectedPlaylistId != null
 
                         if (lastSongs != state.songs) {
                             songAdapter.submitList(state.songs)
@@ -291,6 +294,18 @@ class MusicDialogFragment : DialogFragment() {
             dialogViewModel.addSongRowToPlaylist(playlistId, row)
             withContext(Dispatchers.Main) {
                 Toast.makeText(requireContext(), "已添加到歌单：$playlistName", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun handleSongDelete(row: SongRowUi) {
+        val state = dialogViewModel.uiState.value
+        val playlistId = state.selectedPlaylistId ?: return
+        val playlistName = state.playlists.firstOrNull { it.id == playlistId }?.name ?: return
+        viewLifecycleOwner.lifecycleScope.launch {
+            dialogViewModel.removeSongRowFromPlaylist(playlistId, row)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(requireContext(), "已从歌单移除：$playlistName", Toast.LENGTH_SHORT).show()
             }
         }
     }

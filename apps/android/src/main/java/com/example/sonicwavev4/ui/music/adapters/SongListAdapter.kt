@@ -1,13 +1,9 @@
 package com.example.sonicwavev4.ui.music.adapters
 
 import android.content.ClipData
-import android.animation.AnimatorListenerAdapter
-import android.animation.ValueAnimator
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.PixelFormat
-import android.graphics.drawable.Drawable
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -36,7 +32,8 @@ data class DragPayload(
 class SongListAdapter(
     private val onSongClick: (SongRowUi) -> Unit,
     private val onDownloadClick: (SongRowUi) -> Unit,
-    private val onSongLongPress: (SongRowUi) -> Unit
+    private val onSongLongPress: (SongRowUi) -> Unit,
+    private val onDeleteClick: (SongRowUi) -> Unit
 ) : ListAdapter<SongRowUi, SongListAdapter.SongViewHolder>(DiffCallback) {
 
     var currentPlayingUriString: String? = null
@@ -44,28 +41,36 @@ class SongListAdapter(
             field = value
             notifyDataSetChanged()
         }
+    var isMyListMode: Boolean = false
+        set(value) {
+            if (field == value) return
+            field = value
+            notifyDataSetChanged()
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_song, parent, false)
-        return SongViewHolder(view, onSongClick, onDownloadClick, onSongLongPress)
+        return SongViewHolder(view, onSongClick, onDownloadClick, onSongLongPress, onDeleteClick)
     }
 
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
         val item = getItem(position)
         val isPlaying = item.playUriString == currentPlayingUriString
-        holder.bind(item, isPlaying)
+        holder.bind(item, isPlaying, isMyListMode)
     }
 
     class SongViewHolder(
         itemView: View,
         private val onSongClick: (SongRowUi) -> Unit,
         private val onDownloadClick: (SongRowUi) -> Unit,
-        private val onSongLongPress: (SongRowUi) -> Unit
+        private val onSongLongPress: (SongRowUi) -> Unit,
+        private val onDeleteClick: (SongRowUi) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val title: TextView = itemView.findViewById(R.id.tvSongTitle)
         private val downloadIcon: ImageView = itemView.findViewById(R.id.ivDownloadStatus)
+        private val deleteIcon: ImageView = itemView.findViewById(R.id.ivDeleteFromPlaylist)
 
         private val downloadedColor: Int = title.context.getColor(R.color.black)
         private val pendingDownloadColor: Int = title.context.getColor(R.color.nav_item_inactive)
@@ -87,11 +92,12 @@ class SongListAdapter(
                     longPressArmed = true
                     downX = e.x
                     downY = e.y
+                    blinkItem(itemView)
                 }
             }
         )
 
-        fun bind(item: SongRowUi, playing: Boolean) {
+        fun bind(item: SongRowUi, playing: Boolean, showDelete: Boolean) {
             title.text = item.title
 
             val baseColor = if (item.isDownloaded || !item.isRemote) downloadedColor else pendingDownloadColor
@@ -115,6 +121,13 @@ class SongListAdapter(
                 downloadIcon.setOnClickListener(null)
             }
 
+            deleteIcon.visibility = if (showDelete) View.VISIBLE else View.GONE
+            deleteIcon.setOnClickListener {
+                if (showDelete) {
+                    onDeleteClick(item)
+                }
+            }
+
             itemView.setOnClickListener { onSongClick(item) }
             itemView.setOnTouchListener { v, event ->
                 gestureDetector.onTouchEvent(event)
@@ -132,7 +145,7 @@ class SongListAdapter(
                             val dx = event.x - downX
                             val dy = event.y - downY
                             if (kotlin.math.hypot(dx.toDouble(), dy.toDouble()) > touchSlop) {
-                                dragStarted = startDragIfAllowed(v, item, downX, downY)
+                                dragStarted = startDragIfAllowed(v, item)
                                 if (!dragStarted) {
                                     longPressArmed = false
                                 }
@@ -162,7 +175,7 @@ class SongListAdapter(
             }
         }
 
-        private fun startDragIfAllowed(view: View, item: SongRowUi, touchX: Float, touchY: Float): Boolean {
+        private fun startDragIfAllowed(view: View, item: SongRowUi): Boolean {
             if (item.isRemote && !item.isDownloaded) {
                 Toast.makeText(view.context, "请先下载后再添加到歌单", Toast.LENGTH_SHORT).show()
                 return false
@@ -177,8 +190,7 @@ class SongListAdapter(
                 downloadedLocalUriString = item.downloadedLocalUriString
             )
             val clip = ClipData.newPlainText("song", payload.playableUriString)
-            val shadow = DotDragShadowBuilder(view)
-            showDotPulse(view, touchX, touchY)
+            val shadow = CircleOutlineShadowBuilder(view)
             val success = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                 view.startDragAndDrop(clip, shadow, payload, 0)
             } else {
@@ -188,32 +200,45 @@ class SongListAdapter(
             return success
         }
 
-        private fun showDotPulse(view: View, centerX: Float, centerY: Float) {
-            val drawable = DotPulseDrawable(centerX, centerY)
-            view.overlay.add(drawable)
-            val animator = ValueAnimator.ofFloat(18f, 6f)
-            animator.duration = 140
-            animator.addUpdateListener {
-                drawable.radius = it.animatedValue as Float
-                drawable.invalidateSelf()
-            }
-            animator.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: android.animation.Animator) {
-                    view.overlay.remove(drawable)
+        private fun blinkItem(view: View) {
+            view.animate().cancel()
+            view.alpha = 1f
+            view.animate()
+                .alpha(0.4f)
+                .setDuration(70)
+                .withEndAction {
+                    view.animate()
+                        .alpha(1f)
+                        .setDuration(70)
+                        .withEndAction {
+                            view.animate()
+                                .alpha(0.4f)
+                                .setDuration(70)
+                                .withEndAction {
+                                    view.animate()
+                                        .alpha(1f)
+                                        .setDuration(70)
+                                        .start()
+                                }
+                                .start()
+                        }
+                        .start()
                 }
-            })
-            animator.start()
+                .start()
         }
     }
 
-    private class DotDragShadowBuilder(view: View) : View.DragShadowBuilder(view) {
+    private class CircleOutlineShadowBuilder(view: View) : View.DragShadowBuilder(view) {
+        private val strokeWidth = 3f
+        private val radius = 16f
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#CC000000")
+            style = Paint.Style.STROKE
+            this.strokeWidth = this@CircleOutlineShadowBuilder.strokeWidth
         }
-        private val radius = 12f
 
         override fun onProvideShadowMetrics(outShadowSize: android.graphics.Point, outShadowTouchPoint: android.graphics.Point) {
-            val size = (radius * 2).toInt()
+            val size = (radius * 2 + strokeWidth * 2).toInt()
             outShadowSize.set(size, size)
             outShadowTouchPoint.set(size / 2, size / 2)
         }
@@ -221,30 +246,6 @@ class SongListAdapter(
         override fun onDrawShadow(canvas: Canvas) {
             canvas.drawCircle(radius, radius, radius, paint)
         }
-    }
-
-    private class DotPulseDrawable(
-        private val centerX: Float,
-        private val centerY: Float
-    ) : Drawable() {
-        private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#99000000")
-        }
-        var radius: Float = 18f
-
-        override fun draw(canvas: Canvas) {
-            canvas.drawCircle(centerX, centerY, radius, paint)
-        }
-
-        override fun setAlpha(alpha: Int) {
-            paint.alpha = alpha
-        }
-
-        override fun setColorFilter(colorFilter: android.graphics.ColorFilter?) {
-            paint.colorFilter = colorFilter
-        }
-
-        override fun getOpacity(): Int = PixelFormat.TRANSLUCENT
     }
 
     private object DiffCallback : DiffUtil.ItemCallback<SongRowUi>() {
