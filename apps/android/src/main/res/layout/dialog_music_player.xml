@@ -25,6 +25,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:clipToPadding="false"
+            android:clipChildren="false"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="8dp"
@@ -46,12 +48,27 @@
                 android:paddingBottom="4dp" />
 
             <!-- Cloud categories -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvCloudCategories"
+            <LinearLayout
+                android:id="@+id/llCloudChildren"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:paddingTop="4dp"
-                android:paddingBottom="4dp" />
+                android:paddingBottom="4dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCloudCategories"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never" />
+
+                <View
+                    android:id="@+id/viewCloudSpacer"
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:alpha="0" />
+            </LinearLayout>
         </LinearLayout>
 
         <TextView
@@ -76,6 +93,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:clipToPadding="false"
+            android:clipChildren="false"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="8dp"
@@ -137,7 +156,9 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvMyPlaylists"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never" />
             </LinearLayout>
 
         </LinearLayout>
