@@ -5,11 +5,26 @@ import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.sonicwavev4.MusicItem
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+data class MiniPlayerUiState(
+    val title: String,
+    val isPlaying: Boolean,
+    val positionMs: Int,
+    val durationMs: Int,
+    val hasPlaylist: Boolean
+) {
+    val remainingMs: Int get() = (durationMs - positionMs).coerceAtLeast(0)
+}
 
 class MusicPlayerViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -31,6 +46,8 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     private val _duration = MutableStateFlow(0)
     val duration: StateFlow<Int> = _duration.asStateFlow()
 
+    val miniPlayerUiState: StateFlow<MiniPlayerUiState>
+
     private val handler = Handler(Looper.getMainLooper())
     private val progressRunnable = object : Runnable {
         override fun run() {
@@ -44,6 +61,36 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private var mediaPlayer: MediaPlayer? = null
+
+    init {
+        val initial = MiniPlayerUiState(
+            title = "",
+            isPlaying = false,
+            positionMs = 0,
+            durationMs = 0,
+            hasPlaylist = false
+        )
+
+        miniPlayerUiState = combine(
+            currentTrack,
+            isPlaying,
+            position,
+            duration,
+            playlist
+        ) { track, playing, pos, dur, list ->
+            val safeDur = dur.coerceAtLeast(0)
+            val safePos = if (safeDur > 0) pos.coerceIn(0, safeDur) else 0
+            MiniPlayerUiState(
+                title = track?.title?.trim().orEmpty(),
+                isPlaying = playing,
+                positionMs = safePos,
+                durationMs = safeDur,
+                hasPlaylist = list.isNotEmpty()
+            )
+        }
+            .distinctUntilChanged()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), initial)
+    }
 
     fun setPlaylist(list: List<MusicItem>) {
         _playlist.value = list

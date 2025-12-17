@@ -92,6 +92,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private var playingAnimView: ImageView? = null
     private var playbackSeekBar: SeekBar? = null
     private var playbackTimeText: TextView? = null
+    private var playbackTitleText: TextView? = null
     private lateinit var musicAdapter: MusicAdapter // 【修改点 1】Adapter类型将在后面定义为ListAdapter
     private lateinit var musicDownloader: MusicDownloader
     private lateinit var downloadedMusicRepository: DownloadedMusicRepository
@@ -102,6 +103,8 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private val tonearmPivotXRatio = 0.5f  //旋转中心横坐标，百分比
     private val tonearmPivotYRatio = 0.29f  //旋转中心纵坐标，百分比
     private var isUserSeeking = false
+    private var lastRenderedPlaying: Boolean? = null
+    private var lastRenderedTitle: String? = null
     private var forceExitDialog: AlertDialog? = null
     private val navButtonViews = mutableMapOf<Int, Pair<ImageButton, TextView>>()
     private var customPresetItemView: View? = null
@@ -318,34 +321,8 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    musicViewModel.isPlaying.collect { playing ->
-                        playPauseButton?.setImageResource(
-                            if (playing) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
-                        )
-                        if (playing) {
-                            spinVinyl()
-                            playingAnimView?.alpha = 1f
-                        } else {
-                            pauseVinyl()
-                            playingAnimView?.alpha = 0.5f
-                        }
-                    }
-                }
-                launch {
-                    musicViewModel.duration.collect { duration ->
-                        if (!isUserSeeking) {
-                            playbackSeekBar?.max = duration
-                            playbackSeekBar?.isEnabled = duration > 0
-                        }
-                    }
-                }
-                launch {
-                    musicViewModel.position.collect { position ->
-                        if (!isUserSeeking) {
-                            playbackSeekBar?.progress = position
-                        }
-                        val remaining = (musicViewModel.duration.value - position).coerceAtLeast(0)
-                        updateRemainingTime(remaining)
+                    musicViewModel.miniPlayerUiState.collect { state ->
+                        renderMiniMusicBar(state)
                     }
                 }
                 launch {
@@ -353,14 +330,51 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
                         musicAdapter.setSelectedPosition(if (index != -1) index else RecyclerView.NO_POSITION)
                     }
                 }
-                launch {
-                    musicViewModel.playlist.collect { tracks ->
-                        if (tracks.isEmpty()) {
-                            resetPlaybackUi()
-                        }
-                    }
-                }
             }
+        }
+    }
+
+    private fun renderMiniMusicBar(state: com.example.sonicwavev4.ui.music.MiniPlayerUiState) {
+        if (!state.hasPlaylist) {
+            resetPlaybackUi()
+            playPauseButton?.setImageResource(R.drawable.ic_play_24)
+            playbackTitleText?.text = getString(R.string.now_playing_placeholder)
+            lastRenderedPlaying = false
+            lastRenderedTitle = ""
+            return
+        }
+
+        val title = state.title
+        val displayTitle = if (title.isNotBlank()) title else getString(R.string.now_playing_placeholder)
+        if (lastRenderedTitle != displayTitle) {
+            playbackTitleText?.text = displayTitle
+            lastRenderedTitle = displayTitle
+        }
+
+        if (lastRenderedPlaying != state.isPlaying) {
+            playPauseButton?.setImageResource(
+                if (state.isPlaying) R.drawable.ic_pause_24 else R.drawable.ic_play_24
+            )
+            if (state.isPlaying) {
+                spinVinyl()
+                playingAnimView?.alpha = 1f
+            } else {
+                pauseVinyl()
+                playingAnimView?.alpha = 0.5f
+            }
+            lastRenderedPlaying = state.isPlaying
+        }
+
+        if (!isUserSeeking) {
+            playbackSeekBar?.max = state.durationMs
+            playbackSeekBar?.isEnabled = state.durationMs > 0
+            playbackSeekBar?.progress = state.positionMs
+        }
+
+        if (state.durationMs > 0) {
+            updateRemainingTime(state.remainingMs)
+        } else {
+            playbackTimeText?.text = getString(R.string.remaining_time_format_placeholder)
         }
     }
 
@@ -390,6 +404,8 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         playingAnimView = area.findViewById(R.id.imgPlayingAnim)
         playbackSeekBar = area.findViewById(R.id.seekBarMusic)
         playbackTimeText = area.findViewById(R.id.tvRemainingTime)
+        playbackTitleText = area.findViewById(R.id.tvNowPlayingTitle)
+        playbackTitleText?.text = getString(R.string.now_playing_placeholder)
 
         tonearmView?.apply {
             rotation = tonearmRestRotation
@@ -817,6 +833,8 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             isEnabled = false
         }
         playbackTimeText?.text = getString(R.string.remaining_time_format_placeholder)
+        playbackTitleText?.text = getString(R.string.now_playing_placeholder)
+        lastRenderedTitle = getString(R.string.now_playing_placeholder)
         playingAnimView?.alpha = 0.5f
     }
 
@@ -845,6 +863,9 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
         tonearmView = null
         playbackSeekBar = null
         playbackTimeText = null
+        playbackTitleText = null
+        lastRenderedPlaying = null
+        lastRenderedTitle = null
     }
 
     override fun onSupportNavigateUp(): Boolean {

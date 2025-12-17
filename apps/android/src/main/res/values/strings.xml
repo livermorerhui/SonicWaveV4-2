@@ -35,6 +35,7 @@
     <string name="cd_tonearm">唱臂</string>
     <string name="remaining_time_format">%s</string>
     <string name="remaining_time_format_placeholder">00:00</string>
+    <string name="now_playing_placeholder">未播放</string>
     <string name="humeds_copy_all_to_clipboard">复制全部到剪贴板</string>
     <string name="offline_mode_button_label">离线模式</string>
     <string name="force_exit_dialog_title">离线模式即将退出</string>
