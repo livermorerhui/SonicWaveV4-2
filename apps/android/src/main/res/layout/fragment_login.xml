@@ -42,7 +42,6 @@
         android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        app:endIconMode="password_toggle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/usernameTextInputLayout">
@@ -55,6 +54,16 @@
             android:inputType="textPassword" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <CheckBox
+        android:id="@+id/rememberPasswordCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="记住账号和密码"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/passwordTextInputLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
         android:id="@+id/loginButton"
@@ -69,7 +78,7 @@
         android:textColor="@color/login_primary_button_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/passwordTextInputLayout" />
+        app:layout_constraintTop_toBottomOf="@id/rememberPasswordCheckBox" />
 
     <Button
         android:id="@+id/offlineModeButton"

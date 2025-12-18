@@ -18,10 +18,6 @@
 
         <!-- Disable global button tint so per-view background shows exactly as defined -->
         <item name="android:buttonStyle">@style/ButtonNoTint</item>
-        <item name="colorButtonNormal">@android:color/transparent</item>
-        <item name="colorControlHighlight">@android:color/transparent</item>
-        <item name="colorControlActivated">@android:color/transparent</item>
-        <item name="colorControlNormal">@android:color/transparent</item>
 
     </style>
 

@@ -1,6 +1,7 @@
 package com.example.sonicwavev4.ui.login
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sonicwavev4.core.account.AuthEvent
@@ -11,9 +12,12 @@ import com.example.sonicwavev4.core.account.AuthUiState
 import com.example.sonicwavev4.core.account.HumedsBindInfo
 import com.example.sonicwavev4.network.ErrorMessageResolver
 import com.example.sonicwavev4.repository.AuthRepository
+import com.example.sonicwavev4.utils.EncryptedLoginCredentialStore
 import com.example.sonicwavev4.utils.GlobalLogoutManager
+import com.example.sonicwavev4.utils.LoginCredentialStore
 import com.example.sonicwavev4.utils.LogoutReason
 import com.example.sonicwavev4.utils.OfflineCapabilityManager
+import com.example.sonicwavev4.utils.UnsupportedLoginCredentialStore
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -33,6 +37,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val _events = MutableSharedFlow<AuthEvent>(extraBufferCapacity = 8)
     val events: SharedFlow<AuthEvent> = _events.asSharedFlow()
 
+    private val _loginFormState = MutableStateFlow(LoginFormUiState())
+    val loginFormState: StateFlow<LoginFormUiState> = _loginFormState.asStateFlow()
+
+    private var credentialStore: LoginCredentialStore = UnsupportedLoginCredentialStore()
+
     init {
         observeOfflineCapability()
         observeGlobalLogout()
@@ -51,18 +60,146 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun performLogin(mobile: String, password: String) {
-        if (mobile.isBlank() || password.isBlank()) {
-            emitToast("请输入账号和密码")
+    fun ensureCredentialStoreInitialized(appContext: Context) {
+        credentialStore = EncryptedLoginCredentialStore(appContext.applicationContext)
+
+        val supported = credentialStore.isSupported()
+        val rememberedAccount = if (supported) credentialStore.loadRememberedAccount() else null
+
+        _loginFormState.update { cur ->
+            if (!supported || rememberedAccount.isNullOrBlank()) {
+                cur.copy(
+                    rememberSupported = supported,
+                    isRememberChecked = false,
+                    rememberedAccount = null,
+                    passwordSource = PasswordSource.INPUT,
+                    isStoredAccountMatched = true,
+                    isPasswordVisible = false,
+                    accountText = cur.accountText
+                )
+            } else {
+                val rememberedPassword = credentialStore.loadRememberedPasswordForAccount(rememberedAccount)
+                cur.copy(
+                    rememberSupported = true,
+                    isRememberChecked = true,
+                    rememberedAccount = rememberedAccount,
+                    accountText = rememberedAccount,
+                    passwordSource = if (rememberedPassword.isNullOrBlank()) {
+                        PasswordSource.INPUT
+                    } else {
+                        PasswordSource.STORED
+                    },
+                    isStoredAccountMatched = true,
+                    isPasswordVisible = false
+                )
+            }
+        }
+    }
+
+    fun onRememberCheckedChanged(checked: Boolean) {
+        _loginFormState.update { it.copy(isRememberChecked = checked) }
+        if (!checked && credentialStore.isSupported()) {
+            credentialStore.clear()
+            _loginFormState.update {
+                it.copy(
+                    rememberedAccount = null,
+                    passwordSource = PasswordSource.INPUT,
+                    isStoredAccountMatched = true,
+                    isPasswordVisible = false
+                )
+            }
+        }
+    }
+
+    fun onAccountChanged(newAccount: String) {
+        _loginFormState.update { cur ->
+            val matched = if (cur.passwordSource == PasswordSource.STORED) {
+                newAccount == cur.rememberedAccount
+            } else {
+                true
+            }
+            cur.copy(accountText = newAccount, isStoredAccountMatched = matched)
+        }
+    }
+
+    fun onPasswordChanged(@Suppress("UNUSED_PARAMETER") newText: String) {
+        _loginFormState.update { cur ->
+            cur.copy(
+                passwordSource = PasswordSource.INPUT,
+                isStoredAccountMatched = true
+            )
+        }
+    }
+
+    fun onTogglePasswordVisibility() {
+        val cur = _loginFormState.value
+        if (cur.passwordSource == PasswordSource.STORED) {
+            emitToast("为安全起见，已保存密码不支持明文显示，请重新输入")
+            _loginFormState.update { it.copy(isPasswordVisible = false) }
             return
         }
-        if (AuthRepository.isOfflineTestCredential(mobile, password)) {
+        _loginFormState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
+    }
+
+    private fun performLogin(mobile: String, passwordInput: String) {
+        if (mobile.isBlank()) {
+            emitToast("请输入账号")
+            return
+        }
+
+        val form = _loginFormState.value
+        val resolvedPassword: String = when (form.passwordSource) {
+            PasswordSource.INPUT -> passwordInput
+            PasswordSource.STORED -> {
+                if (!form.isStoredAccountMatched) {
+                    emitToast("账号已变更，请重新输入密码")
+                    return
+                }
+                if (passwordInput != MASK_TOKEN) {
+                    passwordInput
+                } else {
+                    val stored = if (credentialStore.isSupported()) {
+                        credentialStore.loadRememberedPasswordForAccount(mobile)
+                    } else {
+                        null
+                    }
+                    if (stored.isNullOrBlank()) {
+                        emitToast("未找到已保存的密码，请重新输入")
+                        return
+                    }
+                    stored
+                }
+            }
+        }
+
+        if (resolvedPassword.isBlank()) {
+            emitToast("请输入密码")
+            return
+        }
+
+        if (form.isRememberChecked && credentialStore.isSupported()) {
+            credentialStore.saveAccountOnly(mobile)
+        }
+
+        if (AuthRepository.isOfflineTestCredential(mobile, resolvedPassword)) {
             enterOfflineMode()
             return
         }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            val result = authGateway.login(mobile, password)
+            val result = authGateway.login(mobile, resolvedPassword)
+
+            result.onSuccess { authResult ->
+                val shouldRemember = _loginFormState.value.isRememberChecked
+                if (!authResult.isOfflineMode && credentialStore.isSupported()) {
+                    if (shouldRemember) {
+                        credentialStore.savePasswordForAccount(mobile, resolvedPassword)
+                    } else {
+                        credentialStore.clear()
+                    }
+                }
+            }
+
             handleAuthResult(result, successMessage = "登录成功！")
         }
     }

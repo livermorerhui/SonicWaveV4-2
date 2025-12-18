@@ -1,12 +1,15 @@
 package com.example.sonicwavev4.ui.login
 
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import android.content.res.ColorStateList
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -24,6 +27,7 @@ import com.example.sonicwavev4.ui.register.RegisterFragment
 import com.example.sonicwavev4.ui.login.ResetPasswordFragment
 import com.example.sonicwavev4.ui.user.UserFragment
 import com.example.sonicwavev4.utils.OfflineModeRemoteSync
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -32,6 +36,9 @@ class LoginFragment : Fragment() {
     private val loginViewModel: LoginViewModel by activityViewModels()
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
+    private var isSettingStoredPassword = false
+    private var isSettingAccountProgrammatically = false
+    private var isSettingRememberProgrammatically = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,8 +50,11 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        loginViewModel.ensureCredentialStoreInitialized(requireContext().applicationContext)
+        setupLoginForm()
         setupClickListeners()
         collectUiState()
+        collectLoginFormState()
         collectEvents()
         setupDebugEnvSwitcher()
     }
@@ -77,6 +87,58 @@ class LoginFragment : Fragment() {
         }
     }
 
+    private fun setupLoginForm() {
+        binding.passwordTextInputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
+        binding.passwordTextInputLayout.setEndIconOnClickListener {
+            loginViewModel.onTogglePasswordVisibility()
+        }
+
+        binding.rememberPasswordCheckBox.setOnCheckedChangeListener { _, checked ->
+            if (isSettingRememberProgrammatically) return@setOnCheckedChangeListener
+            loginViewModel.onRememberCheckedChanged(checked)
+        }
+
+        binding.usernameEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (isSettingAccountProgrammatically) return
+                loginViewModel.onAccountChanged(s?.toString().orEmpty())
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        binding.passwordEditText.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (isSettingStoredPassword) return
+                val text = s?.toString().orEmpty()
+                val currentFormState = loginViewModel.loginFormState.value
+
+                if (currentFormState.passwordSource == PasswordSource.STORED) {
+                    if (text != MASK_TOKEN) {
+                        loginViewModel.onPasswordChanged("")
+                        Toast.makeText(
+                            requireContext(),
+                            "已清除保存的密码，请重新输入",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        isSettingStoredPassword = true
+                        binding.passwordEditText.setText("")
+                        isSettingStoredPassword = false
+                    }
+                    return
+                }
+
+                loginViewModel.onPasswordChanged(text)
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
     private fun collectUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -84,6 +146,58 @@ class LoginFragment : Fragment() {
                     binding.loginButton.isEnabled = !state.isLoading
                     binding.offlineModeButton.isVisible = state.offlineModeAllowed
                     binding.offlineModeButton.isEnabled = state.offlineModeAllowed && !state.isLoading
+                }
+            }
+        }
+    }
+
+    private fun collectLoginFormState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                loginViewModel.loginFormState.collectLatest { state ->
+                    binding.rememberPasswordCheckBox.isVisible = state.rememberSupported
+                    if (state.rememberSupported) {
+                        if (binding.rememberPasswordCheckBox.isChecked != state.isRememberChecked) {
+                            isSettingRememberProgrammatically = true
+                            binding.rememberPasswordCheckBox.isChecked = state.isRememberChecked
+                            isSettingRememberProgrammatically = false
+                        }
+                    }
+
+                    val desiredAccount = state.accountText
+                    if (binding.usernameEditText.text?.toString() != desiredAccount) {
+                        isSettingAccountProgrammatically = true
+                        binding.usernameEditText.setText(desiredAccount)
+                        binding.usernameEditText.setSelection(desiredAccount.length)
+                        isSettingAccountProgrammatically = false
+                    }
+
+                    if (state.passwordSource == PasswordSource.STORED) {
+                        if (binding.passwordEditText.text?.toString() != MASK_TOKEN) {
+                            isSettingStoredPassword = true
+                            binding.passwordEditText.setText(MASK_TOKEN)
+                            binding.passwordEditText.setSelection(MASK_TOKEN.length)
+                            isSettingStoredPassword = false
+                        }
+                    }
+
+                    val shouldMask = (state.passwordSource == PasswordSource.STORED) || !state.isPasswordVisible
+                    binding.passwordEditText.transformationMethod =
+                        if (shouldMask) PasswordTransformationMethod.getInstance() else null
+                    binding.passwordEditText.isCursorVisible = true
+
+                    if (state.passwordSource == PasswordSource.STORED && !state.isStoredAccountMatched) {
+                        binding.passwordTextInputLayout.error = "账号已变更，请重新输入密码"
+                    } else {
+                        binding.passwordTextInputLayout.error = null
+                    }
+
+                    val iconRes = when {
+                        state.passwordSource == PasswordSource.STORED -> com.google.android.material.R.drawable.design_ic_visibility_off
+                        state.isPasswordVisible -> com.google.android.material.R.drawable.design_password_eye
+                        else -> com.google.android.material.R.drawable.design_ic_visibility_off
+                    }
+                    binding.passwordTextInputLayout.setEndIconDrawable(iconRes)
                 }
             }
         }
