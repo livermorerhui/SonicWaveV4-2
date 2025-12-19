@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sonicwavev4.core.vibration.ParameterTransitionSpec
 import com.example.sonicwavev4.core.vibration.VibrationSessionIntent
 import com.example.sonicwavev4.core.vibration.VibrationSessionUiState
 import com.example.sonicwavev4.data.custompreset.CustomPresetRepository
@@ -920,11 +921,17 @@ class PersetmodeViewModel(
         val intensity = clampOutputIntensity(limitedStep.intensity01V)
         try {
             if (useHardware) {
-                hardwareRepository.applyFrequency(limitedStep.frequencyHz)
-                hardwareRepository.applyIntensity(intensity)
+                hardwareRepository.transitionTo(
+                    limitedStep.frequencyHz,
+                    intensity,
+                    ParameterTransitionSpec.DurationSpec(durationMs = 400, tickMs = 20)
+                )
             } else if (shouldPlayTone) {
-                hardwareRepository.applyFrequency(limitedStep.frequencyHz)
-                hardwareRepository.applyIntensity(intensity)
+                hardwareRepository.transitionTo(
+                    limitedStep.frequencyHz,
+                    intensity,
+                    ParameterTransitionSpec.DurationSpec(durationMs = 400, tickMs = 20)
+                )
             }
         } catch (e: Exception) {
             Log.e("PersetmodeViewModel", "Failed to apply step", e)

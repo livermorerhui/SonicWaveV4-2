@@ -69,7 +69,7 @@
         android:id="@+id/loginButton"
         android:layout_width="400dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         android:background="@drawable/bg_login_primary_button"
         android:backgroundTint="@null"
         app:backgroundTint="@null"

@@ -2,6 +2,7 @@ package com.example.sonicwavev4.core.vibration
 
 import com.example.sonicwavev4.data.home.HardwareEvent
 import com.example.sonicwavev4.data.home.HardwareState
+import com.example.sonicwavev4.core.vibration.ParameterTransitionSpec
 import com.example.sonicwavev4.network.Customer
 import com.example.sonicwavev4.network.OperationEventRequest
 import kotlinx.coroutines.flow.SharedFlow
@@ -24,6 +25,15 @@ interface VibrationHardwareGateway {
     suspend fun playStandaloneTone(frequency: Int, intensity: Int): Boolean
     suspend fun stopStandaloneTone()
     fun playTapSound()
+
+    suspend fun transitionTo(
+        targetFrequency: Int,
+        targetIntensity: Int,
+        spec: ParameterTransitionSpec = ParameterTransitionSpec.DurationSpec(durationMs = 400, tickMs = 20)
+    ) {
+        applyFrequency(targetFrequency)
+        applyIntensity(targetIntensity)
+    }
 }
 
 interface VibrationSessionGateway {

@@ -12,6 +12,8 @@ import cn.wch.ch347lib.callback.IUsbStateChange
 import cn.wch.ch347lib.exception.ChipException
 import cn.wch.ch347lib.exception.NoPermissionException
 import com.example.sonicwavev4.R
+import com.example.sonicwavev4.core.vibration.ParameterRampPlanner
+import com.example.sonicwavev4.core.vibration.ParameterTransitionSpec
 import com.example.sonicwavev4.harddriver.Ad9833Controller
 import com.example.sonicwavev4.harddriver.Mcp41010Controller
 import com.example.sonicwavev4.core.vibration.VibrationHardwareGateway
@@ -20,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,6 +87,7 @@ class HomeHardwareRepository(
 
     private val mutex = Mutex()
     private var desiredState = DesiredHardwareState()
+    private var transitionJob: Job? = null
 
     private var usbDevice: UsbDevice? = null
     private var lastAppliedFrequency = Double.NaN
@@ -104,6 +108,12 @@ class HomeHardwareRepository(
     private lateinit var soundPool: SoundPool
     private var tapSoundId: Int = 0
     private var isSoundPoolReady = false
+
+    private enum class WriteResult {
+        SKIPPED_NO_CHANGE,
+        SUCCESS,
+        FAILURE
+    }
 
     private val usbStateListener = object : IUsbStateChange {
         override fun usbDeviceDetach(device: UsbDevice?) {
@@ -132,6 +142,8 @@ class HomeHardwareRepository(
     }
 
     override suspend fun stop() {
+        transitionJob?.cancel()
+        transitionJob = null
         ch341Manager.setUsbStateListener(emptyUsbStateListener)
         mutex.withLock {
             desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
@@ -146,14 +158,14 @@ class HomeHardwareRepository(
     override suspend fun applyFrequency(freq: Int) = mutex.withLock {
         val clamped = freq.coerceAtLeast(0)
         desiredState = desiredState.copy(frequency = clamped)
-        applyFrequencyInternal(clamped, force = true)
+        applyFrequencyInternal(clamped, force = false)
         logOutputState("applyFrequency($clamped)")
     }
 
     override suspend fun applyIntensity(intensity: Int) = mutex.withLock {
         val clamped = intensity.coerceIn(0, 255)
         desiredState = desiredState.copy(intensity = clamped)
-        applyIntensityInternal(clamped, force = true)
+        applyIntensityInternal(clamped, force = false)
         logOutputState("applyIntensity($clamped)")
     }
 
@@ -183,10 +195,14 @@ class HomeHardwareRepository(
             success
         }
 
-    override suspend fun stopOutput() = mutex.withLock {
-        desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
-        setOutputModeInternal(false)
-        logOutputState("stopOutput")
+    override suspend fun stopOutput() {
+        transitionJob?.cancel()
+        transitionJob = null
+        mutex.withLock {
+            desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
+            setOutputModeInternal(false)
+            logOutputState("stopOutput")
+        }
     }
 
     override suspend fun playStandaloneTone(frequency: Int, intensity: Int): Boolean = mutex.withLock {
@@ -215,19 +231,94 @@ class HomeHardwareRepository(
         }
     }
 
-    override suspend fun stopStandaloneTone() = mutex.withLock {
-        desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
-        if (state.value.isHardwareReady) {
-            setOutputModeInternal(false)
-        } else {
-            stopTonePlayback()
+    override suspend fun stopStandaloneTone() {
+        transitionJob?.cancel()
+        transitionJob = null
+        mutex.withLock {
+            desiredState = desiredState.copy(isOutputEnabled = false, playTone = false)
+            if (state.value.isHardwareReady) {
+                setOutputModeInternal(false)
+            } else {
+                stopTonePlayback()
+            }
+            logOutputState("stopStandaloneTone")
         }
-        logOutputState("stopStandaloneTone")
     }
 
     override fun playTapSound() {
         if (enableTapSound && isSoundPoolReady) {
             soundPool.play(tapSoundId, 1f, 1f, 1, 0, 1f)
+        }
+    }
+
+    override suspend fun transitionTo(
+        targetFrequency: Int,
+        targetIntensity: Int,
+        spec: ParameterTransitionSpec
+    ) {
+        transitionJob?.cancelAndJoin()
+
+        val (startFreq, startIntensity) = mutex.withLock {
+            val sf = if (!lastAppliedFrequency.isNaN()) lastAppliedFrequency.toInt() else desiredState.frequency
+            val si = if (lastAppliedIntensity >= 0) lastAppliedIntensity else desiredState.intensity
+            sf to si
+        }
+
+        val plan = ParameterRampPlanner.plan(startFreq, startIntensity, targetFrequency, targetIntensity, spec)
+
+        transitionJob = scope.launch {
+            var lastSentPoint: Pair<Int, Int>? = null
+            var consecutiveFailures = 0
+
+            for (point in plan.points) {
+                if (!isActive) break
+
+                if (lastSentPoint != null && point == lastSentPoint) {
+                    delay(plan.tickMs.toLong())
+                    continue
+                }
+
+                val tickStartNs = System.nanoTime()
+
+                val (resultF, resultI, shouldStop) = mutex.withLock {
+                    if (!desiredState.isOutputEnabled && !desiredState.playTone) {
+                        Triple(WriteResult.SKIPPED_NO_CHANGE, WriteResult.SKIPPED_NO_CHANGE, true)
+                    } else {
+                        desiredState = desiredState.copy(frequency = point.first, intensity = point.second)
+                        val rf = applyFrequencyInternal(point.first, force = false)
+                        val ri = applyIntensityInternal(point.second, force = false)
+                        Triple(rf, ri, false)
+                    }
+                }
+
+                if (shouldStop) break
+
+                lastSentPoint = point
+
+                val attemptedAnyWrite =
+                    (resultF != WriteResult.SKIPPED_NO_CHANGE) || (resultI != WriteResult.SKIPPED_NO_CHANGE)
+                val anyFailure = (resultF == WriteResult.FAILURE) || (resultI == WriteResult.FAILURE)
+
+                if (anyFailure) {
+                    consecutiveFailures++
+                    if (consecutiveFailures > 3) {
+                        Log.w("HomeHardwareRepository", "Ramp aborted after $consecutiveFailures consecutive failures")
+                        break
+                    }
+                } else if (attemptedAnyWrite) {
+                    consecutiveFailures = 0
+                }
+
+                val elapsedMs = (System.nanoTime() - tickStartNs) / 1_000_000
+                if (elapsedMs > plan.tickMs * 0.8) {
+                    Log.w(
+                        "HomeHardwareRepository",
+                        "Ramp tick took ${elapsedMs}ms (>80% of ${plan.tickMs}ms), consider increasing tickMs"
+                    )
+                }
+
+                delay(plan.tickMs.toLong())
+            }
         }
     }
 
@@ -457,24 +548,25 @@ class HomeHardwareRepository(
         _state.update { it.copy(isTonePlaying = false) }
     }
 
-    private suspend fun applyFrequencyInternal(value: Int, force: Boolean) {
+    private suspend fun applyFrequencyInternal(value: Int, force: Boolean): WriteResult {
         val hardwareReady = state.value.isHardwareReady
         val freqDouble = value.toDouble()
         val shouldRefreshTone = desiredState.playTone && (!hardwareReady || force || freqDouble != lastAppliedFrequency)
+        var result = WriteResult.SKIPPED_NO_CHANGE
 
-        if (hardwareReady) {
-            if (force || freqDouble != lastAppliedFrequency) {
-                try {
-                    ad9833Controller.setFrequency(Ad9833Controller.CHANNEL_0, freqDouble)
-                    ad9833Controller.setActiveFrequency(Ad9833Controller.CHANNEL_0)
-                    lastAppliedFrequency = freqDouble
-                } catch (e: CH341LibException) {
-                    emitToast("设置频率失败: ${e.message}")
-                    emitError(e)
-                }
+        if (hardwareReady && (force || freqDouble != lastAppliedFrequency)) {
+            result = try {
+                ad9833Controller.setFrequency(Ad9833Controller.CHANNEL_0, freqDouble)
+                ad9833Controller.setActiveFrequency(Ad9833Controller.CHANNEL_0)
+                lastAppliedFrequency = freqDouble
                 if (!desiredState.isOutputEnabled) {
                     forceModeOff()
                 }
+                WriteResult.SUCCESS
+            } catch (e: CH341LibException) {
+                emitToast("设置频率失败: ${e.message}")
+                emitError(e)
+                WriteResult.FAILURE
             }
         }
 
@@ -483,22 +575,25 @@ class HomeHardwareRepository(
         } else if (shouldRefreshTone) {
             startTonePlayback(desiredState.frequency, desiredState.intensity)
         }
+
+        return result
     }
 
-    private suspend fun applyIntensityInternal(value: Int, force: Boolean) {
+    private suspend fun applyIntensityInternal(value: Int, force: Boolean): WriteResult {
         val hardwareReady = state.value.isHardwareReady
         val hardwareValue = (value / 1).coerceIn(0, 255) // UI 显示值为发送值的 1 倍
         val shouldRefreshTone = desiredState.playTone && (!hardwareReady || force || value != lastAppliedIntensity)
+        var result = WriteResult.SKIPPED_NO_CHANGE
 
-        if (hardwareReady) {
-            if (force || hardwareValue != lastAppliedHardwareIntensity) {
-                try {
-                    mcp41010Controller.writeValue(hardwareValue)
-                    lastAppliedHardwareIntensity = hardwareValue
-                } catch (e: CH341LibException) {
-                    emitToast("设置幅度失败: ${e.message}")
-                    emitError(e)
-                }
+        if (hardwareReady && (force || hardwareValue != lastAppliedHardwareIntensity)) {
+            result = try {
+                mcp41010Controller.writeValue(hardwareValue)
+                lastAppliedHardwareIntensity = hardwareValue
+                WriteResult.SUCCESS
+            } catch (e: CH341LibException) {
+                emitToast("设置幅度失败: ${e.message}")
+                emitError(e)
+                WriteResult.FAILURE
             }
         }
 
@@ -511,6 +606,8 @@ class HomeHardwareRepository(
         } else if (shouldRefreshTone) {
             startTonePlayback(desiredState.frequency, desiredState.intensity)
         }
+
+        return result
     }
 
     private suspend fun setOutputModeInternal(enableSine: Boolean): Boolean {
