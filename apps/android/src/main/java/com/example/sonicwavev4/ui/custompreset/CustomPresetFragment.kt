@@ -1,7 +1,6 @@
 package com.example.sonicwavev4.ui.custompreset
 
 import android.os.Bundle
-import android.graphics.Rect
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -24,6 +23,7 @@ import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentCustomPresetBinding
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.SoftReduceTouchHost
+import com.example.sonicwavev4.ui.common.TouchHitTest
 import com.example.sonicwavev4.ui.common.SessionControlUiMapper
 import com.example.sonicwavev4.ui.common.UiEvent
 import com.example.sonicwavev4.ui.login.LoginViewModel
@@ -116,9 +116,11 @@ class CustomPresetFragment : Fragment() {
             if (ev.actionMasked != MotionEvent.ACTION_DOWN) return@setSoftReduceTouchListener false
             val state = presetViewModel.sessionUiState.value
             if (!state.isRunning) return@setSoftReduceTouchListener false
-            if (!state.softReductionActive) {
-                presetViewModel.handleSessionIntent(VibrationSessionIntent.SoftReduceFromTap)
-            }
+            // 软降已触发时，空白区不重复触发。
+            if (state.softReductionActive) return@setSoftReduceTouchListener false
+            // 平板端自设模式：排除关键控件触发软降。
+            if (isSoftReduceExcludedTouch(ev)) return@setSoftReduceTouchListener false
+            presetViewModel.handleSessionIntent(VibrationSessionIntent.SoftReduceFromTap)
             false
         }
     }
@@ -317,6 +319,22 @@ class CustomPresetFragment : Fragment() {
     private fun showToast(message: String) {
         if (!isAdded) return
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    // dp 转 px，便于平板端自设模式统一软降排除区的触摸边距。
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density + 0.5f).toInt()
+    }
+
+    // 平板端自设模式：排除暂停/继续/停止按钮触发软降。
+    private fun isSoftReduceExcludedTouch(event: MotionEvent): Boolean {
+        val marginPx = dpToPx(8)
+        val excludedViews = listOfNotNull(
+            binding.btnPause,
+            binding.btnStartStop,
+            binding.btnStop
+        )
+        return excludedViews.any { TouchHitTest.isInside(it, event, marginPx) }
     }
 
 }

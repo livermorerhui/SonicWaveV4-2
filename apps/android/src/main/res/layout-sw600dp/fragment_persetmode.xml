@@ -193,7 +193,7 @@
         android:layout_height="0dp"
         android:orientation="vertical"
         android:gravity="top"
-        android:padding="12dp"
+        android:padding="6dp"
         app:layout_constraintStart_toStartOf="@id/guide_right"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -202,61 +202,79 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="top"
+            android:orientation="vertical"
+            android:gravity="start"
             android:layout_marginBottom="8dp">
 
-            <!-- 左侧：频率/强度/剩余时间 -->
+            <!-- 平板端：状态文本容器（两列一行 + 第二行剩余时间，左对齐） -->
             <LinearLayout
-                android:layout_width="70dp"
+                android:id="@+id/layout_status_texts"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:gravity="start"
                 android:background="?android:attr/selectableItemBackground"
                 android:padding="0dp"
-                android:layout_marginEnd="8dp">
+                android:layout_marginEnd="0dp">
 
+                <!-- 第一行：频率容器 + 强度容器 -->
                 <LinearLayout
-                    android:layout_width="70dp"
+                    android:id="@+id/layout_status_row_1"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="0dp"
+                    android:orientation="horizontal"
+                    android:gravity="start"
                     android:layout_marginBottom="8dp">
-                    <TextView
+
+                    <LinearLayout
+                        android:id="@+id/layout_status_frequency"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="start"
+                        android:layout_marginEnd="16dp"
+                        android:padding="0dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="频率"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/tv_frequency_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="24sp"
+                            tools:text="110"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/layout_status_intensity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="频率"
-                        android:textStyle="bold"/>
-                    <TextView
-                        android:id="@+id/tv_frequency_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="24sp"
-                        tools:text="110"/>
+                        android:orientation="vertical"
+                        android:gravity="start"
+                        android:padding="0dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="强度"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/tv_intensity_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="24sp"
+                            tools:text="120"/>
+                    </LinearLayout>
                 </LinearLayout>
 
+                <!-- 第二行：剩余时间容器 -->
                 <LinearLayout
-                    android:layout_width="70dp"
+                    android:id="@+id/layout_status_remaining"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="0dp"
-                    android:layout_marginBottom="8dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="强度"
-                        android:textStyle="bold"/>
-                    <TextView
-                        android:id="@+id/tv_intensity_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="24sp"
-                        tools:text="120"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="70dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:gravity="start"
                     android:padding="0dp">
                     <TextView
                         android:layout_width="wrap_content"
@@ -272,70 +290,160 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 右侧：强度百分比 -->
+            <!-- 平板端：专家模式「调整区」（强度百分比 + 次数），布局与手机端一致 -->
             <LinearLayout
-                android:id="@+id/layout_intensity_scale"
+                android:id="@+id/layout_expert_adjust"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="33dp"
+                android:layout_marginTop="6dp"
+                android:gravity="center_horizontal"
                 android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/tv_label_expert_adjust"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
+                    android:layout_marginBottom="6dp"
+                    android:text="@string/label_adjust"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
 
-                    <ImageButton
-                        android:id="@+id/btn_intensity_scale_plus"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="增加百分比"
-                        android:padding="0dp"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_triangle_up" />
+                <!-- 平板端：调整区内容一行展示（强度百分比 + 次数） -->
+                <LinearLayout
+                    android:id="@+id/layout_expert_adjust_row"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="start">
 
                     <LinearLayout
+                        android:id="@+id/layout_repeat_count"
                         android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="4dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <EditText
-                            android:id="@+id/input_intensity_scale"
-                            android:layout_width="40dp"
-                            android:layout_height="match_parent"
-                            android:digits="0123456789"
-                            android:gravity="center"
-                            android:hint="100"
-                            android:inputType="number"
-                            android:maxLength="3"
-                            android:padding="0dp"
-                            android:text="100"
-                            android:textSize="18sp" />
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tv_label_repeat_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:text="%"
+                            android:layout_marginBottom="4dp"
+                            android:text="@string/label_repeat_count"
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
+
+                        <ImageButton
+                            android:id="@+id/btn_repeat_count_plus"
+                            android:layout_width="60dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/cd_repeat_count_increase"
+                            android:padding="0dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_triangle_up" />
+
+                        <TextView
+                            android:id="@+id/tv_repeat_count_value"
+                            android:layout_width="60dp"
+                            android:layout_height="40dp"
+                            android:layout_marginTop="0dp"
+                            android:background="@drawable/bg_intensity_percent_pill"
+                            android:gravity="center"
+                            android:text="1"
+                            android:textColor="@color/black"
                             android:textSize="18sp" />
+
+                        <ImageButton
+                            android:id="@+id/btn_repeat_count_minus"
+                            android:layout_width="60dp"
+                            android:layout_height="40dp"
+                            android:layout_marginTop="0dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/cd_repeat_count_decrease"
+                            android:padding="0dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_triangle_down" />
                     </LinearLayout>
 
-                    <ImageButton
-                        android:id="@+id/btn_intensity_scale_minus"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_marginTop="4dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="减少百分比"
-                        android:padding="0dp"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_triangle_down" />
-                </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/layout_intensity_scale"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical">
 
+                        <TextView
+                            android:id="@+id/tv_label_intensity_scale"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
+                            android:text="@string/label_intensity"
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
+
+                        <ImageButton
+                            android:id="@+id/btn_intensity_scale_plus"
+                            android:layout_width="60dp"
+                            android:layout_height="40dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="增加百分比"
+                            android:padding="0dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_triangle_up" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginTop="0dp"
+                            android:background="@drawable/bg_intensity_percent_pill"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:paddingStart="0dp"
+                            android:paddingEnd="0dp">
+
+                            <EditText
+                                android:id="@+id/input_intensity_scale"
+                                android:layout_width="40dp"
+                                android:layout_height="match_parent"
+                                android:layout_marginStart="4dp"
+                                android:background="@null"
+                                android:clickable="false"
+                                android:cursorVisible="false"
+                                android:digits="0123456789"
+                                android:focusable="false"
+                                android:focusableInTouchMode="false"
+                                android:gravity="center"
+                                android:hint="100"
+                                android:inputType="number"
+                                android:longClickable="false"
+                                android:maxLength="3"
+                                android:padding="0dp"
+                                android:text="100"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="4dp"
+                                android:text="%"
+                                android:textSize="18sp" />
+                        </LinearLayout>
+
+                        <ImageButton
+                            android:id="@+id/btn_intensity_scale_minus"
+                            android:layout_width="60dp"
+                            android:layout_height="40dp"
+                            android:layout_marginTop="0dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="减少百分比"
+                            android:padding="0dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_triangle_down" />
+                    </LinearLayout>
+
+
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -368,7 +476,7 @@
         app:layout_constraintStart_toStartOf="@id/guide_right"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="200dp">
+        android:layout_marginTop="280dp">
 
         <Button
             android:id="@+id/btn_start_stop"
@@ -386,7 +494,7 @@
             android:id="@+id/btn_stop"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             style="@style/ButtonNoTint"
             android:text="@string/button_stop"
             android:textSize="22dp"
@@ -400,12 +508,12 @@
             android:id="@+id/btn_soft_resume_inline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:text="@string/soft_resume"
             android:textSize="22dp"
             android:textColor="@color/black"
             android:visibility="gone"
-            android:background="@drawable/bg_keypad_green"
+            android:background="@drawable/bg_huifu_green"
             android:backgroundTint="@null"
             app:backgroundTint="@null" />
     </LinearLayout>

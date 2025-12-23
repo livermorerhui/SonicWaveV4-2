@@ -429,6 +429,11 @@ class HomeViewModel(
 
     fun commitAndCycleInputType() {
         commitInputBuffer()
+        if (_isStarted.value == true && softReductionActive) {
+            // 运行中回车提交：视为手动调整参数，重置软降状态并隐藏恢复按钮。
+            clearSoftReductionState()
+            emitUiState()
+        }
         if (_isStarted.value == true) {
             return
         }
@@ -718,6 +723,9 @@ class HomeViewModel(
     fun stopSession() {
         viewModelScope.launch {
             stopPlaybackIfRunning()
+            // 点击停止或页面离开时，确保软降状态被重置并刷新 UI。
+            clearSoftReductionState()
+            emitUiState()
             try {
                 hardwareRepository.stop()
             } catch (e: Exception) {

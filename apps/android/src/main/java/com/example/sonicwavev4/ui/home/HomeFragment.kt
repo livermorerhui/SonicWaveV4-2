@@ -1,5 +1,6 @@
 package com.example.sonicwavev4.ui.home
 
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -28,6 +29,7 @@ import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentHomeBinding
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.common.UiEvent
+import com.example.sonicwavev4.ui.common.TouchHitTest
 import com.example.sonicwavev4.ui.common.SessionControlUiMapper
 import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.ui.login.LoginViewModel
@@ -212,8 +214,8 @@ class HomeFragment : Fragment() {
         expandedPanel?.visibility = View.GONE
         collapsedPanel?.visibility = View.GONE
 
-        recoverButton?.visibility =
-            if (state.softReductionActive || (state.isRunning && state.intensityValue <= 20)) View.VISIBLE else View.GONE
+        // 平板端：恢复按钮使用 INVISIBLE 保留占位，避免显示/隐藏导致 keypad 位置变化。
+        recoverButton?.visibility = if (state.softReductionActive) View.VISIBLE else View.INVISIBLE
 
         applyStartStopState(state, startButton, stopButton, hideStop = false)
     }
@@ -759,6 +761,10 @@ class HomeFragment : Fragment() {
         val minus = binding.btnIntensityScaleMinus
         val input = binding.inputIntensityScale
 
+        // 手机端：强度百分比输入框不弹出系统键盘
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            input?.showSoftInputOnFocus = false
+        }
         input?.doAfterTextChanged { text ->
             if (updatingIntensityScaleFromState) return@doAfterTextChanged
             val value = text?.toString()?.toIntOrNull()
@@ -869,6 +875,34 @@ class HomeFragment : Fragment() {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
+    // dp 转 px，便于在不同密度设备上统一触摸边距。
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density + 0.5f).toInt()
+    }
+
+    // 平板自选模式：会话运行中，排除关键控件触发软降。
+    private fun isSoftReduceExcludedTouch(event: MotionEvent): Boolean {
+        val marginPx = dpToPx(8)
+        val enterKeyView: View? = keypadViews?.enterButton ?: binding.root.findViewById(R.id.btn_key_enter)
+        val excludedViews: List<View> = listOfNotNull(
+            binding.btnFrequencyUp,
+            binding.btnFrequencyDown,
+            binding.btnIntensityUp,
+            binding.btnIntensityDown,
+            binding.btnTimeUp,
+            binding.btnTimeDown,
+            binding.btnStartStop,
+            binding.btnStop,
+            enterKeyView,
+            keypadViews?.softResumeButton,
+            binding.btnSoftStopExpanded,
+            binding.btnSoftResumeExpanded,
+            binding.btnSoftStopCollapsed,
+            binding.btnSoftResumeCollapsed
+        )
+        return excludedViews.any { v -> TouchHitTest.isInside(v, event, marginPx) }
+    }
+
     private fun handleSoftReduceTouch(event: MotionEvent): Boolean {
         if (event.actionMasked != MotionEvent.ACTION_DOWN) {
             return false
@@ -877,10 +911,15 @@ class HomeFragment : Fragment() {
         if (!state.isRunning) {
             return false
         }
-
-        if (!state.softReductionActive) {
-            viewModel.handleIntent(VibrationSessionIntent.SoftReduceFromTap)
+        if (state.softReductionActive || state.intensityValue <= 20) {
+            return false
         }
+        // 触摸在关键控件上时不触发软降。
+        if (isSoftReduceExcludedTouch(event)) {
+            return false
+        }
+
+        viewModel.handleIntent(VibrationSessionIntent.SoftReduceFromTap)
 
         return false
     }

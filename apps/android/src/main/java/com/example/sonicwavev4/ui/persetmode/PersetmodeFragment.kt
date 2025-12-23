@@ -1,5 +1,6 @@
 package com.example.sonicwavev4.ui.persetmode
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -23,6 +24,7 @@ import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentPersetmodeBinding
 import com.example.sonicwavev4.network.RetrofitClient
+import com.example.sonicwavev4.ui.common.TouchHitTest
 import com.example.sonicwavev4.ui.common.UiEvent
 import com.example.sonicwavev4.ui.common.SessionControlUiMapper
 import com.example.sonicwavev4.ui.custompreset.CustomPresetEditorFragment
@@ -133,11 +135,16 @@ class PersetmodeFragment : Fragment() {
         }
 
         setupIntensityScaleControls()
+        setupRepeatCountControls()
 
         // touch listener registration moved to lifecycle callbacks
     }
 
     private fun setupIntensityScaleControls() {
+        // 平板端：禁止强度百分比输入框弹出系统键盘
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            binding.inputIntensityScale.showSoftInputOnFocus = false
+        }
         binding.inputIntensityScale.doAfterTextChanged { text ->
             if (updatingScaleFromState) return@doAfterTextChanged
             val value = text?.toString()?.toIntOrNull()
@@ -153,6 +160,18 @@ class PersetmodeFragment : Fragment() {
         }
         setupRepeatingScaleButton(binding.btnIntensityScaleMinus, -1)
         setupRepeatingScaleButton(binding.btnIntensityScalePlus, 1)
+    }
+
+    private fun setupRepeatCountControls() {
+        // 平板端专家模式：次数调整区（与手机端功能一致）
+        binding.btnRepeatCountPlus?.setOnClickListener {
+            viewModel.incrementRepeatCount()
+            viewModel.playTapSound()
+        }
+        binding.btnRepeatCountMinus?.setOnClickListener {
+            viewModel.decrementRepeatCount()
+            viewModel.playTapSound()
+        }
     }
 
     private fun setupRepeatingScaleButton(button: View, delta: Int) {
@@ -283,6 +302,7 @@ class PersetmodeFragment : Fragment() {
         binding.tvIntensityValue.text = sessionState.intensityDisplay
         binding.tvRemainingValue.text = sessionState.timeDisplay
         binding.layoutIntensityScale.isVisible = state.category == BUILT_IN
+        binding.layoutExpertAdjust?.isVisible = state.category == BUILT_IN
         val scaleText = state.intensityScalePct.toString()
         if (binding.inputIntensityScale.text?.toString() != scaleText) {
             updatingScaleFromState = true
@@ -290,6 +310,7 @@ class PersetmodeFragment : Fragment() {
             binding.inputIntensityScale.setSelection(scaleText.length)
             updatingScaleFromState = false
         }
+        updateRepeatCountUi(state.repeatCount, state.modeButtonsEnabled)
 
         binding.btnStop?.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
         binding.btnStop?.isEnabled = sessionState.isRunning || sessionState.isPaused
@@ -331,15 +352,49 @@ class PersetmodeFragment : Fragment() {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
+    // dp 转 px，便于平板端统一软降排除区的触摸边距。
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density + 0.5f).toInt()
+    }
+
+    // 平板端专家模式：软降排除区（强度百分比上下键 + 暂停/继续/停止）。
+    private fun isSoftReduceExcludedTouch(event: MotionEvent): Boolean {
+        val marginPx = dpToPx(8)
+        val excludedViews = listOfNotNull(
+            binding.btnIntensityScalePlus,
+            binding.btnIntensityScaleMinus,
+            binding.btnStartStop,
+            binding.btnStop
+        )
+        return excludedViews.any { TouchHitTest.isInside(it, event, marginPx) }
+    }
+
     private fun handleSoftReduceTouch(event: MotionEvent): Boolean {
         if (event.actionMasked != MotionEvent.ACTION_DOWN) return false
         val state = viewModel.sessionUiState.value
         if (!state.isRunning) return false
+        // 软降已触发时，点击空白区不重复触发。
+        if (state.softReductionActive) return false
+        // 平板端专家模式：排除关键控件触发软降。
+        if (isSoftReduceExcludedTouch(event)) return false
 
-        if (!state.softReductionActive) {
-            viewModel.handleSessionIntent(VibrationSessionIntent.SoftReduceFromTap)
-        }
+        viewModel.handleSessionIntent(VibrationSessionIntent.SoftReduceFromTap)
         return false
     }
 
+    private fun updateRepeatCountUi(value: Int, enabled: Boolean) {
+        val plus = binding.btnRepeatCountPlus
+        val minus = binding.btnRepeatCountMinus
+        val label = binding.tvRepeatCountValue
+        plus?.isEnabled = enabled
+        minus?.isEnabled = enabled
+        label?.isEnabled = enabled
+        label?.text = value.toString()
+        label?.setTextColor(
+            ContextCompat.getColor(
+                requireContext(),
+                if (enabled) android.R.color.black else android.R.color.darker_gray
+            )
+        )
+    }
 }

@@ -121,6 +121,7 @@
         android:backgroundTint="@null"
         app:tint="#FFFFFF" />
 
+    <!-- 平板端：软降“恢复”按钮默认占位，避免显示/隐藏导致 keypad 位置变化 -->
     <Button
         android:id="@+id/btn_soft_resume_inline"
         style="@style/KeypadButton"
@@ -131,7 +132,7 @@
         android:background="@drawable/bg_keypad_green"
         android:backgroundTint="@null"
         android:textColor="@color/black"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="@+id/flow_keypad"
         app:layout_constraintStart_toStartOf="@+id/flow_keypad"
         app:layout_constraintTop_toBottomOf="@id/flow_keypad" />

@@ -78,7 +78,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_begin="125dp" />
+            app:layout_constraintGuide_begin="120dp" />
 
 
         <!-- === 左侧栏上部分（自选/专家/自设），代码填充 custom_nav_rail_item === -->
