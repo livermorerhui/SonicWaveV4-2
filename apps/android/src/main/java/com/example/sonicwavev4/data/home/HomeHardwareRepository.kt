@@ -43,7 +43,9 @@ data class HardwareState(
     val isAdReady: Boolean = false,
     val isMcpReady: Boolean = false,
     val isHardwareReady: Boolean = false,
-    val isTonePlaying: Boolean = false
+    val isTonePlaying: Boolean = false,
+    // CH341 初始化失败标记（用于顶栏指示灯：绿=成功，黄=失败，灰=未连接）
+    val isInitFailed: Boolean = false
 )
 
 sealed class HardwareEvent {
@@ -365,7 +367,7 @@ class HomeHardwareRepository(
 
     private suspend fun onDeviceOpened(device: UsbDevice) {
         usbDevice = device
-        _state.update { it.copy(isDeviceOpen = true) }
+        _state.update { it.copy(isDeviceOpen = true, isInitFailed = false) }
         initializeMcp41010Hardware()
         initializeAd9833Hardware()
     }
@@ -389,7 +391,8 @@ class HomeHardwareRepository(
                 }
                 current.copy(
                     isAdReady = newAdReady,
-                    isHardwareReady = newReady
+                    isHardwareReady = newReady,
+                    isInitFailed = if (newReady) false else current.isInitFailed
                 )
             }
             if (becameReady) {
@@ -397,7 +400,7 @@ class HomeHardwareRepository(
             }
             emitToast("AD9833 已初始化")
         } catch (e: CH341LibException) {
-            _state.update { it.copy(isAdReady = false, isHardwareReady = false) }
+            _state.update { it.copy(isAdReady = false, isHardwareReady = false, isInitFailed = true) }
             emitToast("初始化 AD9833 失败: ${e.message}")
             emitError(e)
         }
@@ -422,7 +425,8 @@ class HomeHardwareRepository(
                 }
                 current.copy(
                     isMcpReady = newMcpReady,
-                    isHardwareReady = newReady
+                    isHardwareReady = newReady,
+                    isInitFailed = if (newReady) false else current.isInitFailed
                 )
             }
             if (becameReady) {
@@ -430,7 +434,7 @@ class HomeHardwareRepository(
             }
             emitToast("MCP41010 已初始化")
         } catch (e: CH341LibException) {
-            _state.update { it.copy(isMcpReady = false, isHardwareReady = false) }
+            _state.update { it.copy(isMcpReady = false, isHardwareReady = false, isInitFailed = true) }
             emitToast("初始化 MCP41010 失败: ${e.message}")
             emitError(e)
         }

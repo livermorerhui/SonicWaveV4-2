@@ -3,7 +3,7 @@
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_200">#03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
@@ -22,6 +22,10 @@
     <color name="login_primary_button_text">#FF172B4D</color>
     <color name="login_secondary_button_bg">#FFFFC24B</color>
     <color name="login_secondary_button_text">#FF4A2700</color>
+    <!-- 硬件连接状态指示灯 -->
+    <color name="hardware_status_connected_blue">#2F80ED</color>
+    <color name="hardware_status_init_failed_yellow">#FFF0B429</color>
+    <color name="hardware_status_disconnected_gray">#FFB0B0B0</color>
     <!-- 温和的粉绿色，用于 DatePicker 确定按钮背景 -->
     <color name="date_picker_positive_bg">#FF8BF1C1</color>
     <color name="background_light_gray">#FFF2F2F2</color>

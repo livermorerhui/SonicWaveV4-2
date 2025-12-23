@@ -437,6 +437,7 @@
         android:minHeight="48dp"
         android:text="开始"
         android:textColor="#000000"
+        android:textSize="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btn_stop"
         app:layout_constraintStart_toStartOf="parent"
@@ -457,6 +458,7 @@
         android:minHeight="48dp"
         android:text="@string/button_stop"
         android:textColor="#000000"
+        android:textSize="30dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -483,7 +485,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/soft_stop" />
+            android:text="@string/soft_stop"
+            android:textSize="30dp" />
 
         <Space
             android:layout_width="16dp"
@@ -494,7 +497,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="@string/soft_resume" />
+            android:text="@string/soft_resume"
+            android:textSize="30dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -513,7 +517,8 @@
             android:id="@+id/btn_soft_stop_collapsed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/soft_stop" />
+            android:text="@string/soft_stop"
+            android:textSize="30dp" />
 
         <Space
             android:layout_width="8dp"
@@ -523,7 +528,8 @@
             android:id="@+id/btn_soft_resume_collapsed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/soft_resume" />
+            android:text="@string/soft_resume"
+            android:textSize="30dp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

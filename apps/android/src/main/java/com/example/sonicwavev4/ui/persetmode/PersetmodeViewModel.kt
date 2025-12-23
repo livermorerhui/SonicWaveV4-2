@@ -320,11 +320,14 @@ class PersetmodeViewModel(
         viewModelScope.launch {
             hardwareRepository.events.collect { event ->
                 when (event) {
-                    is com.example.sonicwavev4.data.home.HardwareEvent.Toast -> _events.emit(
-                        UiEvent.ShowToast(event.message)
+                    is com.example.sonicwavev4.data.home.HardwareEvent.Toast -> Log.d(
+                        "PersetmodeViewModel",
+                        "Hardware notice: ${event.message}"
                     )
-                    is com.example.sonicwavev4.data.home.HardwareEvent.Error -> _events.emit(
-                        UiEvent.ShowError(event.throwable)
+                    is com.example.sonicwavev4.data.home.HardwareEvent.Error -> Log.e(
+                        "PersetmodeViewModel",
+                        "Hardware error",
+                        event.throwable
                     )
                 }
             }

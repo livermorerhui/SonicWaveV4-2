@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SonicWaveV4</string>
+    <string name="app_name">SonicWave</string>
     <string name="nav_header_title">用户名</string>
     <string name="nav_header_subtitle">邮箱</string>
     <string name="nav_header_desc">导航头部</string>
@@ -40,6 +40,10 @@
     <string name="cd_time_increase">增加时间</string>
     <string name="cd_vinyl_disc">黑胶唱片</string>
     <string name="cd_tonearm">唱臂</string>
+    <string name="cd_hardware_status_indicator">CH341 状态指示灯</string>
+    <string name="hardware_status_disconnected">CH341 未连接</string>
+    <string name="hardware_status_connected_ready">CH341 连接成功</string>
+    <string name="hardware_status_init_failed">CH341 初始化失败</string>
     <string name="remaining_time_format">%s</string>
     <string name="remaining_time_format_placeholder">00:00</string>
     <string name="now_playing_placeholder">未播放</string>

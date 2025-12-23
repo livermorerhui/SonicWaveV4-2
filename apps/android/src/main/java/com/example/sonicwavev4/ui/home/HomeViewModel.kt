@@ -218,11 +218,8 @@ class HomeViewModel(
         viewModelScope.launch {
             hardwareRepository.events.collect { event ->
                 when (event) {
-                    is HardwareEvent.Toast -> _events.emit(UiEvent.ShowToast(event.message))
-                    is HardwareEvent.Error -> {
-                        Log.e("HomeViewModel", "Hardware error", event.throwable)
-                        _events.emit(UiEvent.ShowError(event.throwable))
-                    }
+                    is HardwareEvent.Toast -> Log.d("HomeViewModel", "Hardware notice: ${event.message}")
+                    is HardwareEvent.Error -> Log.e("HomeViewModel", "Hardware error", event.throwable)
                 }
             }
         }
@@ -337,9 +334,9 @@ class HomeViewModel(
         val intensity = _intensity.value ?: 0
         if (freq != 0 || time != 0 || intensity != 0) return
         phoneOfflineDefaultsApplied = true
-        updateFrequency(25)
-        updateIntensity(10)
-        updateTime(1)
+        updateFrequency(0)
+        updateIntensity(0)
+        updateTime(0)
     }
 
     // --- 缓冲区和参数控制 (无改动) ---

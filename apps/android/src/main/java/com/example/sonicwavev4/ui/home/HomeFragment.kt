@@ -58,7 +58,8 @@ class HomeFragment : Fragment() {
         val flow: View?,
         val numericButtons: List<Button>,
         val clearButton: View?,
-        val enterButton: View?
+        val enterButton: View?,
+        val softResumeButton: View?
     )
 
     private var _binding: FragmentHomeBinding? = null
@@ -195,7 +196,7 @@ class HomeFragment : Fragment() {
     private fun renderTabletState(state: VibrationSessionUiState) {
         val startButton = binding.btnStartStop
         val stopButton = binding.btnStop
-        val recoverButton = binding.btnSoftResumeInline
+        val recoverButton = keypadViews?.softResumeButton
 
         binding.tvTimeValue.isEnabled = !state.isRunning
 
@@ -220,7 +221,7 @@ class HomeFragment : Fragment() {
     private fun renderPhoneState(state: VibrationSessionUiState) {
         val startButton = binding.btnStartStop
         val stopButton = binding.btnStop
-        val recoverButton = binding.btnSoftResumeInline
+        val recoverButton = keypadViews?.softResumeButton
 
         val activeMode = viewModel.activeMode.value
         val displayState = if (isPhoneHome && activeMode == HomeViewModel.ActiveMode.EXPERT) {
@@ -429,7 +430,9 @@ class HomeFragment : Fragment() {
     // --- 点击事件监听器 ---
     private fun setupClickListeners() {
         // Shared keypad wiring (phone + tablet) once keypad is inflated.
-        if (binding.root.findViewById<View?>(R.id.layout_keypad_container) != null &&
+        if (!isPhoneHome) {
+            ensureKeypadViews()
+        } else if (binding.root.findViewById<View?>(R.id.layout_keypad_container) != null &&
             binding.root.findViewById<ViewStub?>(R.id.stub_keypad_container) == null
         ) {
             ensureKeypadViews()
@@ -527,7 +530,8 @@ class HomeFragment : Fragment() {
             flow = root.findViewById(R.id.flow_keypad),
             numericButtons = numericButtons,
             clearButton = root.findViewById(R.id.btn_key_clear),
-            enterButton = root.findViewById(R.id.btn_key_enter)
+            enterButton = root.findViewById(R.id.btn_key_enter),
+            softResumeButton = root.findViewById(R.id.btn_soft_resume_inline)
         )
     }
 
@@ -602,7 +606,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        binding.btnSoftResumeInline?.setOnClickListener {
+        keypadViews?.softResumeButton?.setOnClickListener {
             viewModel.handleIntent(VibrationSessionIntent.SoftReductionResumeClicked)
             viewModel.playTapSound()
         }

@@ -57,6 +57,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import android.content.Intent
 import com.example.sonicwavev4.databinding.ActivityMainBinding
+import com.example.sonicwavev4.data.home.HomeHardwareRepository
+import com.example.sonicwavev4.data.home.HardwareState
 import com.example.sonicwavev4.network.AppUsageRequest
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.customer.CustomerViewModel
@@ -90,6 +92,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
     private val customerViewModel: CustomerViewModel by viewModels()
     private val musicViewModel: MusicPlayerViewModel by viewModels()
+    private val hardwareRepository by lazy { HomeHardwareRepository.getInstance(application) }
 
     private lateinit var sessionManager: SessionManager
     private var musicAreaLayout: ConstraintLayout? = null
@@ -207,6 +210,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
         setupCustomNavigationRail()
         observeSelectedCustomerContext()
+        observeHardwareStatusIndicator()
 
         val musicArea = binding.root.findViewById<View?>(R.id.fragment_bottom_left)
         isMusicUiEnabled = musicArea != null
@@ -245,6 +249,34 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
         observeForceExitCountdown()
         observeGlobalLogout()
+    }
+
+    // 顶栏硬件指示灯（手机/平板共用）：绿=连接+初始化成功，黄=连接但初始化失败，灰=未连接
+    private fun observeHardwareStatusIndicator() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                hardwareRepository.state.collect { state ->
+                    renderHardwareStatusIndicator(state)
+                }
+            }
+        }
+    }
+
+    private fun renderHardwareStatusIndicator(state: HardwareState) {
+        val indicator = binding.toolbarHardwareIndicator
+        val (colorRes, descRes) = when {
+            state.isDeviceOpen && state.isHardwareReady -> {
+                R.color.hardware_status_connected_blue to R.string.hardware_status_connected_ready
+            }
+            state.isDeviceOpen && state.isInitFailed -> {
+                R.color.hardware_status_init_failed_yellow to R.string.hardware_status_init_failed
+            }
+            else -> {
+                R.color.hardware_status_disconnected_gray to R.string.hardware_status_disconnected
+            }
+        }
+        indicator.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, colorRes))
+        indicator.contentDescription = getString(descRes)
     }
 
     override fun onResume() {

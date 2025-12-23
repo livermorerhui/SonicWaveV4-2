@@ -34,6 +34,16 @@
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
+
+        <!-- 平板端：CH341 顶栏指示灯（灰=未连接，绿=连接+初始化成功，黄=连接+初始化失败） -->
+        <View
+            android:id="@+id/toolbar_hardware_indicator"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/bg_hardware_status_indicator"
+            android:contentDescription="@string/cd_hardware_status_indicator" />
     </androidx.appcompat.widget.Toolbar>
 
     <!-- 主要内容布局 Main Content Layout -->
