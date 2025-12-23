@@ -127,7 +127,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="时长" />
+                android:text="时长(分钟)" />
 
             <ImageButton
                 android:id="@+id/btn_duration_minus"

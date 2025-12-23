@@ -13,38 +13,6 @@
 
     <!-- 主内容区域：Toolbar 和 NavHostFragment 直接放在这里 -->
 
-    <com.google.android.material.navigationrail.NavigationRailView
-        android:id="@+id/nav_rail_view"
-        android:layout_width="60dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/nav_rail_background"
-        app:headerLayout="@layout/nav_header_main"
-        app:labelVisibilityMode="labeled"
-        app:layout_constraintBottom_toTopOf="@id/nav_music_rail"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.395"
-        app:menu="@menu/nav_rail_menu" />
-
-    <com.google.android.material.navigationrail.NavigationRailView
-        android:id="@+id/nav_music_rail"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/nav_rail_background"
-        app:itemIconTint="@color/black"
-        app:itemTextColor="@color/black"
-        app:labelVisibilityMode="labeled"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@id/nav_rail_view"
-        app:layout_constraintEnd_toEndOf="@id/nav_rail_view"
-        app:menu="@menu/nav_rail_music" />
-
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
@@ -54,7 +22,7 @@
         app:contentInsetStartWithNavigation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/nav_rail_view"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/Theme.AppCompat.Light.DarkActionBar">
 
@@ -78,29 +46,21 @@
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         android:background="@drawable/panel_background"
         app:defaultNavHost="true"
-        app:layout_constraintBottom_toTopOf="@id/fragment_bottom_left"
+        app:layout_constraintBottom_toTopOf="@id/bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/nav_rail_view"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:navGraph="@navigation/mobile_navigation" />
 
-    <include
-        android:id="@+id/fragment_bottom_left"
-        layout="@layout/layout_mini_music_bar"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:menu="@menu/bottom_nav_menu_main"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/nav_rail_view" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

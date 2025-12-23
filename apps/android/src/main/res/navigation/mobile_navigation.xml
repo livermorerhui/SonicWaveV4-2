@@ -23,4 +23,10 @@
         android:label="自设模式"
         app:layout="@layout/fragment_custom_preset" />
 
+    <fragment
+        android:id="@+id/navigation_me"
+        android:name="com.example.sonicwavev4.ui.login.LoginContainerFragment"
+        android:label="我的"
+        app:layout="@layout/fragment_login_container" />
+
 </navigation>

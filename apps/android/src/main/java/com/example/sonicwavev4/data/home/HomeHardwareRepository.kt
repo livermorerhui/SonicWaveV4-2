@@ -520,7 +520,12 @@ class HomeHardwareRepository(
                             }
                         }
                     }
-                    val result = audioTrack?.write(buffer, 0, buffer.size) ?: -1
+                    val track = audioTrack
+                    val result = try {
+                        track?.write(buffer, 0, buffer.size) ?: -1
+                    } catch (e: IllegalStateException) {
+                        break
+                    }
                     if (result <= 0) break
                 }
             } finally {
@@ -530,22 +535,36 @@ class HomeHardwareRepository(
     }
 
     private fun stopTonePlayback(releaseAudioFocus: Boolean = true) {
-        toneJob?.cancel()
+        val job = toneJob
         toneJob = null
-        audioTrack?.stop()
-        audioTrack?.release()
-        audioTrack = null
-        if (releaseAudioFocus && hasAudioFocus) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                audioFocusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
-            } else {
-                @Suppress("DEPRECATION")
-                audioManager?.abandonAudioFocus(null)
+        scope.launch(Dispatchers.Default) {
+            job?.cancelAndJoin()
+            val track = audioTrack
+            audioTrack = null
+            if (track != null) {
+                try {
+                    track.stop()
+                } catch (_: IllegalStateException) {
+                    // Ignored: already stopped/released.
+                }
+                try {
+                    track.release()
+                } catch (_: IllegalStateException) {
+                    // Ignored: already released.
+                }
             }
-            audioFocusRequest = null
-            hasAudioFocus = false
+            if (releaseAudioFocus && hasAudioFocus) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    audioFocusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
+                } else {
+                    @Suppress("DEPRECATION")
+                    audioManager?.abandonAudioFocus(null)
+                }
+                audioFocusRequest = null
+                hasAudioFocus = false
+            }
+            _state.update { it.copy(isTonePlaying = false) }
         }
-        _state.update { it.copy(isTonePlaying = false) }
     }
 
     private suspend fun applyFrequencyInternal(value: Int, force: Boolean): WriteResult {

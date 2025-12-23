@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -34,6 +35,22 @@ class ResetPasswordFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupClickListeners()
         collectUiState()
+    }
+
+    private fun hostContainerId(): Int {
+        return if (requireActivity().findViewById<View?>(R.id.fragment_right_main) != null) {
+            R.id.fragment_right_main
+        } else {
+            R.id.login_container_host
+        }
+    }
+
+    private fun hostFragmentManager(): FragmentManager {
+        return if (requireActivity().findViewById<View?>(R.id.fragment_right_main) != null) {
+            requireActivity().supportFragmentManager
+        } else {
+            parentFragmentManager
+        }
     }
 
     private fun setupClickListeners() {
@@ -78,8 +95,8 @@ class ResetPasswordFragment : Fragment() {
     }
 
     private fun navigateBackToLogin() {
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_right_main, LoginFragment())
+        hostFragmentManager().beginTransaction()
+            .replace(hostContainerId(), LoginFragment())
             .commit()
     }
 

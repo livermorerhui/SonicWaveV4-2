@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -40,6 +41,22 @@ class RegisterFragment : Fragment() {
     private var hasShownHumedsBindDialog = false
     private var hasNavigatedBack = false
     private var humedsBindDialog: AlertDialog? = null
+
+    private fun hostContainerId(): Int {
+        return if (requireActivity().findViewById<View?>(R.id.fragment_right_main) != null) {
+            R.id.fragment_right_main
+        } else {
+            R.id.login_container_host
+        }
+    }
+
+    private fun hostFragmentManager(): FragmentManager {
+        return if (requireActivity().findViewById<View?>(R.id.fragment_right_main) != null) {
+            requireActivity().supportFragmentManager
+        } else {
+            parentFragmentManager
+        }
+    }
     private var humedsPwdInput: EditText? = null
     private var lastCodeSent: Boolean = false
     private var lastNeedSmsInput: Boolean = true
@@ -292,8 +309,8 @@ class RegisterFragment : Fragment() {
     }
 
     private fun navigateBackToLogin() {
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragment_right_main, LoginFragment())
+        hostFragmentManager().beginTransaction()
+            .replace(hostContainerId(), LoginFragment())
             .commit()
     }
 

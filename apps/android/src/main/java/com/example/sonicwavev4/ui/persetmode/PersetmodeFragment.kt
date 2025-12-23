@@ -24,6 +24,7 @@ import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentPersetmodeBinding
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.common.UiEvent
+import com.example.sonicwavev4.ui.common.SessionControlUiMapper
 import com.example.sonicwavev4.ui.custompreset.CustomPresetEditorFragment
 import com.example.sonicwavev4.ui.persetmode.PresetCategory.BUILT_IN
 import com.example.sonicwavev4.ui.customer.CustomerViewModel
@@ -247,21 +248,12 @@ class PersetmodeFragment : Fragment() {
     }
 
     private fun renderState(state: PresetModeUiState, sessionState: VibrationSessionUiState) {
-        val startLabel = when {
-            sessionState.isPaused -> "继续"
-            sessionState.isRunning -> "暂停"
-            else -> getString(R.string.button_start)
-        }
-        binding.btnStartStop.text = startLabel
+        val startUi = SessionControlUiMapper.primaryButtonUi(sessionState)
+        binding.btnStartStop.setText(startUi.labelRes)
         binding.btnStartStop.isEnabled = sessionState.startButtonEnabled || sessionState.isRunning || sessionState.isPaused
-        val startBg = when {
-            sessionState.isPaused -> R.drawable.bg_jixu_green  // 继续：绿色
-            sessionState.isRunning -> R.drawable.bg_button_yellow // 暂停：黄色
-            else -> R.drawable.bg_home_start_button             // 未运行：绿色
-        }
         ViewCompat.setBackgroundTintList(binding.btnStartStop, null)
         binding.btnStartStop.backgroundTintList = null
-        binding.btnStartStop.setBackgroundResource(startBg)
+        binding.btnStartStop.setBackgroundResource(startUi.backgroundRes)
         binding.btnStartStop.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
 
         val selectedTextColor = ContextCompat.getColor(requireContext(), android.R.color.white)

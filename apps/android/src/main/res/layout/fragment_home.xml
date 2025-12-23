@@ -8,293 +8,601 @@
     android:padding="16dp"
     tools:context=".ui.home.HomeFragment">
 
-    <!-- Guideline remains the same, it's our flexible divider -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.7" />
-
-
     <!-- ====================================================== -->
     <!-- ===   [OPTIMIZED] Left Side: Parameter Controls    === -->
     <!-- ====================================================== -->
 
-    <!-- 1. Frequency Control Group -->
-    <TextView
-        android:id="@+id/tv_label_frequency"
-        style="@style/ParameterLabel"
-        android:text="@string/label_frequency"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintEnd_toStartOf="@+id/btn_frequency_down" />
-
-    <ImageButton
-        android:id="@+id/btn_frequency_down"
-        style="@style/ParameterButton.Minus"
-        android:contentDescription="@string/cd_frequency_decrease"
-        android:layout_marginStart="8dp"
-        app:layout_constraintTop_toTopOf="@id/tv_label_frequency"
-        app:layout_constraintBottom_toBottomOf="@id/tv_label_frequency"
-        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
-        app:layout_constraintEnd_toStartOf="@+id/tv_frequency_value"/>
-
-    <TextView
-        android:id="@+id/tv_frequency_value"
-        style="@style/ParameterDisplay"
-        android:text="0 Hz"
-        android:minHeight="48dp"
-        app:layout_constraintTop_toTopOf="@id/btn_frequency_down"
-        app:layout_constraintBottom_toBottomOf="@id/btn_frequency_down"
-        app:layout_constraintStart_toEndOf="@+id/btn_frequency_down"
-        app:layout_constraintEnd_toStartOf="@+id/btn_frequency_up"
-        app:layout_constrainedWidth="true"/> <!-- Allow text to wrap if squished -->
-
-    <ImageButton
-        android:id="@+id/btn_frequency_up"
-        style="@style/ParameterButton.Plus"
-        android:contentDescription="@string/cd_frequency_increase"
-        app:layout_constraintTop_toTopOf="@id/tv_frequency_value"
-        app:layout_constraintBottom_toBottomOf="@id/tv_frequency_value"
-        app:layout_constraintStart_toEndOf="@+id/tv_frequency_value"
-        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
-        android:layout_marginEnd="8dp"/>
-
-    <!-- Barrier ensures all minus buttons align vertically after the longest label -->
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrier_labels"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_manual_params"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:barrierDirection="end"
-        app:constraint_referenced_ids="tv_label_frequency, tv_label_intensity, tv_label_time" />
-
-
-    <!-- 2. Intensity Control Group (follows the same pattern) -->
-    <TextView
-        android:id="@+id/tv_label_intensity"
-        style="@style/ParameterLabel"
-        android:text="@string/label_intensity"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginTop="0dp"
+        app:cardUseCompatPadding="false"
+        app:cardPreventCornerOverlap="true"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_label_frequency"
-        android:layout_marginTop="24dp"/>
-
-    <ImageButton
-        android:id="@+id/btn_intensity_down"
-        style="@style/ParameterButton.Minus"
-        android:contentDescription="@string/cd_intensity_decrease"
-        android:layout_marginStart="8dp"
-        app:layout_constraintTop_toTopOf="@id/tv_label_intensity"
-        app:layout_constraintBottom_toBottomOf="@id/tv_label_intensity"
-        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
-        app:layout_constraintEnd_toStartOf="@+id/tv_intensity_value"/>
-
-    <TextView
-        android:id="@+id/tv_intensity_value"
-        style="@style/ParameterDisplay"
-        android:text="0"
-        android:minHeight="48dp"
-        app:layout_constraintTop_toTopOf="@id/btn_intensity_down"
-        app:layout_constraintBottom_toBottomOf="@id/btn_intensity_down"
-        app:layout_constraintStart_toEndOf="@+id/btn_intensity_down"
-        app:layout_constraintEnd_toStartOf="@+id/btn_intensity_up"
-        app:layout_constrainedWidth="true"/>
-
-    <ImageButton
-        android:id="@+id/btn_intensity_up"
-        style="@style/ParameterButton.Plus"
-        android:contentDescription="@string/cd_intensity_increase"
-        app:layout_constraintTop_toTopOf="@id/tv_intensity_value"
-        app:layout_constraintBottom_toBottomOf="@id/tv_intensity_value"
-        app:layout_constraintStart_toEndOf="@+id/tv_intensity_value"
-        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
-        android:layout_marginEnd="8dp"/>
-
-
-    <!-- 3. Time Control Group -->
-    <TextView
-        android:id="@+id/tv_label_time"
-        style="@style/ParameterLabel"
-        android:text="@string/label_time"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_label_intensity"
-        android:layout_marginTop="24dp"/>
-
-    <ImageButton
-        android:id="@+id/btn_time_down"
-        style="@style/ParameterButton.Minus"
-        android:contentDescription="@string/cd_time_decrease"
-        android:layout_marginStart="8dp"
-        app:layout_constraintTop_toTopOf="@id/tv_label_time"
-        app:layout_constraintBottom_toBottomOf="@id/tv_label_time"
-        app:layout_constraintStart_toEndOf="@+id/barrier_labels"
-        app:layout_constraintEnd_toStartOf="@+id/tv_time_value"/>
-
-    <TextView
-        android:id="@+id/tv_time_value"
-        style="@style/ParameterDisplay"
-        android:text="0 分钟"
-        android:minHeight="48dp"
-        app:layout_constraintTop_toTopOf="@id/btn_time_down"
-        app:layout_constraintBottom_toBottomOf="@id/btn_time_down"
-        app:layout_constraintStart_toEndOf="@+id/btn_time_down"
-        app:layout_constraintEnd_toStartOf="@+id/btn_time_up"
-        app:layout_constrainedWidth="true"/>
-
-    <ImageButton
-        android:id="@+id/btn_time_up"
-        style="@style/ParameterButton.Plus"
-        android:contentDescription="@string/cd_time_increase"
-        app:layout_constraintTop_toTopOf="@id/tv_time_value"
-        app:layout_constraintBottom_toBottomOf="@id/tv_time_value"
-        app:layout_constraintStart_toEndOf="@+id/tv_time_value"
-        app:layout_constraintEnd_toEndOf="@id/guideline_vertical"
-        android:layout_marginEnd="8dp"/>
-
-    <!-- ===================================================== -->
-    <!-- ===    [REFACTORED] Right Side: Keypad            === -->
-    <!-- ===================================================== -->
-
-    <!-- All keypad buttons are now managed by this Flow helper -->
-
-    <!-- Keypad Buttons (no layout constraints needed anymore) -->
-
-    <androidx.constraintlayout.helper.widget.Flow
-        android:id="@+id/flow_keypad"
-        android:layout_width="200dp"
-        android:layout_height="270dp"
-        android:layout_marginStart="8dp"
-        app:constraint_referenced_ids="btn_key_7, btn_key_8, btn_key_9,
-                                       btn_key_4, btn_key_5, btn_key_6,
-                                       btn_key_1, btn_key_2, btn_key_3,
-                                       btn_key_clear, btn_key_0, btn_key_enter"
-
-        app:flow_horizontalStyle="spread_inside"
-        app:flow_maxElementsWrap="3"
-        app:flow_verticalStyle="spread_inside"
-        app:flow_wrapMode="chain"
-
-        app:layout_constraintBottom_toBottomOf="@id/btn_stop"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.047"
-        app:layout_constraintStart_toEndOf="@id/guideline_vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <Button
-        android:id="@+id/btn_key_7"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:background="@drawable/bg_keypad_yellow"
-        android:backgroundTint="@null"
-        android:text="7"
-        android:textColor="#000000" />
-    <Button
-        android:id="@+id/btn_key_8"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:background="@drawable/bg_keypad_yellow"
-        android:backgroundTint="@null"
-        android:text="8"
-        android:textColor="#000000" />
-    <Button
-        android:id="@+id/btn_key_9"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:background="@drawable/bg_keypad_yellow"
-        android:backgroundTint="@null"
-        android:text="9"
-        android:textColor="#000000" />
-    <Button
-        android:id="@+id/btn_key_4"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:background="@drawable/bg_keypad_yellow"
-        android:backgroundTint="@null"
-        android:text="4"
-        android:textColor="#000000" />
-    <Button
-        android:id="@+id/btn_key_5"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:background="@drawable/bg_keypad_yellow"
-        android:backgroundTint="@null"
-        android:text="5"
-        android:textColor="#000000" />
-    <Button
-        android:id="@+id/btn_key_6"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:background="@drawable/bg_keypad_yellow"
-        android:backgroundTint="@null"
-        android:text="6"
-        android:textColor="#000000" />
-    <Button
-        android:id="@+id/btn_key_1"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:background="@drawable/bg_keypad_yellow"
-        android:backgroundTint="@null"
-        android:text="1"
-        android:textColor="#000000" />
-    <Button
-        android:id="@+id/btn_key_2"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:background="@drawable/bg_keypad_yellow"
-        android:backgroundTint="@null"
-        android:text="2"
-        android:textColor="#000000" />
-    <Button
-        android:id="@+id/btn_key_3"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:background="@drawable/bg_keypad_yellow"
-        android:backgroundTint="@null"
-        android:text="3"
-        android:textColor="#000000" />
-    <Button
-        android:id="@+id/btn_key_0"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:background="@drawable/bg_keypad_yellow"
-        android:backgroundTint="@null"
-        android:text="0"
-        android:textColor="#000000" />
-    <Button
-        android:id="@+id/btn_key_clear"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:text="C"
-        android:background="@drawable/bg_keypad_red"
-        android:backgroundTint="@null"
-        android:textColor="#FFFFFF" />
-    <ImageButton
-        android:id="@+id/btn_key_enter"
-        style="@style/KeypadButton"
-        android:minHeight="48dp"
-        android:src="@drawable/ic_return_key_white"
-        android:contentDescription="输入"
-        app:tint="?attr/colorOnSurface"
-        android:scaleType="fitCenter"
-        android:background="@drawable/bg_keypad_green"
-        android:backgroundTint="@null"
-        android:tint="#FFFFFF" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/manual_params_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_phone_section_frame"
+            android:padding="12dp">
 
-    <Button
-        android:id="@+id/btn_soft_resume_inline"
-        style="@style/KeypadButton"
+            <!-- 1. Frequency Control Group -->
+            <TextView
+                android:id="@+id/tv_label_frequency"
+                style="@style/ParameterLabel"
+                android:text="@string/label_frequency"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintEnd_toStartOf="@+id/btn_frequency_down" />
+
+            <ImageButton
+                android:id="@+id/btn_frequency_down"
+                style="@style/ParameterButton.Minus"
+                android:contentDescription="@string/cd_frequency_decrease"
+                android:layout_marginStart="4dp"
+                app:layout_constraintTop_toTopOf="@id/tv_label_frequency"
+                app:layout_constraintBottom_toBottomOf="@id/tv_label_frequency"
+                app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+                app:layout_constraintEnd_toStartOf="@+id/tv_frequency_value"/>
+
+            <TextView
+                android:id="@+id/tv_frequency_value"
+                style="@style/ParameterDisplay"
+                android:text="0 Hz"
+                android:minHeight="48dp"
+                app:layout_constraintTop_toTopOf="@id/btn_frequency_down"
+                app:layout_constraintBottom_toBottomOf="@id/btn_frequency_down"
+                app:layout_constraintStart_toEndOf="@+id/btn_frequency_down"
+                app:layout_constraintEnd_toStartOf="@+id/btn_frequency_up"
+                app:layout_constrainedWidth="true"/> <!-- Allow text to wrap if squished -->
+
+            <ImageButton
+                android:id="@+id/btn_frequency_up"
+                style="@style/ParameterButton.Plus"
+                android:contentDescription="@string/cd_frequency_increase"
+                app:layout_constraintTop_toTopOf="@id/tv_frequency_value"
+                app:layout_constraintBottom_toBottomOf="@id/tv_frequency_value"
+                app:layout_constraintStart_toEndOf="@+id/tv_frequency_value"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="4dp"/>
+
+            <!-- Barrier ensures all minus buttons align vertically after the longest label -->
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier_labels"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="end"
+                app:constraint_referenced_ids="tv_label_frequency, tv_label_intensity, tv_label_time" />
+
+
+            <!-- 2. Intensity Control Group (follows the same pattern) -->
+            <TextView
+                android:id="@+id/tv_label_intensity"
+                style="@style/ParameterLabel"
+                android:text="@string/label_intensity"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_label_frequency"
+                android:layout_marginTop="12dp"/>
+
+            <ImageButton
+                android:id="@+id/btn_intensity_down"
+                style="@style/ParameterButton.Minus"
+                android:contentDescription="@string/cd_intensity_decrease"
+                android:layout_marginStart="4dp"
+                app:layout_constraintTop_toTopOf="@id/tv_label_intensity"
+                app:layout_constraintBottom_toBottomOf="@id/tv_label_intensity"
+                app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+                app:layout_constraintEnd_toStartOf="@+id/tv_intensity_value"/>
+
+            <TextView
+                android:id="@+id/tv_intensity_value"
+                style="@style/ParameterDisplay"
+                android:text="0"
+                android:minHeight="48dp"
+                app:layout_constraintTop_toTopOf="@id/btn_intensity_down"
+                app:layout_constraintBottom_toBottomOf="@id/btn_intensity_down"
+                app:layout_constraintStart_toEndOf="@+id/btn_intensity_down"
+                app:layout_constraintEnd_toStartOf="@+id/btn_intensity_up"
+                app:layout_constrainedWidth="true"/>
+
+            <ImageButton
+                android:id="@+id/btn_intensity_up"
+                style="@style/ParameterButton.Plus"
+                android:contentDescription="@string/cd_intensity_increase"
+                app:layout_constraintTop_toTopOf="@id/tv_intensity_value"
+                app:layout_constraintBottom_toBottomOf="@id/tv_intensity_value"
+                app:layout_constraintStart_toEndOf="@+id/tv_intensity_value"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="4dp"/>
+
+
+            <!-- 3. Time Control Group -->
+            <TextView
+                android:id="@+id/tv_label_time"
+                style="@style/ParameterLabel"
+                android:text="@string/label_time"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_label_intensity"
+                android:layout_marginTop="12dp"/>
+
+            <ImageButton
+                android:id="@+id/btn_time_down"
+                style="@style/ParameterButton.Minus"
+                android:contentDescription="@string/cd_time_decrease"
+                android:layout_marginStart="4dp"
+                app:layout_constraintTop_toTopOf="@id/tv_label_time"
+                app:layout_constraintBottom_toBottomOf="@id/tv_label_time"
+                app:layout_constraintStart_toEndOf="@+id/barrier_labels"
+                app:layout_constraintEnd_toStartOf="@+id/tv_time_value"/>
+
+            <TextView
+                android:id="@+id/tv_time_value"
+                style="@style/ParameterDisplay"
+                android:text="0 分钟"
+                android:minHeight="48dp"
+                app:layout_constraintTop_toTopOf="@id/btn_time_down"
+                app:layout_constraintBottom_toBottomOf="@id/btn_time_down"
+                app:layout_constraintStart_toEndOf="@+id/btn_time_down"
+                app:layout_constraintEnd_toStartOf="@+id/btn_time_up"
+                app:layout_constrainedWidth="true"/>
+
+            <ImageButton
+                android:id="@+id/btn_time_up"
+                style="@style/ParameterButton.Plus"
+                android:contentDescription="@string/cd_time_increase"
+                app:layout_constraintTop_toTopOf="@id/tv_time_value"
+                app:layout_constraintBottom_toBottomOf="@id/tv_time_value"
+                app:layout_constraintStart_toEndOf="@+id/tv_time_value"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="4dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/layout_expert_modes_phone"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        app:cardUseCompatPadding="false"
+        app:cardPreventCornerOverlap="true"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_manual_params"
+        app:layout_constraintBottom_toTopOf="@id/btn_start_stop">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_expert_modes_inner"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_phone_section_frame"
+            android:padding="12dp">
+
+            <androidx.constraintlayout.helper.widget.Flow
+                android:id="@+id/flow_expert_modes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                app:constraint_referenced_ids="btn_whole_body,btn_vision_mode,btn_upper_head,btn_chest_abdomen,btn_lower_limb"
+                app:flow_horizontalAlign="start"
+                app:flow_horizontalGap="12dp"
+                app:flow_horizontalStyle="spread_inside"
+                app:flow_maxElementsWrap="2"
+                app:flow_verticalGap="12dp"
+                app:flow_wrapMode="aligned"
+
+                app:layout_constraintEnd_toStartOf="@id/layout_expert_adjust"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/btn_whole_body"
+                style="@style/Widget.SonicWave.PresetModeButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_preset_mode_button_default"
+                android:minWidth="0dp"
+                android:text="全身模式"
+                android:textAllCaps="false"
+                android:textColor="@color/color_preset_mode_button_text" />
+
+            <Button
+                android:id="@+id/btn_vision_mode"
+                style="@style/Widget.SonicWave.PresetModeButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_preset_mode_button_default"
+                android:minWidth="0dp"
+                android:text="视力模式"
+                android:textAllCaps="false"
+                android:textColor="@color/color_preset_mode_button_text" />
+
+            <Button
+                android:id="@+id/btn_upper_head"
+                style="@style/Widget.SonicWave.PresetModeButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_preset_mode_button_default"
+                android:minWidth="0dp"
+                android:text="头部上肢"
+                android:textAllCaps="false"
+                android:textColor="@color/color_preset_mode_button_text" />
+
+            <Button
+                android:id="@+id/btn_chest_abdomen"
+                style="@style/Widget.SonicWave.PresetModeButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_preset_mode_button_default"
+                android:minWidth="0dp"
+                android:text="胸部腹部"
+                android:textAllCaps="false"
+                android:textColor="@color/color_preset_mode_button_text" />
+
+            <Button
+                android:id="@+id/btn_lower_limb"
+                style="@style/Widget.SonicWave.PresetModeButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_preset_mode_button_default"
+                android:minWidth="0dp"
+                android:text="下肢模式"
+                android:textAllCaps="false"
+                android:textColor="@color/color_preset_mode_button_text" />
+
+            <!-- 右侧“调整”区域：强度百分比 + 次数 -->
+            <LinearLayout
+                android:id="@+id/layout_expert_adjust"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <TextView
+                    android:id="@+id/tv_label_expert_adjust"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:text="@string/label_adjust"
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
+
+                <LinearLayout
+                    android:id="@+id/layout_intensity_scale"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_label_intensity_scale"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="@string/label_intensity"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+
+                    <ImageButton
+                        android:id="@+id/btn_intensity_scale_plus"
+                        android:layout_width="60dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="增加百分比"
+                        android:padding="0dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_triangle_up" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="4dp"
+                        android:background="@drawable/bg_intensity_percent_pill"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp">
+
+                        <EditText
+                            android:id="@+id/input_intensity_scale"
+                            android:layout_width="40dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="4dp"
+                            android:background="@null"
+                            android:digits="0123456789"
+                            android:gravity="center"
+                            android:hint="100"
+                            android:inputType="number"
+                            android:maxLength="3"
+                            android:padding="0dp"
+                            android:text="100"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="4dp"
+                            android:text="%"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+
+                    <ImageButton
+                        android:id="@+id/btn_intensity_scale_minus"
+                        android:layout_width="60dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="4dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="减少百分比"
+                        android:padding="0dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_triangle_down" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_repeat_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_label_repeat_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="@string/label_repeat_count"
+                        android:textColor="@color/black"
+                        android:textSize="14sp" />
+
+                    <ImageButton
+                        android:id="@+id/btn_repeat_count_plus"
+                        android:layout_width="60dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/cd_repeat_count_increase"
+                        android:padding="0dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_triangle_up" />
+
+                    <TextView
+                        android:id="@+id/tv_repeat_count_value"
+                        android:layout_width="60dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="4dp"
+                        android:background="@drawable/bg_intensity_percent_pill"
+                        android:gravity="center"
+                        android:text="1"
+                        android:textColor="@color/black"
+                        android:textSize="18sp" />
+
+                    <ImageButton
+                        android:id="@+id/btn_repeat_count_minus"
+                        android:layout_width="60dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="4dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/cd_repeat_count_decrease"
+                        android:padding="0dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_triangle_down" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- ===================================================== -->
+    <!-- ===         Phone Keypad Container                 === -->
+    <!-- ===================================================== -->
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/layout_keypad_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/soft_resume"
-        android:background="@drawable/bg_keypad_green"
-        android:backgroundTint="@null"
+        android:background="@drawable/bg_keypad_container_gray"
+        android:padding="12dp"
         android:visibility="gone"
-        app:layout_constraintStart_toEndOf="@id/guideline_vertical"
-        app:layout_constraintTop_toBottomOf="@id/flow_keypad" />
+        app:cardCornerRadius="20dp"
+        app:cardElevation="6dp"
+        app:cardPreventCornerOverlap="true"
+        app:cardUseCompatPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/card_manual_params"
+        app:layout_constraintEnd_toEndOf="@id/card_manual_params">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="12dp" >
+
+            <androidx.constraintlayout.helper.widget.Flow
+                android:id="@+id/flow_keypad"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:constraint_referenced_ids="btn_key_7, btn_key_8, btn_key_9,
+                                               btn_key_4, btn_key_5, btn_key_6,
+                                               btn_key_1, btn_key_2, btn_key_3,
+                                               btn_key_clear, btn_key_0, btn_key_enter"
+                app:flow_horizontalGap="8dp"
+                app:flow_horizontalStyle="spread_inside"
+                app:flow_maxElementsWrap="3"
+                app:flow_verticalGap="8dp"
+                app:flow_verticalStyle="spread_inside"
+                app:flow_wrapMode="chain"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/btn_key_7"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_yellow"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="7"
+                android:textColor="#000000"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_key_8"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_yellow"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="8"
+                android:textColor="#000000"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_key_9"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_yellow"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="9"
+                android:textColor="#000000"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_key_4"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_yellow"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="4"
+                android:textColor="#000000"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_key_5"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_yellow"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="5"
+                android:textColor="#000000"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_key_6"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_yellow"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="6"
+                android:textColor="#000000"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_key_1"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_yellow"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="1"
+                android:textColor="#000000"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_key_2"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_yellow"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="2"
+                android:textColor="#000000"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_key_3"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_yellow"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="3"
+                android:textColor="#000000"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_key_0"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_yellow"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="0"
+                android:textColor="#000000"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_key_clear"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_red"
+                android:backgroundTint="@null"
+                android:minHeight="48dp"
+                android:text="C"
+                android:textColor="#FFFFFF"
+                android:visibility="gone"
+                tools:ignore="MissingConstraints" />
+
+            <ImageButton
+                android:id="@+id/btn_key_enter"
+                style="@style/KeypadButton"
+                android:background="@drawable/bg_keypad_green"
+                android:backgroundTint="@null"
+                android:contentDescription="输入"
+                android:minHeight="48dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_return_key_white"
+                android:visibility="gone"
+                app:tint="#FFFFFF"
+                tools:ignore="MissingConstraints" />
+
+            <Button
+                android:id="@+id/btn_soft_resume_inline"
+                style="@style/KeypadButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_keypad_green"
+                android:backgroundTint="@null"
+                android:text="@string/soft_resume"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/flow_keypad" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
     <!-- ===================================================== -->
     <!-- ===         Bottom: Functional Buttons            === -->
@@ -304,17 +612,20 @@
         style="@style/NoTintButton"
         android:layout_width="0dp"
         android:layout_height="70dp"
+        android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="16dp"
-        android:background="@drawable/bg_button_yellow"
+        android:background="@drawable/bg_jixu_green"
         android:backgroundTint="@null"
         app:backgroundTint="@null"
         android:minHeight="48dp"
         android:text="开始"
         android:textColor="#000000"
-        app:layout_constraintEnd_toStartOf="@+id/btn_stop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_stop"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_time_down"
+        app:layout_constraintTop_toBottomOf="@id/layout_expert_modes_phone"
+        app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintWidth_min="120dp" />
 
     <Button
@@ -323,23 +634,19 @@
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:background="@drawable/bg_button_red"
+        android:backgroundTint="@null"
+        app:backgroundTint="@null"
         android:minHeight="48dp"
         android:text="@string/button_stop"
         android:textColor="#000000"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_vertical"
-        app:layout_constraintStart_toEndOf="@+id/btn_start_stop"
-        app:layout_constraintTop_toBottomOf="@+id/btn_time_up"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_start_stop"
+        app:layout_constraintTop_toTopOf="@id/btn_start_stop"
         app:layout_constraintWidth_min="120dp" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_soft_panel_top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_end="94dp" />
 
     <LinearLayout
         android:id="@+id/layout_soft_panel_expanded"
@@ -353,7 +660,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/guideline_soft_panel_top">
+        app:layout_constraintTop_toBottomOf="@id/btn_stop">
 
         <Button
             android:id="@+id/btn_soft_stop_expanded"

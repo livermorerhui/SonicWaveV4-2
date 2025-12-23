@@ -90,6 +90,8 @@ data class PresetModeUiState(
     val frequencyHz: Int? = null,
     val intensity01V: Int? = null,
     val intensityScalePct: Int = 100,
+    val baseDurationSeconds: Int = 0,
+    val repeatCount: Int = 1,
     val remainingSeconds: Int = 0,
     val totalDurationSeconds: Int = 0,
     val customPresets: List<CustomPresetUiModel> = emptyList(),
@@ -102,6 +104,11 @@ class PersetmodeViewModel(
     private val sessionRepository: HomeSessionRepository,
     private val customPresetRepository: CustomPresetRepository
 ) : AndroidViewModel(application) {
+
+    companion object {
+        private const val MIN_REPEAT_COUNT = 1
+        private const val MAX_REPEAT_COUNT = 10
+    }
 
     private val presetModes: List<PresetMode> = listOf(
         WholeBody10m,
@@ -134,6 +141,7 @@ class PersetmodeViewModel(
     private var lastHardwareReady = false
     private var shouldPlayTone = false
     private var isPaused = false
+    private var runningBaseSteps: List<Step> = emptyList()
     // 安全降强状态
     private var softIntensityLimitedToTwenty: Boolean = false
     private var softOriginalIntensity: Int? = null
@@ -253,6 +261,9 @@ class PersetmodeViewModel(
                     hardwareRepository.stopStandaloneTone()
                 } else {
                     hardwareRepository.stopOutput()
+                    if (shouldPlayTone) {
+                        hardwareRepository.stopStandaloneTone()
+                    }
                 }
             } catch (e: Exception) {
                 Log.w("PersetmodeViewModel", "Failed to pause output", e)
@@ -353,6 +364,7 @@ class PersetmodeViewModel(
                             updated.copy(
                                 frequencyHz = null,
                                 intensity01V = null,
+                                baseDurationSeconds = 0,
                                 remainingSeconds = 0,
                                 totalDurationSeconds = 0
                             )
@@ -381,17 +393,26 @@ class PersetmodeViewModel(
         val steps = scaledSteps(mode)
         val first = steps.firstOrNull()
         updateUiState {
+            val total = mode.totalDurationSec * it.repeatCount
             it.copy(
                 category = PresetCategory.BUILT_IN,
                 selectedModeIndex = clamped,
                 frequencyHz = first?.frequencyHz,
                 intensity01V = first?.intensity01V,
-                remainingSeconds = mode.totalDurationSec,
-                totalDurationSeconds = mode.totalDurationSec
+                baseDurationSeconds = mode.totalDurationSec,
+                remainingSeconds = total,
+                totalDurationSeconds = total
             )
         }
         recomputeStartButtonEnabled()
     }
+
+    fun ensureModeButtonsEnabled() {
+        val state = _uiState.value
+        if (state.isRunning || state.modeButtonsEnabled) return
+        updateUiState { it.copy(modeButtonsEnabled = true) }
+    }
+
 
     fun enterCustomMode() {
         if (_uiState.value.isRunning) return
@@ -426,6 +447,7 @@ class PersetmodeViewModel(
                 customPresets = it.customPresets.map { model -> model.copy(isSelected = false) },
                 frequencyHz = null,
                 intensity01V = null,
+                baseDurationSeconds = 0,
                 remainingSeconds = 0,
                 totalDurationSeconds = 0
             )
@@ -438,14 +460,16 @@ class PersetmodeViewModel(
         val first = orderedSteps.firstOrNull()
         val totalDuration = orderedSteps.sumOf { it.durationSec }
         updateUiState {
+            val total = totalDuration * it.repeatCount
             it.copy(
                 category = PresetCategory.CUSTOM,
                 selectedCustomPresetId = preset.id,
                 customPresets = customPresetsCache.map { presetItem -> presetItem.toUiModel(preset.id) },
                 frequencyHz = first?.frequencyHz,
                 intensity01V = first?.intensity01V,
-                remainingSeconds = totalDuration,
-                totalDurationSeconds = totalDuration
+                baseDurationSeconds = totalDuration,
+                remainingSeconds = total,
+                totalDurationSeconds = total
             )
         }
         recomputeStartButtonEnabled()
@@ -476,19 +500,56 @@ class PersetmodeViewModel(
         val clamped = value.coerceIn(1, 100)
         if (intensityScalePct.value == clamped) return
         intensityScalePct.value = clamped
+        val state = _uiState.value
+        if (state.isRunning) {
+            val currentIndex = state.currentStepIndex ?: 0
+            val baseStep = runningBaseSteps.getOrNull(currentIndex) ?: state.currentStep
+            val scaledStep = baseStep?.let { scaleStep(it, clamped / 100.0) }
+            val limitedStep = scaledStep?.let { applySoftLimitToStep(it) }
+            updateUiState { current ->
+                val updatedStep = limitedStep ?: current.currentStep
+                current.copy(
+                    intensityScalePct = clamped,
+                    intensity01V = updatedStep?.intensity01V ?: current.intensity01V,
+                    currentStep = updatedStep
+                )
+            }
+            if (limitedStep != null) {
+                viewModelScope.launch {
+                    applyIntensityAndUpdateState(limitedStep.intensity01V)
+                }
+            }
+            return
+        }
         val mode = currentMode()
         val first = scaledSteps(mode).firstOrNull()
         updateUiState {
-            val withScale = it.copy(intensityScalePct = clamped)
-            if (it.isRunning) {
-                withScale
-            } else {
-                withScale.copy(
-                    frequencyHz = first?.frequencyHz,
-                    intensity01V = first?.intensity01V
-                )
-            }
+            it.copy(
+                intensityScalePct = clamped,
+                frequencyHz = first?.frequencyHz,
+                intensity01V = first?.intensity01V
+            )
         }
+    }
+
+    fun incrementRepeatCount() = setRepeatCount(_uiState.value.repeatCount + 1)
+
+    fun decrementRepeatCount() = setRepeatCount(_uiState.value.repeatCount - 1)
+
+    fun setRepeatCount(value: Int) {
+        if (_uiState.value.isRunning) return
+        val clamped = value.coerceIn(MIN_REPEAT_COUNT, MAX_REPEAT_COUNT)
+        if (_uiState.value.repeatCount == clamped) return
+        updateUiState { state ->
+            // Keep total duration display in sync with repeat count.
+            val total = state.baseDurationSeconds * clamped
+            state.copy(
+                repeatCount = clamped,
+                remainingSeconds = total,
+                totalDurationSeconds = total
+            )
+        }
+        recomputeStartButtonEnabled()
     }
 
     fun setSessionActive(active: Boolean) {
@@ -584,7 +645,7 @@ class PersetmodeViewModel(
         val presetName: String
         if (category == PresetCategory.BUILT_IN) {
             val mode = currentMode()
-            val modeSteps = scaledSteps(mode)
+            val modeSteps = mode.steps
             if (modeSteps.isEmpty()) {
                 viewModelScope.launch {
                     _events.emit(UiEvent.ShowToast("当前预设没有有效步骤"))
@@ -619,6 +680,9 @@ class PersetmodeViewModel(
     private fun buildInitialUiState(): PresetModeUiState {
         val mode = presetModes.first()
         val first = scaledSteps(mode).firstOrNull()
+        val baseDuration = mode.totalDurationSec
+        val repeatCount = MIN_REPEAT_COUNT
+        val totalDuration = baseDuration * repeatCount
         return PresetModeUiState(
             modeSummaries = presetModes.map {
                 PresetModeSummary(
@@ -632,8 +696,10 @@ class PersetmodeViewModel(
             frequencyHz = first?.frequencyHz,
             intensity01V = first?.intensity01V,
             intensityScalePct = intensityScalePct.value,
-            remainingSeconds = mode.totalDurationSec,
-            totalDurationSeconds = mode.totalDurationSec,
+            baseDurationSeconds = baseDuration,
+            repeatCount = repeatCount,
+            remainingSeconds = totalDuration,
+            totalDurationSeconds = totalDuration,
             isStartEnabled = false
         )
     }
@@ -645,6 +711,18 @@ class PersetmodeViewModel(
         return mode.steps.map { step ->
             step.copy(intensity01V = scaleIntensity(step.intensity01V, factor))
         }
+    }
+
+    private fun scaleStep(step: Step, factor: Double = intensityScalePct.value / 100.0): Step {
+        return step.copy(intensity01V = scaleIntensity(step.intensity01V, factor))
+    }
+
+    // Repeat full step list to match the selected count for total duration.
+    private fun repeatSteps(steps: List<Step>, repeatCount: Int): List<Step> {
+        if (repeatCount <= 1) return steps
+        val repeated = ArrayList<Step>(steps.size * repeatCount)
+        repeat(repeatCount) { repeated.addAll(steps) }
+        return repeated
     }
 
     private fun applySoftLimitToIntensity(raw: Int): Int {
@@ -765,13 +843,15 @@ class PersetmodeViewModel(
         val first = steps.firstOrNull()
         val totalDuration = steps.sumOf { it.durationSec }
         updateUiState {
+            val total = totalDuration * it.repeatCount
             it.copy(
                 category = PresetCategory.CUSTOM,
                 selectedCustomPresetId = presetId,
                 frequencyHz = first?.frequencyHz,
                 intensity01V = first?.intensity01V,
-                remainingSeconds = totalDuration,
-                totalDurationSeconds = totalDuration
+                baseDurationSeconds = totalDuration,
+                remainingSeconds = total,
+                totalDurationSeconds = total
             )
         }
         recomputeStartButtonEnabled()
@@ -832,8 +912,12 @@ class PersetmodeViewModel(
     ) {
         clearSoftReductionState()
         isPaused = false
-        val first = steps.first()
-        val totalDuration = steps.sumOf { it.durationSec }
+        val repeatCount = _uiState.value.repeatCount
+        val baseDuration = steps.sumOf { it.durationSec }
+        val stepsToRun = repeatSteps(steps, repeatCount)
+        runningBaseSteps = stepsToRun
+        val first = applySoftLimitToStep(scaleStep(stepsToRun.first()))
+        val totalDuration = stepsToRun.sumOf { it.durationSec }
         val scalePct = intensityScalePct.value
         viewModelScope.launch {
             try {
@@ -883,12 +967,13 @@ class PersetmodeViewModel(
                     currentStep = initialStep,
                     frequencyHz = initialStep.frequencyHz,
                     intensity01V = initialStep.intensity01V,
+                    baseDurationSeconds = baseDuration,
                     remainingSeconds = totalDuration,
                     totalDurationSeconds = totalDuration
                 )
             }
             recomputeStartButtonEnabled()
-            runJob = launch { runPresetSequence(steps, useHardware) }
+            runJob = launch { runPresetSequence(stepsToRun, useHardware) }
         }
     }
 
@@ -944,7 +1029,7 @@ class PersetmodeViewModel(
         var remaining = steps.sumOf { it.durationSec }
         var index = 0
         while (index < steps.size && coroutineContext.isActive) {
-            val step = applySoftLimitToStep(steps[index])
+            val step = applySoftLimitToStep(scaleStep(steps[index]))
             Log.d(
                 "PresetRun",
                 "stepState index=$index freq=${step.frequencyHz} intensity=${step.intensity01V} duration=${step.durationSec} remaining=$remaining hardwareReady=$lastHardwareReady runningWithoutHardware=$runningWithoutHardware"
@@ -972,7 +1057,7 @@ class PersetmodeViewModel(
             }
             val nextIndex = index + 1
             if (nextIndex < steps.size && coroutineContext.isActive) {
-                val nextStep = applySoftLimitToStep(steps[nextIndex])
+                val nextStep = applySoftLimitToStep(scaleStep(steps[nextIndex]))
                 Log.d(
                     "PresetRun",
                     "applyStep index=$nextIndex freq=${nextStep.frequencyHz} intensity=${nextStep.intensity01V} scalePct=${intensityScalePct.value} useHardware=$useHardware shouldPlayTone=$shouldPlayTone"
@@ -1004,6 +1089,7 @@ class PersetmodeViewModel(
         }
         clearSoftReductionState()
         isPaused = false
+        runningBaseSteps = emptyList()
         val runId = currentRunId
         val wasSoftwareOnly = runningWithoutHardware
         runningWithoutHardware = false
@@ -1015,6 +1101,9 @@ class PersetmodeViewModel(
                     hardwareRepository.stopStandaloneTone()
                 } else {
                     hardwareRepository.stopOutput()
+                    if (shouldPlayTone) {
+                        hardwareRepository.stopStandaloneTone()
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("PersetmodeViewModel", "Failed to stop hardware output", e)
@@ -1032,22 +1121,29 @@ class PersetmodeViewModel(
         val nextIntensity: Int?
         val nextRemaining: Int
         val nextTotal: Int
+        val nextBaseDuration: Int
+        val repeatCount = _uiState.value.repeatCount
         if (isCustomCategory) {
             val preset = selectedCustomPreset()
             val steps = preset?.toSteps()
             val first = steps?.firstOrNull()
-            val total = steps?.sumOf { it.durationSec } ?: 0
+            val baseTotal = steps?.sumOf { it.durationSec } ?: 0
+            val total = baseTotal * repeatCount
             nextFreq = first?.frequencyHz
             nextIntensity = first?.intensity01V
             nextRemaining = total
             nextTotal = total
+            nextBaseDuration = baseTotal
         } else {
             val mode = currentMode()
             val first = scaledSteps(mode).firstOrNull()
+            val baseTotal = mode.totalDurationSec
+            val total = baseTotal * repeatCount
             nextFreq = first?.frequencyHz
             nextIntensity = first?.intensity01V
-            nextRemaining = mode.totalDurationSec
-            nextTotal = mode.totalDurationSec
+            nextRemaining = total
+            nextTotal = total
+            nextBaseDuration = baseTotal
         }
         updateUiState {
             it.copy(
@@ -1057,6 +1153,7 @@ class PersetmodeViewModel(
                 currentStep = null,
                 frequencyHz = nextFreq,
                 intensity01V = nextIntensity,
+                baseDurationSeconds = nextBaseDuration,
                 remainingSeconds = nextRemaining,
                 totalDurationSeconds = nextTotal
             )

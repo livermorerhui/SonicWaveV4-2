@@ -1,13 +1,17 @@
 package com.example.sonicwavev4.ui.home
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -17,21 +21,59 @@ import com.example.sonicwavev4.R
 import com.example.sonicwavev4.SoftReduceTouchHost
 import com.example.sonicwavev4.core.vibration.VibrationSessionIntent
 import com.example.sonicwavev4.core.vibration.VibrationSessionUiState
+import com.example.sonicwavev4.data.custompreset.CustomPresetRepositoryImpl
 import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentHomeBinding
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.ui.common.UiEvent
+import com.example.sonicwavev4.ui.common.SessionControlUiMapper
 import com.example.sonicwavev4.ui.customer.CustomerViewModel
 import com.example.sonicwavev4.ui.login.LoginViewModel
+import com.example.sonicwavev4.ui.persetmode.PersetmodeViewModel
+import com.example.sonicwavev4.ui.persetmode.PersetmodeViewModelFactory
+import com.example.sonicwavev4.ui.persetmode.PresetModeUiState
 import com.example.sonicwavev4.utils.SessionManager
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
 
+    private data class PhoneCombinedState(
+        val manualSession: VibrationSessionUiState,
+        val presetSession: VibrationSessionUiState,
+        val presetUi: PresetModeUiState,
+        val activeMode: HomeViewModel.ActiveMode
+    )
+
+    private companion object {
+        const val PHONE_LONG_PRESS_DELAY_MS = 2000L
+        const val PHONE_REPEAT_INTERVAL_MS = 150L
+    }
+
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private val isTablet by lazy { resources.getBoolean(R.bool.is_tablet) }
+    private val isPhoneHome: Boolean
+        get() = binding.btnWholeBody != null
+    private fun hasRightPanel(): Boolean =
+        requireActivity().findViewById<View?>(R.id.fragment_right_main) != null
+    private fun isPhone(): Boolean = !hasRightPanel()
+    // Phone-only: avoid caching view references across view recreation.
+    private val expertModeButtons: List<Button>
+        get() = listOfNotNull(
+            binding.btnWholeBody,
+            binding.btnVisionMode,
+            binding.btnUpperHead,
+            binding.btnChestAbdomen,
+            binding.btnLowerLimb
+        )
+    private var cachedManualActive: Boolean = false
+    private var cachedExpertActive: Boolean = false
+    private var lastExpertActive: Boolean = false
+    private var latestPresetSessionState: VibrationSessionUiState? = null
+    private var updatingIntensityScaleFromState = false
 
     private val authViewModel: LoginViewModel by activityViewModels()
     private val customerViewModel: CustomerViewModel by activityViewModels()
@@ -46,6 +88,22 @@ class HomeFragment : Fragment() {
         HomeViewModelFactory(application, hardwareRepository, sessionRepository)
     }
 
+    private val presetViewModel: PersetmodeViewModel by viewModels {
+        val application = requireActivity().application
+        val hardwareRepository = HomeHardwareRepository.getInstance(application)
+        val sessionRepository = HomeSessionRepository(
+            SessionManager(application.applicationContext),
+            RetrofitClient.api
+        )
+        val customPresetRepository = CustomPresetRepositoryImpl.getInstance(application)
+        PersetmodeViewModelFactory(
+            application,
+            hardwareRepository,
+            sessionRepository,
+            customPresetRepository
+        )
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
@@ -53,10 +111,20 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupPhoneInputs()
         setupClickListeners()
-        observeUiState()
+        setupExpertIntensityScaleControls()
+        setupExpertRepeatCountControls()
+        if (isPhoneHome) {
+            presetViewModel.ensureModeButtonsEnabled()
+            observePhoneState()
+            observePresetState()
+        } else {
+            observeUiState()
+        }
         observeEvents()
         observeAccountPrivileges()
+        observeSelectedCustomer()
     }
 
     override fun onDestroyView() {
@@ -70,13 +138,20 @@ class HomeFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         viewModel.stopSession()
+        if (isPhoneHome) {
+            presetViewModel.stopIfRunning()
+        }
     }
 
     override fun onResume() {
         super.onResume()
         viewModel.prepareHardwareForEntry()
-        (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener { ev ->
-            handleSoftReduceTouch(ev)
+        if (!isPhoneHome && isTablet) {
+            (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener { ev ->
+                handleSoftReduceTouch(ev)
+            }
+        } else {
+            (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener(null)
         }
     }
 
@@ -86,14 +161,25 @@ class HomeFragment : Fragment() {
     }
 
     private fun observeUiState() {
+        if (isPhoneHome) return
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { renderState(it) }
+                viewModel.uiState.collect {
+                    renderState(it)
+                }
             }
         }
     }
 
     private fun renderState(state: VibrationSessionUiState) {
+        if (isTablet) {
+            renderTabletState(state)
+        } else {
+            renderPhoneState(state)
+        }
+    }
+
+    private fun renderTabletState(state: VibrationSessionUiState) {
         val startButton = binding.btnStartStop
         val stopButton = binding.btnStop
         val recoverButton = binding.btnSoftResumeInline
@@ -115,27 +201,152 @@ class HomeFragment : Fragment() {
         recoverButton?.visibility =
             if (state.softReductionActive || (state.isRunning && state.intensityValue <= 20)) View.VISIBLE else View.GONE
 
-        val startLabel = when {
-            state.isPaused -> "继续"
-            state.isRunning -> "暂停"
-            else -> getString(R.string.button_start)
-        }
-        startButton?.text = startLabel
+        applyStartStopState(state, startButton, stopButton, hideStop = false)
+    }
 
-        val startBgRes = when {
-            state.isPaused -> R.drawable.bg_jixu_green // “继续”状态：绿色
-            state.isRunning -> R.drawable.bg_button_yellow // “暂停”状态：黄色
-            else -> R.drawable.bg_home_start_button // 未运行：绿色
+    private fun renderPhoneState(state: VibrationSessionUiState) {
+        val startButton = binding.btnStartStop
+        val stopButton = binding.btnStop
+        val recoverButton = binding.btnSoftResumeInline
+
+        val activeMode = viewModel.activeMode.value
+        val displayState = if (isPhoneHome && activeMode == HomeViewModel.ActiveMode.EXPERT) {
+            latestPresetSessionState ?: state
+        } else {
+            state
         }
+
+        binding.tvFrequencyValue.text = displayState.frequencyDisplay
+        binding.tvIntensityValue.text = displayState.intensityDisplay
+        binding.tvTimeValue.text = displayState.timeDisplay
+
+        val runningOrPaused = displayState.isRunning || displayState.isPaused
+        binding.tvTimeValue.isEnabled = !runningOrPaused
+
+        updateHighlights(displayState.activeInputType)
+
+        recoverButton?.visibility = View.GONE
+        binding.layoutSoftPanelExpanded?.visibility = View.GONE
+        binding.layoutSoftPanelCollapsed?.visibility = View.GONE
+
+        val activeSessionState = if (isPhoneHome && activeMode == HomeViewModel.ActiveMode.EXPERT) {
+            latestPresetSessionState ?: state
+        } else {
+            state
+        }
+
+        applyStartStopState(activeSessionState, startButton, stopButton, hideStop = false)
+    }
+
+    private fun renderPresetButtons(
+        presetState: PresetModeUiState,
+        buttonsEnabled: Boolean,
+        activeMode: HomeViewModel.ActiveMode
+    ) {
+        if (!isPhoneHome) return
+        val selectedTextColor = ContextCompat.getColor(requireContext(), android.R.color.white)
+        val defaultTextColor = ContextCompat.getColor(requireContext(), R.color.preset_mode_button_text_default)
+        val disabledTextColor = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
+
+        expertModeButtons.forEachIndexed { index, button ->
+            val selected = activeMode == HomeViewModel.ActiveMode.EXPERT && index == presetState.selectedModeIndex
+            val targetTextColor = when {
+                !buttonsEnabled -> disabledTextColor
+                selected -> selectedTextColor
+                else -> defaultTextColor
+            }
+            button.isEnabled = buttonsEnabled
+            button.background = ContextCompat.getDrawable(
+                requireContext(),
+                if (selected) R.drawable.bg_preset_mode_button_selected else R.drawable.bg_preset_mode_button_default
+            )
+            button.backgroundTintList = null
+            button.setTextColor(targetTextColor)
+        }
+    }
+
+    private fun applyStartStopState(
+        state: VibrationSessionUiState,
+        startButton: Button?,
+        stopButton: View?,
+        hideStop: Boolean
+    ) {
+        val startUi = SessionControlUiMapper.primaryButtonUi(state)
+        startButton?.setText(startUi.labelRes)
         startButton?.backgroundTintList = null
-        startButton?.setBackgroundResource(startBgRes)
+        startButton?.setBackgroundResource(startUi.backgroundRes)
         startButton?.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.black))
 
-        val stopVisible = state.isRunning || state.isPaused
+        val stopVisible = !hideStop && (state.isRunning || state.isPaused)
         stopButton?.visibility = if (stopVisible) View.VISIBLE else View.GONE
         stopButton?.isEnabled = stopVisible
 
         startButton?.isEnabled = if (state.isPaused) true else state.startButtonEnabled || state.isRunning
+    }
+
+    private fun observePhoneState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                combine(
+                    viewModel.uiState,
+                    presetViewModel.sessionUiState,
+                    presetViewModel.uiState,
+                    viewModel.activeMode
+                ) { manualSession, presetSession, presetUi, activeMode ->
+                    PhoneCombinedState(manualSession, presetSession, presetUi, activeMode)
+                }.collect { (manualSession, presetSession, presetUi, activeMode) ->
+                    val manualActive = manualSession.isRunning || manualSession.isPaused
+                    val expertActive = presetSession.isRunning || presetSession.isPaused
+
+                    cachedManualActive = manualActive
+                    cachedExpertActive = expertActive
+                    latestPresetSessionState = presetSession
+
+                    val displayState = if (isPhoneKeypadVisible()) {
+                        manualSession
+                    } else {
+                        when {
+                            expertActive -> presetSession
+                            manualActive -> manualSession
+                            activeMode == HomeViewModel.ActiveMode.EXPERT -> presetSession
+                            else -> manualSession
+                        }
+                    }
+
+                    val runningOrPaused = displayState.isRunning || displayState.isPaused
+
+                    binding.tvFrequencyValue.text = displayState.frequencyDisplay
+                    binding.tvIntensityValue.text = displayState.intensityDisplay
+                    binding.tvTimeValue.text = displayState.timeDisplay
+                    binding.tvTimeValue.isEnabled = !runningOrPaused
+                    updateHighlights(displayState.activeInputType)
+
+                    val expertButtonsEnabled = presetUi.modeButtonsEnabled && !manualActive
+                    val intensityScaleEnabled = !manualActive
+                    renderPresetButtons(presetUi, expertButtonsEnabled, activeMode)
+                    updateIntensityScaleUi(presetUi.intensityScalePct, intensityScaleEnabled)
+                    updateRepeatCountUi(presetUi.repeatCount, expertButtonsEnabled)
+
+                    val manualControlsEnabled = !expertActive
+                    binding.tvFrequencyValue.isEnabled = manualControlsEnabled
+                    binding.tvIntensityValue.isEnabled = manualControlsEnabled
+                    binding.tvTimeValue.isEnabled = manualControlsEnabled && !manualSession.isRunning
+                    binding.btnFrequencyDown?.isEnabled = manualControlsEnabled
+                    binding.btnFrequencyUp?.isEnabled = manualControlsEnabled
+                    binding.btnIntensityDown?.isEnabled = manualControlsEnabled
+                    binding.btnIntensityUp?.isEnabled = manualControlsEnabled
+                    binding.btnTimeDown?.isEnabled = manualControlsEnabled
+                    binding.btnTimeUp?.isEnabled = manualControlsEnabled
+
+                    if (expertActive && !lastExpertActive) {
+                        showPhoneKeypad(false)
+                    }
+                    lastExpertActive = expertActive
+
+                    applyStartStopState(displayState, binding.btnStartStop, binding.btnStop, hideStop = false)
+                }
+            }
+        }
     }
 
     private fun observeEvents() {
@@ -151,6 +362,22 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun observePresetState() {
+        if (!isPhoneHome) return
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                launch {
+                    presetViewModel.events.collect { event ->
+                        when (event) {
+                            is UiEvent.ShowToast -> showToast(event.message)
+                            is UiEvent.ShowError -> showToast(event.throwable.message ?: "Unexpected error")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun observeAccountPrivileges() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
@@ -159,8 +386,24 @@ class HomeFragment : Fragment() {
                         val isTestAccount = state.accountType?.equals("test", ignoreCase = true) == true
                         viewModel.updateAccountAccess(isTestAccount)
                         viewModel.setSessionActive(state.isLoggedIn)
+                        if (isPhone() && state.isLoggedIn && isTestAccount && state.isOfflineMode) {
+                            viewModel.applyPhoneOfflineDefaultsIfNeeded()
+                        }
+                        if (isPhoneHome) {
+                            presetViewModel.updateAccountAccess(isTestAccount)
+                            presetViewModel.setSessionActive(state.isLoggedIn)
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    private fun observeSelectedCustomer() {
+        if (!isPhoneHome) return
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                customerViewModel.selectedCustomer.collect { presetViewModel.setActiveCustomer(it) }
             }
         }
     }
@@ -175,6 +418,76 @@ class HomeFragment : Fragment() {
 
     // --- 点击事件监听器 ---
     private fun setupClickListeners() {
+        // Shared keypad wiring (phone + tablet).
+        setupKeypadListeners()
+
+        if (isTablet) {
+            setupTabletClickListeners()
+        } else {
+            setupPhoneClickListeners()
+        }
+    }
+
+    private fun setupPhoneInputs() {
+        if (isTablet) return
+
+        setupPhoneDisplayInput(binding.tvFrequencyValue, "frequency")
+        setupPhoneDisplayInput(binding.tvIntensityValue, "intensity")
+        setupPhoneDisplayInput(binding.tvTimeValue, "time")
+        setupPhoneKeypadDismissListener()
+    }
+
+    private fun setupPhoneDisplayInput(view: TextView?, inputType: String) {
+        view ?: return
+        view.setOnClickListener {
+            if (!view.isEnabled) return@setOnClickListener
+            viewModel.setActiveMode(HomeViewModel.ActiveMode.MANUAL)
+            viewModel.handleIntent(VibrationSessionIntent.SelectInput(inputType))
+            viewModel.playTapSound()
+            showPhoneKeypad(true)
+        }
+    }
+
+    private fun isPhoneKeypadVisible(): Boolean {
+        return binding.layoutKeypadContainer?.visibility == View.VISIBLE
+    }
+
+    private fun setupPhoneKeypadDismissListener() {
+        binding.root.setOnTouchListener { _, event ->
+            if (event.actionMasked != MotionEvent.ACTION_DOWN) return@setOnTouchListener false
+            if (!isPhoneKeypadVisible()) return@setOnTouchListener false
+            if (isTouchInsideView(binding.layoutKeypadContainer, event)) return@setOnTouchListener false
+            if (isTouchInsideView(binding.tvFrequencyValue, event)) return@setOnTouchListener false
+            if (isTouchInsideView(binding.tvIntensityValue, event)) return@setOnTouchListener false
+            if (isTouchInsideView(binding.tvTimeValue, event)) return@setOnTouchListener false
+            showPhoneKeypad(false)
+            false
+        }
+    }
+
+    private fun isTouchInsideView(view: View?, event: MotionEvent): Boolean {
+        if (view == null || view.visibility != View.VISIBLE) return false
+        val location = IntArray(2)
+        view.getLocationOnScreen(location)
+        val x = event.rawX
+        val y = event.rawY
+        return x >= location[0] && x <= location[0] + view.width &&
+            y >= location[1] && y <= location[1] + view.height
+    }
+
+    private fun showPhoneKeypad(show: Boolean) {
+        val visibility = if (show) View.VISIBLE else View.GONE
+        binding.layoutKeypadContainer?.visibility = visibility
+        listOfNotNull(
+            binding.flowKeypad,
+            binding.btnKey0, binding.btnKey1, binding.btnKey2, binding.btnKey3, binding.btnKey4,
+            binding.btnKey5, binding.btnKey6, binding.btnKey7, binding.btnKey8, binding.btnKey9,
+            binding.btnKeyClear, binding.btnKeyEnter
+        ).forEach { it.visibility = visibility }
+    }
+
+    private fun setupTabletClickListeners() {
+        // --- Tablet-only: input selection ---
         binding.tvFrequencyValue.setOnClickListener {
             viewModel.handleIntent(VibrationSessionIntent.SelectInput("frequency"))
             viewModel.playTapSound()
@@ -188,63 +501,60 @@ class HomeFragment : Fragment() {
             viewModel.playTapSound()
         }
 
-        configureAdjustButton(
+        // --- Tablet-only: +/- (support long-press repeat) ---
+        configureTabletAdjustButton(
             button = binding.btnFrequencyUp,
             onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustFrequency(1)) }
         )
-        configureAdjustButton(
+        configureTabletAdjustButton(
             button = binding.btnFrequencyDown,
             onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustFrequency(-1)) }
         )
-        configureAdjustButton(
+        configureTabletAdjustButton(
             button = binding.btnIntensityUp,
             onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustIntensity(1)) }
         )
-        configureAdjustButton(
+        configureTabletAdjustButton(
             button = binding.btnIntensityDown,
             onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustIntensity(-1)) }
         )
-        binding.btnTimeUp.setOnClickListener {
-            viewModel.handleIntent(VibrationSessionIntent.AdjustTime(1))
-            viewModel.playTapSound()
-        }
-        binding.btnTimeDown.setOnClickListener {
-            viewModel.handleIntent(VibrationSessionIntent.AdjustTime(-1))
-            viewModel.playTapSound()
-        }
+        configureTabletAdjustButton(
+            button = binding.btnTimeUp,
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustTime(1)) }
+        )
+        configureTabletAdjustButton(
+            button = binding.btnTimeDown,
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustTime(-1)) }
+        )
 
+        // --- Tablet-only: start/stop ---
         binding.btnStartStop?.setOnClickListener {
             val selectedCustomer = customerViewModel.selectedCustomer.value
             viewModel.handleIntent(VibrationSessionIntent.ToggleStartStop(selectedCustomer))
             viewModel.playTapSound()
         }
+
         binding.btnStop?.setOnClickListener {
-            viewModel.stopSession()
-            viewModel.playTapSound()
-        }
-
-        val numericClickListener = View.OnClickListener { view ->
-            if (viewModel.currentInputType.value.isNullOrEmpty()) return@OnClickListener
-            viewModel.handleIntent(VibrationSessionIntent.AppendDigit((view as Button).text.toString()))
-            viewModel.playTapSound()
-        }
-        listOf(binding.btnKey0, binding.btnKey1, binding.btnKey2, binding.btnKey3, binding.btnKey4,
-            binding.btnKey5, binding.btnKey6, binding.btnKey7, binding.btnKey8, binding.btnKey9)
-            .forEach { it.setOnClickListener(numericClickListener) }
-
-        binding.btnKeyClear.setOnClickListener {
-            viewModel.handleIntent(VibrationSessionIntent.DeleteDigit)
-            viewModel.playTapSound()
-        }
-        binding.btnKeyClear.setOnLongClickListener {
-            viewModel.handleIntent(VibrationSessionIntent.ClearCurrent)
-            viewModel.playTapSound()
-            true
-        }
-
-        binding.btnKeyEnter.setOnClickListener {
-            viewModel.handleIntent(VibrationSessionIntent.CommitAndCycle)
-            viewModel.playTapSound()
+            if (isPhoneHome) {
+                when {
+                    cachedExpertActive || (viewModel.activeMode.value == HomeViewModel.ActiveMode.EXPERT && !cachedManualActive) -> {
+                        presetViewModel.stopIfRunning()
+                        presetViewModel.playTapSound()
+                    }
+                    cachedManualActive -> {
+                        viewModel.stopSession()
+                        viewModel.playTapSound()
+                    }
+                    else -> {
+                        viewModel.stopSession()
+                        viewModel.playTapSound()
+                        presetViewModel.stopIfRunning()
+                    }
+                }
+            } else {
+                viewModel.stopSession()
+                viewModel.playTapSound()
+            }
         }
 
         binding.btnSoftResumeInline?.setOnClickListener {
@@ -270,17 +580,243 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun configureAdjustButton(
+    private fun setupPhoneClickListeners() {
+        if (!isPhoneHome) {
+            setupTabletClickListeners()
+            return
+        }
+
+        expertModeButtons.forEachIndexed { index, button ->
+            button.setOnClickListener {
+                if (cachedExpertActive || cachedManualActive) {
+                    Toast.makeText(requireContext(), "请先停止当前会话", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                viewModel.setActiveMode(HomeViewModel.ActiveMode.EXPERT)
+                presetViewModel.selectMode(index)
+                presetViewModel.playTapSound()
+            }
+        }
+
+        binding.btnStop?.setOnClickListener {
+            when {
+                cachedExpertActive || (viewModel.activeMode.value == HomeViewModel.ActiveMode.EXPERT && !cachedManualActive) -> {
+                    presetViewModel.stopIfRunning()
+                    presetViewModel.playTapSound()
+                    viewModel.setActiveMode(HomeViewModel.ActiveMode.MANUAL)
+                }
+                cachedManualActive -> {
+                    viewModel.stopSession()
+                    viewModel.playTapSound()
+                }
+                else -> {
+                    viewModel.stopSession()
+                    viewModel.playTapSound()
+                    presetViewModel.stopIfRunning()
+                    viewModel.setActiveMode(HomeViewModel.ActiveMode.MANUAL)
+                }
+            }
+        }
+
+        configureTabletAdjustButton(
+            button = binding.btnFrequencyUp,
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustFrequency(1)) }
+        )
+        configureTabletAdjustButton(
+            button = binding.btnFrequencyDown,
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustFrequency(-1)) }
+        )
+
+        configureTabletAdjustButton(
+            button = binding.btnIntensityUp,
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustIntensity(1)) }
+        )
+        configureTabletAdjustButton(
+            button = binding.btnIntensityDown,
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustIntensity(-1)) }
+        )
+
+        configureTabletAdjustButton(
+            button = binding.btnTimeUp,
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustTime(1)) }
+        )
+        configureTabletAdjustButton(
+            button = binding.btnTimeDown,
+            onSingleTap = { viewModel.handleIntent(VibrationSessionIntent.AdjustTime(-1)) }
+        )
+
+        binding.btnStartStop?.setOnClickListener {
+            val selectedCustomer = customerViewModel.selectedCustomer.value
+            if (isPhoneHome) {
+                when {
+                    cachedExpertActive -> {
+                        presetViewModel.handleSessionIntent(VibrationSessionIntent.ToggleStartStop(selectedCustomer))
+                        presetViewModel.playTapSound()
+                    }
+                    cachedManualActive -> {
+                        viewModel.handleIntent(VibrationSessionIntent.ToggleStartStop(selectedCustomer))
+                        viewModel.playTapSound()
+                    }
+                    viewModel.activeMode.value == HomeViewModel.ActiveMode.EXPERT -> {
+                        presetViewModel.handleSessionIntent(VibrationSessionIntent.ToggleStartStop(selectedCustomer))
+                        presetViewModel.playTapSound()
+                    }
+                    else -> {
+                        viewModel.handleIntent(VibrationSessionIntent.ToggleStartStop(selectedCustomer))
+                        viewModel.playTapSound()
+                    }
+                }
+            } else {
+                viewModel.handleIntent(VibrationSessionIntent.ToggleStartStop(selectedCustomer))
+                viewModel.playTapSound()
+            }
+        }
+    }
+
+    private fun setupKeypadListeners() {
+        // --- Shared keypad handlers (phone + tablet) ---
+        val numericClickListener = View.OnClickListener { view ->
+            if (viewModel.currentInputType.value.isNullOrEmpty()) return@OnClickListener
+            viewModel.handleIntent(VibrationSessionIntent.AppendDigit((view as Button).text.toString()))
+            viewModel.playTapSound()
+        }
+        listOf(
+            binding.btnKey0, binding.btnKey1, binding.btnKey2, binding.btnKey3, binding.btnKey4,
+            binding.btnKey5, binding.btnKey6, binding.btnKey7, binding.btnKey8, binding.btnKey9
+        )
+            .filterNotNull()
+            .forEach { it.setOnClickListener(numericClickListener) }
+
+        binding.btnKeyClear?.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.DeleteDigit)
+            viewModel.playTapSound()
+        }
+        binding.btnKeyClear?.setOnLongClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.ClearCurrent)
+            viewModel.playTapSound()
+            true
+        }
+
+        binding.btnKeyEnter?.setOnClickListener {
+            viewModel.handleIntent(VibrationSessionIntent.CommitAndCycle)
+            viewModel.playTapSound()
+            // 手机端：回车只提交/切换输入，不再关闭 keypad（保留继续输入的体验）
+        }
+    }
+
+    private fun setupExpertIntensityScaleControls() {
+        if (!isPhoneHome) return
+        val plus = binding.btnIntensityScalePlus
+        val minus = binding.btnIntensityScaleMinus
+        val input = binding.inputIntensityScale
+
+        input?.doAfterTextChanged { text ->
+            if (updatingIntensityScaleFromState) return@doAfterTextChanged
+            val value = text?.toString()?.toIntOrNull()
+            if (value == null) {
+                val current = presetViewModel.uiState.value.intensityScalePct.toString()
+                updatingIntensityScaleFromState = true
+                input.setText(current)
+                input.setSelection(current.length)
+                updatingIntensityScaleFromState = false
+                return@doAfterTextChanged
+            }
+            presetViewModel.setIntensityScalePct(value)
+        }
+
+        plus?.setOnClickListener { adjustIntensityScale(1) }
+        minus?.setOnClickListener { adjustIntensityScale(-1) }
+    }
+
+    private fun setupExpertRepeatCountControls() {
+        if (!isPhoneHome) return
+        val plus = binding.btnRepeatCountPlus
+        val minus = binding.btnRepeatCountMinus
+        plus?.setOnClickListener { presetViewModel.incrementRepeatCount() }
+        minus?.setOnClickListener { presetViewModel.decrementRepeatCount() }
+    }
+
+    private fun adjustIntensityScale(delta: Int) {
+        val current = presetViewModel.uiState.value.intensityScalePct
+        presetViewModel.setIntensityScalePct(current + delta)
+    }
+
+    private fun updateIntensityScaleUi(value: Int, enabled: Boolean) {
+        val plus = binding.btnIntensityScalePlus
+        val minus = binding.btnIntensityScaleMinus
+        val input = binding.inputIntensityScale
+        plus?.isEnabled = enabled
+        minus?.isEnabled = enabled
+        input?.isEnabled = enabled
+        input ?: return
+        val target = value.toString()
+        if (input.text?.toString() == target) return
+        updatingIntensityScaleFromState = true
+        input.setText(target)
+        input.setSelection(target.length)
+        updatingIntensityScaleFromState = false
+    }
+
+    private fun updateRepeatCountUi(value: Int, enabled: Boolean) {
+        val plus = binding.btnRepeatCountPlus
+        val minus = binding.btnRepeatCountMinus
+        val label = binding.tvRepeatCountValue
+        plus?.isEnabled = enabled
+        minus?.isEnabled = enabled
+        label?.isEnabled = enabled
+        label?.text = value.toString()
+        label?.setTextColor(
+            ContextCompat.getColor(
+                requireContext(),
+                if (enabled) android.R.color.black else android.R.color.darker_gray
+            )
+        )
+    }
+
+    private fun configureTabletAdjustButton(
         button: View,
         onSingleTap: () -> Unit
     ) {
-        button.setOnClickListener {
-            onSingleTap()
-            viewModel.playTapSound()
+        // Tablet-only: allow long-press repeat without affecting phone logic.
+        val handler = Handler(Looper.getMainLooper())
+        var isRepeating = false
+        var repeatRunnable: Runnable? = null
+
+        val startRepeat = Runnable {
+            isRepeating = true
+            repeatRunnable = object : Runnable {
+                override fun run() {
+                    onSingleTap()
+                    viewModel.playTapSound()
+                    handler.postDelayed(this, PHONE_REPEAT_INTERVAL_MS)
+                }
+            }.also { handler.post(it) }
+        }
+
+        button.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    isRepeating = false
+                    handler.postDelayed(startRepeat, PHONE_LONG_PRESS_DELAY_MS)
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    handler.removeCallbacks(startRepeat)
+                    repeatRunnable?.let { handler.removeCallbacks(it) }
+                    if (event.actionMasked == MotionEvent.ACTION_UP && !isRepeating) {
+                        onSingleTap()
+                        viewModel.playTapSound()
+                    }
+                    isRepeating = false
+                    true
+                }
+                else -> false
+            }
         }
     }
 
     private fun showToast(message: String) {
+        if (!isAdded) return
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 

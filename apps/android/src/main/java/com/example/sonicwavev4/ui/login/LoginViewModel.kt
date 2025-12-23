@@ -55,6 +55,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             }
             is AuthIntent.Register -> performRegister(intent)
             AuthIntent.EnterOfflineMode -> enterOfflineMode()
+            AuthIntent.EnterOfflineModeSilently -> enterOfflineModeSilently()
             is AuthIntent.Logout -> performLogout(intent.reason)
             AuthIntent.ClearError -> clearError()
         }
@@ -238,6 +239,15 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private fun enterOfflineModeSilently() {
+        if (_uiState.value.isLoggedIn) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            val result = authGateway.enterOfflineMode()
+            handleAuthResultSilently(result)
+        }
+    }
+
     private suspend fun handleAuthResult(result: Result<AuthResult>, successMessage: String) {
         result.onSuccess { authResult ->
             _uiState.update {
@@ -262,6 +272,24 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             val message = resolveErrorMessage(throwable)
             _uiState.update { it.copy(isLoading = false, errorMessage = message) }
             _events.emit(AuthEvent.ShowError(message))
+        }
+    }
+
+    private suspend fun handleAuthResultSilently(result: Result<AuthResult>) {
+        result.onSuccess { authResult ->
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    isLoggedIn = true,
+                    isOfflineMode = authResult.isOfflineMode,
+                    accountType = authResult.accountType ?: "test",
+                    username = authResult.username,
+                    errorMessage = null
+                )
+            }
+        }.onFailure { throwable ->
+            val message = resolveErrorMessage(throwable)
+            _uiState.update { it.copy(isLoading = false, errorMessage = message) }
         }
     }
 

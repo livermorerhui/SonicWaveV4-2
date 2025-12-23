@@ -202,7 +202,7 @@ class CustomPresetEditorFragment : DialogFragment() {
                         labelText = "频率(Hz)",
                         initialValue = step.frequencyHz,
                         minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_FREQUENCY_HZ,
-                        maxValue = Int.MAX_VALUE,
+                        maxValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_FREQUENCY_HZ,
                         replaceOnFirstKey = true
                     )
                 )
@@ -227,12 +227,14 @@ class CustomPresetEditorFragment : DialogFragment() {
                 }
             }
             FieldType.DURATION -> {
+                val durationMinutes = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints
+                    .secondsToMinutesDisplay(step.durationSec)
                 keypadView.bindConfig(
                     NumericKeypadView.Config(
-                        labelText = "时长(秒)",
-                        initialValue = step.durationSec,
-                        minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_DURATION_SEC,
-                        maxValue = Int.MAX_VALUE,
+                        labelText = "时长(分钟)",
+                        initialValue = durationMinutes,
+                        minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_DURATION_MIN,
+                        maxValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_DURATION_MIN,
                         replaceOnFirstKey = true
                     )
                 )
@@ -284,7 +286,7 @@ class CustomPresetEditorFragment : DialogFragment() {
                 labelText = "频率(Hz)",
                 initialValue = step.frequencyHz,
                 minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_FREQUENCY_HZ,
-                maxValue = Int.MAX_VALUE,
+                maxValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_FREQUENCY_HZ,
                 replaceOnFirstKey = true
             )
         )
@@ -323,12 +325,14 @@ class CustomPresetEditorFragment : DialogFragment() {
             editorViewModel.stopCurrentStepPlayback()
         }
         editorViewModel.setSelectedField(index, FieldType.DURATION)
+        val durationMinutes = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints
+            .secondsToMinutesDisplay(step.durationSec)
         keypadView.bindConfig(
             NumericKeypadView.Config(
-                labelText = "时长(秒)",
-                initialValue = step.durationSec,
-                minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_DURATION_SEC,
-                maxValue = Int.MAX_VALUE,
+                labelText = "时长(分钟)",
+                initialValue = durationMinutes,
+                minValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MIN_DURATION_MIN,
+                maxValue = com.example.sonicwavev4.data.custompreset.CustomPresetConstraints.MAX_DURATION_MIN,
                 replaceOnFirstKey = true
             )
         )

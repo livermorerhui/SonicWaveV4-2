@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sonicwavev4.R
+import com.example.sonicwavev4.data.custompreset.CustomPresetConstraints
 import com.example.sonicwavev4.data.custompreset.model.CustomPresetStep
 import com.example.sonicwavev4.databinding.ItemCustomPresetStepBinding
 
@@ -87,8 +88,11 @@ class CustomPresetStepAdapter(
                 val updated = step.copy(intensity01V = new.toIntOrNull() ?: step.intensity01V)
                 onStepChanged(bindingAdapterPosition, updated)
             }
-            setText(binding.etDuration, step.durationSec.toString()) { new ->
-                val updated = step.copy(durationSec = new.toIntOrNull() ?: step.durationSec)
+            val durationMinutes = CustomPresetConstraints.secondsToMinutesDisplay(step.durationSec)
+            setText(binding.etDuration, durationMinutes.toString()) { new ->
+                val minutes = new.toIntOrNull() ?: durationMinutes
+                val clampedMinutes = CustomPresetConstraints.clampDurationMinutes(minutes)
+                val updated = step.copy(durationSec = CustomPresetConstraints.minutesToSeconds(clampedMinutes))
                 onStepChanged(bindingAdapterPosition, updated)
             }
 
@@ -147,11 +151,15 @@ class CustomPresetStepAdapter(
                 onStepChanged(bindingAdapterPosition, updated)
             }
             binding.btnDurationPlus.setOnClickListener {
-                val updated = step.copy(durationSec = step.durationSec + 1)
+                val minutes = CustomPresetConstraints.secondsToMinutesDisplay(step.durationSec)
+                val nextMinutes = CustomPresetConstraints.clampDurationMinutes(minutes + 1)
+                val updated = step.copy(durationSec = CustomPresetConstraints.minutesToSeconds(nextMinutes))
                 onStepChanged(bindingAdapterPosition, updated)
             }
             binding.btnDurationMinus.setOnClickListener {
-                val updated = step.copy(durationSec = (step.durationSec - 1).coerceAtLeast(0))
+                val minutes = CustomPresetConstraints.secondsToMinutesDisplay(step.durationSec)
+                val nextMinutes = CustomPresetConstraints.clampDurationMinutes(minutes - 1)
+                val updated = step.copy(durationSec = CustomPresetConstraints.minutesToSeconds(nextMinutes))
                 onStepChanged(bindingAdapterPosition, updated)
             }
 

@@ -129,7 +129,8 @@ class CustomPresetEditorViewModel(
             id = UUID.randomUUID().toString(),
             frequencyHz = 0,
             intensity01V = 0,
-            durationSec = 1,
+            // 自设模式时长以“分钟”输入，内部以秒存储。
+            durationSec = CustomPresetConstraints.minutesToSeconds(CustomPresetConstraints.MIN_DURATION_MIN),
             order = current.steps.size
         )
         _uiState.update { it.copy(steps = (it.steps + newStep).normalizeOrder()).recomputeCanSave() }
@@ -158,7 +159,7 @@ class CustomPresetEditorViewModel(
         updated[index] = newStep.copy(
             frequencyHz = CustomPresetConstraints.clampFrequency(newStep.frequencyHz),
             intensity01V = CustomPresetConstraints.clampIntensity(newStep.intensity01V),
-            durationSec = CustomPresetConstraints.clampDuration(newStep.durationSec),
+            durationSec = CustomPresetConstraints.clampDurationSeconds(newStep.durationSec),
             order = current.steps[index].order
         )
         _uiState.update { it.copy(steps = updated.normalizeOrder()).recomputeCanSave() }
@@ -198,7 +199,8 @@ class CustomPresetEditorViewModel(
         val current = _uiState.value
         if (index !in current.steps.indices) return
         val step = current.steps[index]
-        updateStep(index, step.copy(durationSec = value))
+        val durationSeconds = CustomPresetConstraints.minutesToSeconds(value)
+        updateStep(index, step.copy(durationSec = durationSeconds))
     }
 
     fun onPlayStepClicked(index: Int) {

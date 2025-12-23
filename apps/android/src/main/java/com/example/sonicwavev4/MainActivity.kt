@@ -4,6 +4,8 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.content.Context
+import android.graphics.Rect
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.content.res.Resources
@@ -19,8 +21,11 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -50,6 +55,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import android.content.Intent
 import com.example.sonicwavev4.databinding.ActivityMainBinding
 import com.example.sonicwavev4.network.AppUsageRequest
 import com.example.sonicwavev4.network.RetrofitClient
@@ -61,8 +67,11 @@ import com.example.sonicwavev4.utils.DeviceIdentityProvider
 import com.example.sonicwavev4.utils.GlobalLogoutManager
 import com.example.sonicwavev4.utils.OfflineForceExitManager
 import com.example.sonicwavev4.utils.SessionManager
+import com.example.sonicwavev4.utils.TestToneSettings
 import com.example.sonicwavev4.MusicDownloadEvent
 import com.example.sonicwavev4.MusicDownloadEventBus
+import com.example.sonicwavev4.core.account.AuthIntent
+import com.example.sonicwavev4.ui.login.LoginViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -76,6 +85,8 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private val isTablet by lazy { resources.getBoolean(R.bool.is_tablet) }
+    private val loginViewModel: LoginViewModel by viewModels()
 
     private val customerViewModel: CustomerViewModel by viewModels()
     private val musicViewModel: MusicPlayerViewModel by viewModels()
@@ -102,6 +113,7 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private val tonearmPlayRotation = 15f   //旋转角度
     private val tonearmPivotXRatio = 0.5f  //旋转中心横坐标，百分比
     private val tonearmPivotYRatio = 0.29f  //旋转中心纵坐标，百分比
+    private var isMusicUiEnabled: Boolean = false
     private var isUserSeeking = false
     private var lastRenderedPlaying: Boolean? = null
     private var lastRenderedTitle: String? = null
@@ -110,6 +122,9 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     private var customPresetItemView: View? = null
     private var currentNavItemId: Int = R.id.navigation_home
     private var softReduceTouchListener: ((MotionEvent) -> Boolean)? = null
+
+    private fun hasRightPanel(): Boolean = findViewById<View?>(R.id.fragment_right_main) != null
+    private fun isPhone(): Boolean = !hasRightPanel()
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -129,14 +144,36 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
         sessionManager = SessionManager(this)
 
+        if (isPhone()) {
+            TestToneSettings.setSineToneEnabled(true)
+            loginViewModel.handleIntent(AuthIntent.EnterOfflineModeSilently)
+        }
+
         setSupportActionBar(binding.toolbar)
+        if (!isTablet) {
+            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            binding.root.setOnTouchListener { _, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    val focused = currentFocus
+                    if (focused is EditText) {
+                        val outRect = Rect()
+                        focused.getGlobalVisibleRect(outRect)
+                        if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
+                            focused.clearFocus()
+                            hideKeyboard(focused)
+                        }
+                    }
+                }
+                false
+            }
+        }
         // Use custom toolbar view instead of NavigationUI-provided titles
         supportActionBar?.setDisplayShowTitleEnabled(false)
         binding.toolbarTitle?.text = ""
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         navController = navHostFragment.navController
-        appBarConfiguration = AppBarConfiguration(setOf(R.id.navigation_home, R.id.navigation_persetmode, R.id.navigation_custom_preset))
+        appBarConfiguration = AppBarConfiguration(setOf(R.id.navigation_home, R.id.navigation_persetmode, R.id.navigation_custom_preset, R.id.navigation_me))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
@@ -146,15 +183,41 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
             }
         }
 
+        binding.bottomNav?.let { bottomNav ->
+            bottomNav.selectedItemId = R.id.navigation_home
+            bottomNav.setOnItemSelectedListener { item ->
+                when (item.itemId) {
+                    R.id.navigation_home -> {
+                        val popped = navController.popBackStack(R.id.navigation_home, false)
+                        if (!popped && navController.currentDestination?.id != R.id.navigation_home) {
+                            navController.navigate(R.id.navigation_home)
+                        }
+                        true
+                    }
+                    R.id.menu_me -> {
+                        if (navController.currentDestination?.id != R.id.navigation_me) {
+                            navController.navigate(R.id.navigation_me)
+                        }
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }
+
         setupCustomNavigationRail()
         observeSelectedCustomerContext()
 
-        musicAreaLayout = binding.root.findViewById(R.id.fragment_bottom_left)
-        musicDownloader = MusicDownloader(this)
-        downloadedMusicRepository = DownloadedMusicRepository(this)
-        setupMusicArea()
-        observeMusicPlayer()
-        checkAndRequestPermissions()
+        val musicArea = binding.root.findViewById<View?>(R.id.fragment_bottom_left)
+        isMusicUiEnabled = musicArea != null
+        if (isMusicUiEnabled) {
+            musicAreaLayout = musicArea as? ConstraintLayout
+            musicDownloader = MusicDownloader(this)
+            downloadedMusicRepository = DownloadedMusicRepository(this)
+            setupMusicArea()
+            observeMusicPlayer()
+            checkAndRequestPermissions()
+        }
 
         // Record app launch time
         val launchTime = System.currentTimeMillis()
@@ -186,23 +249,36 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
 
     override fun onResume() {
         super.onResume()
-        if (musicViewModel.isPlaying.value) {
+        if (isMusicUiEnabled && musicViewModel.isPlaying.value) {
             spinVinyl()
         }
     }
 
     override fun onPause() {
         super.onPause()
-        pauseVinyl()
+        if (isMusicUiEnabled) {
+            pauseVinyl()
+        }
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        softReduceTouchListener?.invoke(ev)
+        if (isTablet) {
+            softReduceTouchListener?.invoke(ev)
+        }
         return super.dispatchTouchEvent(ev)
     }
 
     override fun setSoftReduceTouchListener(listener: ((MotionEvent) -> Boolean)?) {
+        if (!isTablet) {
+            softReduceTouchListener = null
+            return
+        }
         softReduceTouchListener = listener
+    }
+
+    private fun hideKeyboard(target: View) {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        imm?.hideSoftInputFromWindow(target.windowToken, 0)
     }
 
     // 【修改点 2】修复了下载功能的线程问题，防止UI卡死
@@ -379,7 +455,13 @@ class MainActivity : AppCompatActivity(), MusicDownloadDialogFragment.DownloadLi
     }
 
     private fun showLoginFragment() {
-        val container = findViewById<View?>(R.id.fragment_right_main) ?: return
+        val container = findViewById<View?>(R.id.fragment_right_main)
+        if (container == null) {
+            if (this::navController.isInitialized) {
+                navController.navigate(R.id.navigation_me)
+            }
+            return
+        }
         val fragmentManager = supportFragmentManager
         val current = fragmentManager.findFragmentById(container.id)
         if (current is com.example.sonicwavev4.ui.login.LoginFragment) return

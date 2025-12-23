@@ -15,6 +15,7 @@ sealed class AuthIntent {
     ) : AuthIntent()
 
     object EnterOfflineMode : AuthIntent()
+    object EnterOfflineModeSilently : AuthIntent()
     data class Logout(val reason: LogoutReason = LogoutReason.UserInitiated) : AuthIntent()
     object ClearError : AuthIntent()
 }

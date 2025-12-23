@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginStart="8dp"
-        android:hint="时长(秒)">
+        android:hint="时长(分钟)">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_duration"

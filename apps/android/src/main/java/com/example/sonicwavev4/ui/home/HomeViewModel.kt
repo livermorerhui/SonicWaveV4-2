@@ -37,6 +37,11 @@ class HomeViewModel(
     private val sessionRepository: VibrationSessionGateway
 ) : AndroidViewModel(application) {
 
+    enum class ActiveMode {
+        MANUAL,
+        EXPERT
+    }
+
     // --- 变量和状态 (无改动) ---
     private var currentOperationId: Long? = null
     private val _frequency = MutableLiveData(0)
@@ -78,8 +83,12 @@ class HomeViewModel(
     private val _events = MutableSharedFlow<UiEvent>(extraBufferCapacity = 16)
     val events: SharedFlow<UiEvent> = _events.asSharedFlow()
     private var runningWithoutHardware = false
+
+    private val _activeMode = MutableStateFlow(ActiveMode.MANUAL)
+    val activeMode: StateFlow<ActiveMode> = _activeMode.asStateFlow()
     private var isSessionActive = false
     private var isPaused = false
+    private var phoneOfflineDefaultsApplied: Boolean = false
     companion object {
         private const val LOGIN_REQUIRED_MESSAGE = "请先登录账号"
         private const val HARDWARE_NOT_READY_MESSAGE = "硬件初始化中，请稍候"
@@ -107,7 +116,8 @@ class HomeViewModel(
         committedValue: Int
     ): Int {
         return if (activeType == targetType && (editing || buffer.isNotEmpty())) {
-            buffer.toIntOrNull() ?: 0
+            val raw = buffer.toIntOrNull() ?: 0
+            clampInputValueForType(targetType, raw)
         } else {
             committedValue
         }
@@ -289,6 +299,7 @@ class HomeViewModel(
         if (isSessionActive == active) return
         isSessionActive = active
         if (!active) {
+            phoneOfflineDefaultsApplied = false
             updateAccountAccess(false)
             if (_isStarted.value == true) {
                 forceStop(StopReason.LOGOUT)
@@ -314,6 +325,21 @@ class HomeViewModel(
                 hardwareReady || testAccount
             }
         emitUiState()
+    }
+
+    fun applyPhoneOfflineDefaultsIfNeeded() {
+        if (phoneOfflineDefaultsApplied) return
+        if (!isSessionActive) return
+        if (_isTestAccount.value != true) return
+        if (_isStarted.value == true || isPaused) return
+        val freq = _frequency.value ?: 0
+        val time = _timeInMinutes.value ?: 0
+        val intensity = _intensity.value ?: 0
+        if (freq != 0 || time != 0 || intensity != 0) return
+        phoneOfflineDefaultsApplied = true
+        updateFrequency(25)
+        updateIntensity(10)
+        updateTime(1)
     }
 
     // --- 缓冲区和参数控制 (无改动) ---
@@ -357,7 +383,14 @@ class HomeViewModel(
 
     fun appendToInputBuffer(digit: String) {
         if ((_inputBuffer.value?.length ?: 0) < 9) {
-            _inputBuffer.value = (_inputBuffer.value ?: "") + digit
+            val nextBuffer = (_inputBuffer.value ?: "") + digit
+            val inputType = _currentInputType.value
+            val parsed = nextBuffer.toIntOrNull()
+            _inputBuffer.value = if (!inputType.isNullOrEmpty() && parsed != null) {
+                clampInputValueForType(inputType, parsed).toString()
+            } else {
+                nextBuffer
+            }
             _isEditing.value = true
             emitUiState()
         }
@@ -420,9 +453,9 @@ class HomeViewModel(
 
         // 步骤 3: 在最新的、已同步的值上进行安全的加减操作
         when (type) {
-            "frequency" -> updateFrequency(max(0, (_frequency.value ?: 0) + delta))
-            "intensity" -> updateIntensity(max(0, (_intensity.value ?: 0) + delta))
-            "time"      -> updateTime(max(0, (_timeInMinutes.value ?: 0) + delta))
+            "frequency" -> updateFrequency(HomeParameterConstraints.clampFrequency((_frequency.value ?: 0) + delta))
+            "intensity" -> updateIntensity(HomeParameterConstraints.clampIntensity((_intensity.value ?: 0) + delta))
+            "time"      -> updateTime(HomeParameterConstraints.clampTimeMinutes((_timeInMinutes.value ?: 0) + delta))
         }
     }
 
@@ -444,6 +477,59 @@ class HomeViewModel(
             VibrationSessionIntent.SoftReductionCollapsePanel -> handleSoftReductionCollapsePanel()
         }
     }
+
+    fun onFrequencyChanged(value: Int) {
+        applyDirectValue("frequency", HomeParameterConstraints.clampFrequency(value))
+    }
+
+    fun onIntensityChanged(value: Int) {
+        applyDirectValue("intensity", HomeParameterConstraints.clampIntensity(value))
+    }
+
+    fun onTimeChanged(value: Int) {
+        applyDirectValue("time", HomeParameterConstraints.clampTimeMinutes(value))
+    }
+
+    private fun applyDirectValue(type: String, value: Int) {
+        val alreadyValue = when (type) {
+            "frequency" -> _frequency.value == value
+            "intensity" -> _intensity.value == value
+            "time" -> _timeInMinutes.value == value
+            else -> false
+        }
+        resetInputState(type)
+        if (alreadyValue) {
+            emitUiState()
+            return
+        }
+        when (type) {
+            "frequency" -> updateFrequency(value)
+            "intensity" -> updateIntensity(value)
+            "time" -> updateTime(value)
+        }
+    }
+
+    private fun resetInputState(type: String) {
+        _currentInputType.value = type
+        _inputBuffer.value = ""
+        _isEditing.value = false
+    }
+
+    private fun clampValueForType(type: String, value: Int): Int =
+        when (type) {
+            "frequency" -> HomeParameterConstraints.clampFrequency(value)
+            "intensity" -> HomeParameterConstraints.clampIntensity(value)
+            "time" -> HomeParameterConstraints.clampTimeMinutes(value)
+            else -> value
+        }
+
+    private fun clampInputValueForType(type: String, value: Int): Int =
+        when (type) {
+            "frequency" -> HomeParameterConstraints.clampFrequencyInput(value)
+            "intensity" -> HomeParameterConstraints.clampIntensity(value)
+            "time" -> HomeParameterConstraints.clampTimeMinutes(value)
+            else -> value
+        }
 
     private fun handleSoftReduceFromTap() {
         if (softReductionActive) return
@@ -561,7 +647,10 @@ class HomeViewModel(
     }
 
     fun stopPlaybackIfRunning() {
-        if (_isStarted.value == true || currentOperationId != null) {
+        // Phone-only navigation can leave the session in paused state; clear it here so
+        // returning to Home doesn't lock expert buttons via "manualActive = isPaused".
+        val wasPaused = isPaused
+        if (_isStarted.value == true || currentOperationId != null || wasPaused) {
             forceStop(StopReason.MANUAL)
         }
     }
@@ -577,6 +666,9 @@ class HomeViewModel(
                     hardwareRepository.stopStandaloneTone()
                 } else {
                     hardwareRepository.stopOutput()
+                    if (_playSineTone.value == true) {
+                        hardwareRepository.stopStandaloneTone()
+                    }
                 }
             } catch (e: Exception) {
                 Log.w("HomeViewModel", "Failed to pause output cleanly", e)
@@ -682,6 +774,11 @@ class HomeViewModel(
         emitUiState()
     }
 
+    fun setActiveMode(mode: ActiveMode) {
+        if (_activeMode.value == mode) return
+        _activeMode.value = mode
+    }
+
     private fun handleStartOperation(selectedCustomer: Customer?, useHardware: Boolean, playTone: Boolean) {
         viewModelScope.launch {
             val targetFrequency = frequency.value ?: 0
@@ -754,16 +851,20 @@ class HomeViewModel(
                 hardwareRepository.stopStandaloneTone()
             } else {
                 hardwareRepository.stopOutput()
+                if (_playSineTone.value == true) {
+                    hardwareRepository.stopStandaloneTone()
+                }
             }
         }
     }
 
     private fun updateFrequency(value: Int) {
-        if (_frequency.value != value) {
-            _frequency.value = value
+        val clamped = HomeParameterConstraints.clampFrequency(value)
+        if (_frequency.value != clamped) {
+            _frequency.value = clamped
         }
         viewModelScope.launch {
-            hardwareRepository.applyFrequency(value)
+            hardwareRepository.applyFrequency(clamped)
         }
         if (shouldLogOperationEvents()) {
             logOperationEvent(OperationEventType.ADJUST_FREQUENCY)
@@ -772,11 +873,12 @@ class HomeViewModel(
     }
 
     private fun updateIntensity(value: Int) {
-        if (_intensity.value != value) {
-            _intensity.value = value
+        val clamped = HomeParameterConstraints.clampIntensity(value)
+        if (_intensity.value != clamped) {
+            _intensity.value = clamped
         }
         viewModelScope.launch {
-            hardwareRepository.applyIntensity(value)
+            hardwareRepository.applyIntensity(clamped)
         }
         if (shouldLogOperationEvents()) {
             logOperationEvent(OperationEventType.ADJUST_INTENSITY)
@@ -785,8 +887,9 @@ class HomeViewModel(
     }
 
     private fun updateTime(value: Int) {
-        if (_timeInMinutes.value != value) {
-            _timeInMinutes.value = value
+        val clamped = HomeParameterConstraints.clampTimeMinutes(value)
+        if (_timeInMinutes.value != clamped) {
+            _timeInMinutes.value = clamped
             if (shouldLogOperationEvents()) {
                 logOperationEvent(OperationEventType.ADJUST_TIME)
             }

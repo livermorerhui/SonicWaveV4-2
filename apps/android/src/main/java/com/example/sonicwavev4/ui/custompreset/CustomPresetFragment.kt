@@ -24,6 +24,7 @@ import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentCustomPresetBinding
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.SoftReduceTouchHost
+import com.example.sonicwavev4.ui.common.SessionControlUiMapper
 import com.example.sonicwavev4.ui.common.UiEvent
 import com.example.sonicwavev4.ui.login.LoginViewModel
 import com.example.sonicwavev4.ui.persetmode.CustomPresetUiModel
@@ -273,18 +274,17 @@ class CustomPresetFragment : Fragment() {
         binding.tvSelectedPresetName.text = selected?.name ?: "未选择自设模式"
         binding.tvSelectedSummary.text = selected?.summary ?: "请选择自设模式后再开始"
 
-        val startLabel = when {
-            sessionState.isPaused -> "继续"
-            sessionState.isRunning -> "暂停"
-            else -> getString(R.string.button_start)
-        }
-        binding.btnStartStop.text = startLabel
+        val startUi = SessionControlUiMapper.primaryButtonUi(sessionState)
+        binding.btnStartStop.setText(startUi.labelRes)
+        binding.btnStartStop.backgroundTintList = null
+        binding.btnStartStop.setBackgroundResource(startUi.backgroundRes)
+        binding.btnStartStop.setTextColor(resources.getColor(android.R.color.black, null))
         binding.btnStartStop.isEnabled = sessionState.startButtonEnabled || sessionState.isRunning || sessionState.isPaused
         binding.tvFrequencyValue.text = sessionState.frequencyDisplay
         binding.tvIntensityValue.text = sessionState.intensityDisplay
         binding.tvRemainingValue.text = sessionState.timeDisplay
 
-        // 暂停/继续按钮：暂停时显示黄色，继续时绿色
+        // Pause/resume button: yellow while pausing, green while resuming
         val pauseBg = if (sessionState.isPaused) R.drawable.bg_jixu_green else R.drawable.bg_button_yellow
         binding.btnPause.backgroundTintList = null
         binding.btnPause.setBackgroundResource(pauseBg)
@@ -292,7 +292,7 @@ class CustomPresetFragment : Fragment() {
 
         binding.btnStartStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.GONE else View.VISIBLE
         binding.btnPause.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
-        binding.btnPause.text = if (sessionState.isPaused) "继续" else "暂停"
+        binding.btnPause.setText(if (sessionState.isPaused) R.string.button_resume else R.string.button_pause)
         binding.btnStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
         binding.btnStop.isEnabled = sessionState.isRunning || sessionState.isPaused
         binding.btnSoftResumeInline.visibility =
@@ -300,7 +300,7 @@ class CustomPresetFragment : Fragment() {
 
         binding.btnStartStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.GONE else View.VISIBLE
         binding.btnPause.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
-        binding.btnPause.text = if (sessionState.isPaused) "继续" else "暂停"
+        binding.btnPause.setText(if (sessionState.isPaused) R.string.button_resume else R.string.button_pause)
         binding.btnStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
         binding.btnStop.isEnabled = sessionState.isRunning || sessionState.isPaused
         binding.btnSoftResumeInline.visibility =

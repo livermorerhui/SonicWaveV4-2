@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.persetmode.PersetmodeFragment">
+
+    <!-- 两条纵向参考线：左 22%，右 78%，把屏幕分成三列 -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.22" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.74"/>
+
+    <!-- 左侧：模式按钮 -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/panel_modes"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:padding="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guide_left"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="top|center_horizontal">
+
+        <Button
+            android:id="@+id/btn_whole_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_preset_mode_button_default"
+            style="@style/Widget.SonicWave.PresetModeButton"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="全身模式"
+            android:textSize="18dp"
+            android:textAllCaps="false"
+            android:textColor="@color/color_preset_mode_button_text"/>
+
+        <Button
+            android:id="@+id/btn_vision_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_preset_mode_button_default"
+            style="@style/Widget.SonicWave.PresetModeButton"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="视力模式"
+            android:textSize="18dp"
+            android:textAllCaps="false"
+            android:textColor="@color/color_preset_mode_button_text"/>
+
+        <Button
+            android:id="@+id/btn_upper_head"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_preset_mode_button_default"
+            style="@style/Widget.SonicWave.PresetModeButton"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="头部上肢"
+            android:textSize="18dp"
+            android:textAllCaps="false"
+            android:textColor="@color/color_preset_mode_button_text"/>
+
+        <Button
+            android:id="@+id/btn_chest_abdomen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_preset_mode_button_default"
+            style="@style/Widget.SonicWave.PresetModeButton"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="胸部腹部"
+            android:textSize="18dp"
+            android:textAllCaps="false"
+            android:textColor="@color/color_preset_mode_button_text"/>
+
+        <Button
+            android:id="@+id/btn_lower_limb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_preset_mode_button_default"
+            style="@style/Widget.SonicWave.PresetModeButton"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="下肢模式"
+            android:textSize="18dp"
+            android:textAllCaps="false"
+            android:textColor="@color/color_preset_mode_button_text"/>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- 中间：人形轮廓 + 高亮层  -->
+    <LinearLayout
+        android:id="@+id/panel_center"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:padding="12dp"
+        app:layout_constraintStart_toStartOf="@id/guide_left"
+        app:layout_constraintEnd_toStartOf="@id/guide_right"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <FrameLayout
+            android:id="@+id/body_canvas"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <!-- 底图：人形轮廓（请放置你自己的轮廓图片到 res/drawable/） -->
+            <ImageView
+                android:id="@+id/img_body_outline"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:contentDescription="人体轮廓"
+                android:src="@drawable/ic_body_outline"
+                tools:ignore="ContentDescription"/>
+
+            <!-- 叠加的高亮层（默认隐藏；代码里根据模式 setVisibility(View.VISIBLE)） -->
+            <ImageView
+                android:id="@+id/img_highlight_whole"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:alpha="0.6"
+                android:visibility="gone"
+                android:src="@drawable/ic_highlight_whole"/>
+
+            <ImageView
+                android:id="@+id/img_highlight_vision"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:alpha="0.6"
+                android:visibility="gone"
+                android:src="@drawable/ic_highlight_vision"/>
+
+            <ImageView
+                android:id="@+id/img_highlight_upper_head"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:alpha="0.6"
+                android:visibility="gone"
+                android:src="@drawable/ic_highlight_upper_head"/>
+
+            <ImageView
+                android:id="@+id/img_highlight_chest_abdomen"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:alpha="0.6"
+                android:visibility="gone"
+                android:src="@drawable/ic_highlight_chest_abdomen"/>
+
+            <ImageView
+                android:id="@+id/img_highlight_lower_limb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:alpha="0.6"
+                android:visibility="gone"
+                android:src="@drawable/ic_highlight_lower_limb"/>
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <!-- 右侧：状态窗口（频率/强度/剩余时间） -->
+    <LinearLayout
+        android:id="@+id/panel_status"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="top"
+        android:padding="12dp"
+        app:layout_constraintStart_toStartOf="@id/guide_right"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="top"
+            android:layout_marginBottom="8dp">
+
+            <!-- 左侧：频率/强度/剩余时间 -->
+            <LinearLayout
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="?android:attr/selectableItemBackground"
+                android:padding="0dp"
+                android:layout_marginEnd="8dp">
+
+                <LinearLayout
+                    android:layout_width="70dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="0dp"
+                    android:layout_marginBottom="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="频率"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/tv_frequency_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="24sp"
+                        tools:text="110"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="70dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="0dp"
+                    android:layout_marginBottom="8dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="强度"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/tv_intensity_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="24sp"
+                        tools:text="120"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="70dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="0dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="剩余时间"
+                        android:textStyle="bold"/>
+                    <TextView
+                        android:id="@+id/tv_remaining_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="24sp"
+                        tools:text="09:42"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 右侧：强度百分比 -->
+            <LinearLayout
+                android:id="@+id/layout_intensity_scale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="33dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/btn_intensity_scale_plus"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="增加百分比"
+                        android:padding="0dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_triangle_up" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/input_intensity_scale"
+                            android:layout_width="40dp"
+                            android:layout_height="match_parent"
+                            android:digits="0123456789"
+                            android:gravity="center"
+                            android:hint="100"
+                            android:inputType="number"
+                            android:maxLength="3"
+                            android:padding="0dp"
+                            android:text="100"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="%"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+
+                    <ImageButton
+                        android:id="@+id/btn_intensity_scale_minus"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="4dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="减少百分比"
+                        android:padding="0dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_triangle_down" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_edit_preset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            style="@style/ButtonNoTint"
+            android:visibility="gone"
+            android:contentDescription="专家模式编辑入口已隐藏，仅保留功能调用"
+            android:text="编辑"
+            android:textSize="22dp"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_button_blue"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"/>
+
+
+    </LinearLayout>
+
+    <!-- 固定位置的开始/停止/恢复按钮 -->
+    <LinearLayout
+        android:id="@+id/layout_run_controls"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        app:layout_constraintStart_toStartOf="@id/guide_right"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="200dp">
+
+        <Button
+            android:id="@+id/btn_start_stop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/ButtonNoTint"
+            android:text="@string/button_start"
+            android:textSize="22dp"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_home_start_button"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"/>
+
+        <Button
+            android:id="@+id/btn_stop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            style="@style/ButtonNoTint"
+            android:text="@string/button_stop"
+            android:textSize="22dp"
+            android:textColor="@color/black"
+            android:visibility="gone"
+            android:background="@drawable/bg_button_red"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null"/>
+
+        <Button
+            android:id="@+id/btn_soft_resume_inline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="@string/soft_resume"
+            android:textSize="22dp"
+            android:textColor="@color/black"
+            android:visibility="gone"
+            android:background="@drawable/bg_keypad_green"
+            android:backgroundTint="@null"
+            app:backgroundTint="@null" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
