@@ -6,7 +6,7 @@
     </style>
 
     <style name="Widget.SonicWave.PresetModeButton" parent="@android:style/Widget.Button">
-        <item name="android:background">@drawable/bg_preset_mode_button_default</item>
+        <item name="android:background">@drawable/bg_preset_mode_button</item>
         <item name="android:backgroundTint">@null</item>
         <item name="android:textColor">@color/color_preset_mode_button_text</item>
         <item name="android:elevation">0dp</item>

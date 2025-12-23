@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -52,6 +53,14 @@ class HomeFragment : Fragment() {
         const val PHONE_REPEAT_INTERVAL_MS = 150L
     }
 
+    private data class KeypadViews(
+        val root: View,
+        val flow: View?,
+        val numericButtons: List<Button>,
+        val clearButton: View?,
+        val enterButton: View?
+    )
+
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val isTablet by lazy { resources.getBoolean(R.bool.is_tablet) }
@@ -74,6 +83,8 @@ class HomeFragment : Fragment() {
     private var lastExpertActive: Boolean = false
     private var latestPresetSessionState: VibrationSessionUiState? = null
     private var updatingIntensityScaleFromState = false
+    private var keypadViews: KeypadViews? = null
+    private var keypadListenersBound = false
 
     private val authViewModel: LoginViewModel by activityViewModels()
     private val customerViewModel: CustomerViewModel by activityViewModels()
@@ -133,6 +144,8 @@ class HomeFragment : Fragment() {
         requireActivity().findViewById<View?>(android.R.id.content)?.setOnTouchListener(null)
         (requireActivity() as? SoftReduceTouchHost)?.setSoftReduceTouchListener(null)
         _binding = null
+        keypadViews = null
+        keypadListenersBound = false
     }
 
     override fun onStop() {
@@ -256,10 +269,7 @@ class HomeFragment : Fragment() {
                 else -> defaultTextColor
             }
             button.isEnabled = buttonsEnabled
-            button.background = ContextCompat.getDrawable(
-                requireContext(),
-                if (selected) R.drawable.bg_preset_mode_button_selected else R.drawable.bg_preset_mode_button_default
-            )
+            button.isSelected = selected
             button.backgroundTintList = null
             button.setTextColor(targetTextColor)
         }
@@ -418,8 +428,13 @@ class HomeFragment : Fragment() {
 
     // --- 点击事件监听器 ---
     private fun setupClickListeners() {
-        // Shared keypad wiring (phone + tablet).
-        setupKeypadListeners()
+        // Shared keypad wiring (phone + tablet) once keypad is inflated.
+        if (binding.root.findViewById<View?>(R.id.layout_keypad_container) != null &&
+            binding.root.findViewById<ViewStub?>(R.id.stub_keypad_container) == null
+        ) {
+            ensureKeypadViews()
+        }
+        setupKeypadListenersIfReady()
 
         if (isTablet) {
             setupTabletClickListeners()
@@ -449,14 +464,14 @@ class HomeFragment : Fragment() {
     }
 
     private fun isPhoneKeypadVisible(): Boolean {
-        return binding.layoutKeypadContainer?.visibility == View.VISIBLE
+        return keypadViews?.root?.visibility == View.VISIBLE
     }
 
     private fun setupPhoneKeypadDismissListener() {
         binding.root.setOnTouchListener { _, event ->
             if (event.actionMasked != MotionEvent.ACTION_DOWN) return@setOnTouchListener false
             if (!isPhoneKeypadVisible()) return@setOnTouchListener false
-            if (isTouchInsideView(binding.layoutKeypadContainer, event)) return@setOnTouchListener false
+            if (isTouchInsideView(keypadViews?.root, event)) return@setOnTouchListener false
             if (isTouchInsideView(binding.tvFrequencyValue, event)) return@setOnTouchListener false
             if (isTouchInsideView(binding.tvIntensityValue, event)) return@setOnTouchListener false
             if (isTouchInsideView(binding.tvTimeValue, event)) return@setOnTouchListener false
@@ -476,14 +491,44 @@ class HomeFragment : Fragment() {
     }
 
     private fun showPhoneKeypad(show: Boolean) {
+        if (show) {
+            ensureKeypadViews()
+            setupKeypadListenersIfReady()
+        }
+        val views = keypadViews ?: return
         val visibility = if (show) View.VISIBLE else View.GONE
-        binding.layoutKeypadContainer?.visibility = visibility
-        listOfNotNull(
-            binding.flowKeypad,
-            binding.btnKey0, binding.btnKey1, binding.btnKey2, binding.btnKey3, binding.btnKey4,
-            binding.btnKey5, binding.btnKey6, binding.btnKey7, binding.btnKey8, binding.btnKey9,
-            binding.btnKeyClear, binding.btnKeyEnter
-        ).forEach { it.visibility = visibility }
+        views.root.visibility = visibility
+        listOfNotNull(views.flow)
+            .plus(views.numericButtons)
+            .plus(listOfNotNull(views.clearButton, views.enterButton))
+            .forEach { it.visibility = visibility }
+    }
+
+    private fun ensureKeypadViews() {
+        if (keypadViews != null) return
+        val stub = binding.root.findViewById<ViewStub>(R.id.stub_keypad_container)
+        val root = if (stub != null) {
+            if (stub.parent != null) {
+                stub.inflate()
+            } else {
+                binding.root.findViewById(R.id.layout_keypad_container)
+            }
+        } else {
+            binding.root.findViewById(R.id.layout_keypad_container)
+        } ?: return
+
+        val numericButtons = listOf(
+            R.id.btn_key_0, R.id.btn_key_1, R.id.btn_key_2, R.id.btn_key_3, R.id.btn_key_4,
+            R.id.btn_key_5, R.id.btn_key_6, R.id.btn_key_7, R.id.btn_key_8, R.id.btn_key_9
+        ).mapNotNull { id -> root.findViewById<Button?>(id) }
+
+        keypadViews = KeypadViews(
+            root = root,
+            flow = root.findViewById(R.id.flow_keypad),
+            numericButtons = numericButtons,
+            clearButton = root.findViewById(R.id.btn_key_clear),
+            enterButton = root.findViewById(R.id.btn_key_enter)
+        )
     }
 
     private fun setupTabletClickListeners() {
@@ -592,6 +637,7 @@ class HomeFragment : Fragment() {
                     Toast.makeText(requireContext(), "请先停止当前会话", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
+                showPhoneKeypad(false)
                 viewModel.setActiveMode(HomeViewModel.ActiveMode.EXPERT)
                 presetViewModel.selectMode(index)
                 presetViewModel.playTapSound()
@@ -673,31 +719,30 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun setupKeypadListeners() {
+    private fun setupKeypadListenersIfReady() {
+        val views = keypadViews ?: return
+        if (keypadListenersBound) return
+        keypadListenersBound = true
+
         // --- Shared keypad handlers (phone + tablet) ---
         val numericClickListener = View.OnClickListener { view ->
             if (viewModel.currentInputType.value.isNullOrEmpty()) return@OnClickListener
             viewModel.handleIntent(VibrationSessionIntent.AppendDigit((view as Button).text.toString()))
             viewModel.playTapSound()
         }
-        listOf(
-            binding.btnKey0, binding.btnKey1, binding.btnKey2, binding.btnKey3, binding.btnKey4,
-            binding.btnKey5, binding.btnKey6, binding.btnKey7, binding.btnKey8, binding.btnKey9
-        )
-            .filterNotNull()
-            .forEach { it.setOnClickListener(numericClickListener) }
+        views.numericButtons.forEach { it.setOnClickListener(numericClickListener) }
 
-        binding.btnKeyClear?.setOnClickListener {
+        views.clearButton?.setOnClickListener {
             viewModel.handleIntent(VibrationSessionIntent.DeleteDigit)
             viewModel.playTapSound()
         }
-        binding.btnKeyClear?.setOnLongClickListener {
+        views.clearButton?.setOnLongClickListener {
             viewModel.handleIntent(VibrationSessionIntent.ClearCurrent)
             viewModel.playTapSound()
             true
         }
 
-        binding.btnKeyEnter?.setOnClickListener {
+        views.enterButton?.setOnClickListener {
             viewModel.handleIntent(VibrationSessionIntent.CommitAndCycle)
             viewModel.playTapSound()
             // 手机端：回车只提交/切换输入，不再关闭 keypad（保留继续输入的体验）

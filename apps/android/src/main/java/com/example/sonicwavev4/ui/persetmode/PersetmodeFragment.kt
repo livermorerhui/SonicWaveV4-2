@@ -262,10 +262,7 @@ class PersetmodeFragment : Fragment() {
 
         modeButtons.forEachIndexed { index, button ->
             val selected = index == state.selectedModeIndex
-            button.background = ContextCompat.getDrawable(
-                requireContext(),
-                if (selected) R.drawable.bg_preset_mode_button_selected else R.drawable.bg_preset_mode_button_default
-            )
+            button.isSelected = selected
             ViewCompat.setBackgroundTintList(button, null)
             button.isEnabled = state.modeButtonsEnabled
             val targetTextColor = when {
