@@ -23,6 +23,7 @@ import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentCustomPresetBinding
 import com.example.sonicwavev4.network.RetrofitClient
 import com.example.sonicwavev4.SoftReduceTouchHost
+import com.example.sonicwavev4.ui.common.SoftResumeUi
 import com.example.sonicwavev4.ui.common.TouchHitTest
 import com.example.sonicwavev4.ui.common.SessionControlUiMapper
 import com.example.sonicwavev4.ui.common.UiEvent
@@ -115,7 +116,8 @@ class CustomPresetFragment : Fragment() {
         (activity as? SoftReduceTouchHost)?.setSoftReduceTouchListener { ev ->
             if (ev.actionMasked != MotionEvent.ACTION_DOWN) return@setSoftReduceTouchListener false
             val state = presetViewModel.sessionUiState.value
-            if (!state.isRunning) return@setSoftReduceTouchListener false
+            // 平板端自设模式：暂停状态不触发软降。
+            if (!state.isRunning || state.isPaused) return@setSoftReduceTouchListener false
             // 软降已触发时，空白区不重复触发。
             if (state.softReductionActive) return@setSoftReduceTouchListener false
             // 平板端自设模式：排除关键控件触发软降。
@@ -297,8 +299,9 @@ class CustomPresetFragment : Fragment() {
         binding.btnPause.setText(if (sessionState.isPaused) R.string.button_resume else R.string.button_pause)
         binding.btnStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
         binding.btnStop.isEnabled = sessionState.isRunning || sessionState.isPaused
+        // 平板端自设模式：恢复按钮仅在软降激活时显示。
         binding.btnSoftResumeInline.visibility =
-            if (sessionState.softReductionActive || (sessionState.isRunning && sessionState.intensityValue <= 20)) View.VISIBLE else View.GONE
+            if (SoftResumeUi.shouldShow(sessionState)) View.VISIBLE else View.GONE
 
         binding.btnStartStop.visibility = if (sessionState.isRunning || sessionState.isPaused) View.GONE else View.VISIBLE
         binding.btnPause.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE

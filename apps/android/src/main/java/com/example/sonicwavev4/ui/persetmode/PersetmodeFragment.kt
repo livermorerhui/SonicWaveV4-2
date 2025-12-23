@@ -24,6 +24,7 @@ import com.example.sonicwavev4.data.home.HomeHardwareRepository
 import com.example.sonicwavev4.data.home.HomeSessionRepository
 import com.example.sonicwavev4.databinding.FragmentPersetmodeBinding
 import com.example.sonicwavev4.network.RetrofitClient
+import com.example.sonicwavev4.ui.common.SoftResumeUi
 import com.example.sonicwavev4.ui.common.TouchHitTest
 import com.example.sonicwavev4.ui.common.UiEvent
 import com.example.sonicwavev4.ui.common.SessionControlUiMapper
@@ -314,8 +315,9 @@ class PersetmodeFragment : Fragment() {
 
         binding.btnStop?.visibility = if (sessionState.isRunning || sessionState.isPaused) View.VISIBLE else View.GONE
         binding.btnStop?.isEnabled = sessionState.isRunning || sessionState.isPaused
+        // 平板端专家模式：恢复按钮仅在软降激活时显示。
         binding.btnSoftResumeInline?.visibility =
-            if (sessionState.softReductionActive || (sessionState.isRunning && sessionState.intensityValue <= 20)) View.VISIBLE else View.GONE
+            if (SoftResumeUi.shouldShow(sessionState)) View.VISIBLE else View.GONE
     }
 
     private fun observeEditButtonVisibility() {
@@ -372,7 +374,8 @@ class PersetmodeFragment : Fragment() {
     private fun handleSoftReduceTouch(event: MotionEvent): Boolean {
         if (event.actionMasked != MotionEvent.ACTION_DOWN) return false
         val state = viewModel.sessionUiState.value
-        if (!state.isRunning) return false
+        // 平板端专家模式：暂停状态不触发软降。
+        if (!state.isRunning || state.isPaused) return false
         // 软降已触发时，点击空白区不重复触发。
         if (state.softReductionActive) return false
         // 平板端专家模式：排除关键控件触发软降。
